@@ -1,0 +1,16 @@
+# output dir
+output
+instant_test_output
+inference_test_output
+
+logs/*
+app.db
+app/static/cutting_file/*
+app/static/downloads/*
+app/static/draw/*
+app/static/zip/*
+migrations
+PUT_YOUR_DATASET_HERE
+tests.py
+.flaskenv
+__pycache__

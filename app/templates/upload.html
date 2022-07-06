@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #menu_upload{
+        background: white;
+
+}
+
+    .container-wrapper{
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+    <div class="wrapper">
+        <header>File UpLoader</header>
+        <form action="{{url_for('upload')}}" enctype="multiple / form-data">
+            <input type="file" name="file" class="input-file" hidden>
+            <p>Click Here</p>
+            <img src="./static/logo/upload.png" style="height: 6em; width: 6em;">
+            <p>Browse File to Upload</p>
+        </form>
+        <section class="progress-area"></section>
+        <section class="uploaded-area"></section>
+    </div>
+<script src="/static/js/upload.js"></script>
+
+{{ super() }}
+{% endblock %}

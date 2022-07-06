@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<!--    <link href="/static/css/bootstrap.min.css" rel="stylesheet ">-->
+    <link type="text/css" href="{{ url_for('static', filename='css/api_style.css') }}" rel="stylesheet " />
+    {% block title %}
+    {% if title %}
+        <title>MEDIT - {{ title }}</title>
+    {% else %}
+        <title>Analysis Data</title>
+    {% endif %}
+    {% endblock %}
+
+<!--    <script src="https://kit.fontawesome.com/1710e4743f.js" crossorigin="anonymous"></script>-->
+</head>
+<body>
+    <div class="content">
+        <div class="nav-bar" style="">
+            <div class="company-name">MEDIT</div>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}">Login</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </div>
+        <div class="my_content">
+            <div class="menu">
+                <div class="menu_a">
+                    <a id="menu_analysis" href="/analysis"><img src="/static/logo/analysis.png" alt="#">Анализ</a>
+                    <a id="menu_upload" href="/upload"><img src="/static/logo/download.png" alt="#">Загрузить</a>
+                    <a id="menu_history" href="/index?select=history"><img src="/static/logo/history.png" alt="#">История</a>
+                    <a id="menu_info" href="#"><img src="/static/logo/info.png" alt="#">О программе</a>
+                </div>
+                <div class="menu_logo">
+                <img id="logo" src="/static/logo/mitoz.gif" alt=""><p>Mitoze</p><img src="/static/logo/mitoz_ai.png" alt="#"></div>
+            </div>
+            <div class="container-wrapper">
+                {% block content %}
+
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

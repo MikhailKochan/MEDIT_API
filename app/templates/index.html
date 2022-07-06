@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #menu_analysis{
+        background: white;
+
+}
+</style>
+
+<div class="container-table">
+<div class="box" style="background: #eff1f4;">
+    Data/Time
+</div>
+<div class="box" style="background: #eff1f4;">
+    Name/ID
+</div>
+<div class="box" style="background: #eff1f4;">
+    Status
+</div>
+<div class="box" style="background: #eff1f4;">
+    Всего митозов
+</div>
+<div class="box" style="background: #eff1f4;">
+    Download
+</div>
+</div>
+{% for msg in data %}
+<div class="container-table">
+    <div class="box" id="datetime">{{msg.timestamp.strftime('%d/%m/%Y %H:%M:%S')}}</div>
+    <div class="box">{{msg.Images.filename}}/{{msg.Images.analysis_number }}</div>
+    {% if msg.status == 'Done' %}
+    <div class="box" id="status">Done<img src="/static/logo/green_check.png"></div>
+    {% else %}
+        <div class="box" id="status">{{msg.status}}</div>
+    {% endif %}
+    <div class="box" id="result">
+        <b>{{msg.result_all_mitoz}}</b>
+    </div>
+    {% if msg.id == '' %}
+    <div class="box" >
+        <a class="button2" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_cutting_file.zip" style="display:none">auto label</a>
+    </div>
+    {% else %}
+    <div class="box" >
+        <a class="button" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_draw.zip" style="display:none">predict</a><br>
+        <a class="button2" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_cutting_file.zip" style="display:none">auto label</a>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+<script src="/static/js/index.js"></script>
+
+{{ super() }}
+{% endblock %}
+
+<!--            <script>-->
+<!--                let total = ({{ msg[5] }} * 2);-->
+<!--                let dataId = {{ msg[0] }};-->
+
+<!--                function getCategoryList() {-->
+
+<!--                var xhr = new XMLHttpRequest();-->
+<!--                xhr.open("GET", `/status/${dataId}`, false);-->
+<!--                xhr.send();-->
+
+<!--                // stop the engine while xhr isn't done-->
+<!--                for(; xhr.readyState !== 4;)-->
+
+<!--                if (xhr.status === 200) {-->
+
+<!--                    console.log('SUCCESS', xhr.responseText);-->
+
+<!--                } else console.warn('request_error');-->
+
+<!--                return JSON.parse(xhr.responseText);-->
+<!--                }-->
+<!--                const x = getCategoryList();-->
+
+<!--                  function progress () {-->
+<!--                    const now = getCategoryList();-->
+<!--                    var percent = document.querySelector('.percent')-->
+<!--                    let width = Math.floor((now/total) * 100);-->
+<!--                    let elem = document.getElementById("progress"),-->
+<!--                    id = setInterval(progressStatus,5000);-->
+<!--                    function progressStatus () {-->
+<!--                      if (width >= 100) {-->
+<!--                        clearInterval(id);-->
+<!--                        document.location.reload();-->
+<!--                      } else {-->
+<!--                        const now = getCategoryList();-->
+<!--                        let width = Math.floor((now/total) * 100);-->
+<!--                        elem.style.width = width + '%';-->
+<!--                        percent.textContent = width + '%';-->
+<!--                      }-->
+<!--                    }-->
+<!--                  }-->
+<!--                  progress();-->
+<!--            </script>-->

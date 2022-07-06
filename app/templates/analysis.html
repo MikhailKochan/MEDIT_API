@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #menu_analysis{
+        background: white;
+}
+
+
+</style>
+<div class="box">
+    <form action="{{url_for('index')}}">
+          <select name="select">
+              {% for msg in data %}
+              <option value="{{ msg[0] }}">Номер исследования - {{ msg[0] }}</option>
+              {% endfor %}
+        </select>
+        <div>
+            <button class="button" type="submit">Проверить результат</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

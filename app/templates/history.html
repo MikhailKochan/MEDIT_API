@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #menu_history{
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 10px 30px -1px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+}
+    .menu a{
+        border-left: none;
+        border-bottom: 1px solid black;
+
+</style>
+
+
+<div class="container-table">
+<div class="box">
+    Data/Time
+</div>
+<div class="box">
+    Name/ID
+</div>
+<div class="box">
+    Status
+</div>
+<div class="box">
+    Result
+</div>
+<div class="box">
+    Download
+</div>
+</div>
+{% for msg in data %}
+<div class="container-table">
+    <div class="box" style="background: white;">
+        {{msg[2]}}
+    </div>
+    <div class="box" style="background: white;">
+        {{msg[0]}}
+    </div>
+    <div class="box" style="background: white;">
+
+    </div>
+    <div class="box" style="background: white;">
+        Всего митозов <h4>{{msg[3]}}</h4>
+    </div>
+    <div class="box" style="background: white;">
+        {% if msg[7] == 'Done' %}
+            <a href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_draw.zip">predict</a><br>
+            <a href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_dataset.zip">auto label</a>
+        {% else %}
+            <p>Не готово, ожидайте</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endfor %}
+{{ super() }}
+{% endblock %}
+

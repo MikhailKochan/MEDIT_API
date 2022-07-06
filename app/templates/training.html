@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    #menu_analysis{
+        background: white;
+}
+
+
+</style>
+<!--<div class="container-table">-->
+<!--    <div class="box" style="background: #eff1f4;">-->
+<!--        Формат-->
+<!--    </div>-->
+<!--    <div class="box" style="background: #eff1f4;">-->
+<!--        Всего изображений в датасете-->
+<!--    </div>-->
+<!--    <div class="box" style="background: #eff1f4;">-->
+<!--        Колличество итераций-->
+<!--    </div>-->
+<!--    <div class="box" style="background: #eff1f4;">-->
+<!--        CUDA-->
+<!--    </div>-->
+<!--</div>-->
+<!--<div class="container-table">-->
+<!--    <div class="box" id="format">{{data['format']}}</div>-->
+<!--    <div class="box">{{data['in_all_picture']}}</div>-->
+<!--    <div class="box" id="iter">-->
+<!--        <b>{{data['iter']}}</b>-->
+<!--    </div>-->
+<!--    {% if data['cuda'] == 'cuda' %}-->
+<!--    <div class="box" id="cuda">Done<img src="/static/logo/green_check.png"></div>-->
+<!--    {% else %}-->
+<!--        <div class="box" id="cpu">{{data['cuda']}}</div>-->
+<!--    {% endif %}</div>-->
+<!--<div class="box" >-->
+<!--    <form action="{{url_for('get_train')}}" style="align-items: center">-->
+
+
+<!--        <div>-->
+<!--            <a class="button" href="/start_train" >Начать обучение</a>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</div>-->
+
+{% endblock %}

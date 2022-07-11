@@ -9,7 +9,7 @@
 
 </style>
 <div class="box">
-    <form action="{{url_for('index')}}">
+    <form action="{{url_for('main.index')}}">
           <select name="select">
               {% for msg in data %}
               <option value="{{ msg[0] }}">Номер исследования - {{ msg[0] }}</option>

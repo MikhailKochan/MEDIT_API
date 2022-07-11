@@ -1,14 +1,18 @@
 import torch
 import os
 from dotenv import load_dotenv
+from sys import platform
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.flaskenv'))
 
 
 class Config(object):
+    # location where install detectron2
     DETECTRON = 'D:/nina/detectron2_repo'
 
+    model = ''
+    model_output = ''
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
 
@@ -17,9 +21,21 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    UPLOAD_FOLDER = os.path.join(basedir, 'static/downloads')
-    SAVE_ZIP = os.path.join(basedir, "static/zip")
-    CUTTING_FOLDER = os.path.join(basedir, "static/cutting_file")
+    UPDATE_TIME = int(10)
+
+    UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')
+    SAVE_ZIP = os.path.join(basedir, "app/static/zip")
+    CUTTING_FOLDER = os.path.join(basedir, "app/static/cutting_file")
+    DRAW = os.path.join(basedir, "app/static/draw")
+
+    BASEDIR = basedir
+
+    if platform == 'win32':
+        DETECTRON = DETECTRON.replace('/', '\\')
+        UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
+        SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
+        CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
+        DRAW = DRAW.replace('/', '\\')
 
     CLASS_NAMES = ("mitoz", "GMCC", "osteocit")
 

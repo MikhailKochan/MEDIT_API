@@ -1,6 +1,6 @@
-from app import db
-from app import login, app
+from app import login, db
 from datetime import datetime
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import pathlib
@@ -61,12 +61,12 @@ class Images(db.Model):
 
     def cutting(self):
 
-        h_sum = int(self.height / app.config['_CUT_IMAGE_SIZE'][1])
-        w_sum = int(self.width / app.config['_CUT_IMAGE_SIZE'][0])
+        h_sum = int(self.height / current_app.config['_CUT_IMAGE_SIZE'][1])
+        w_sum = int(self.width / current_app.config['_CUT_IMAGE_SIZE'][0])
 
         if h_sum and w_sum <= 1:
-            text = f"This img less than {app.config['CUTTING_FOLDER']}, cutting not need."
-            app.logger.info(text)
+            text = f"This img less than {current_app.config['CUTTING_FOLDER']}, cutting not need."
+            current_app.logger.info(text)
             return text
         if self.format.lower() == '.svs':
             file = openslide.OpenSlide(self.file_path)
@@ -74,28 +74,28 @@ class Images(db.Model):
             return f'{self.format} not added'
         # elif self.format.lower() == '.jpg':
         #     return f"jpg format not add"
-        h_rest = self.height % app.config['_CUT_IMAGE_SIZE'][1]
-        w_rest = self.width % app.config['_CUT_IMAGE_SIZE'][0]
+        h_rest = self.height % current_app.config['_CUT_IMAGE_SIZE'][1]
+        w_rest = self.width % current_app.config['_CUT_IMAGE_SIZE'][0]
         s_col = int(h_rest / 2)
         s_row = int(w_rest / 2)
         total = h_sum * w_sum
 
-        if not os.path.exists(os.path.join(app.config['CUTTING_FOLDER'], self.filename)):
-            os.mkdir(os.path.join(app.config['CUTTING_FOLDER'], self.filename))
-            app.logger.info(f"Directory {self.filename} created")
+        if not os.path.exists(os.path.join(current_app.config['CUTTING_FOLDER'], self.filename)):
+            os.mkdir(os.path.join(current_app.config['CUTTING_FOLDER'], self.filename))
+            current_app.logger.info(f"Directory {self.filename} created")
             with tqdm(total=total, position=0, leave=False) as pbar:
                 for i in range(0, w_sum):
                     for j in range(0, h_sum):
                         pbar.set_description(f"Total img: {total}. Start cutting:")
-                        start_row = j * app.config['_CUT_IMAGE_SIZE'][0] + s_row
-                        start_col = i * app.config['_CUT_IMAGE_SIZE'][1] + s_col
+                        start_row = j * current_app.config['_CUT_IMAGE_SIZE'][0] + s_row
+                        start_col = i * current_app.config['_CUT_IMAGE_SIZE'][1] + s_col
                         filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
-                        path_to_save_cut_file = os.path.join(os.path.join(app.config['CUTTING_FOLDER'], self.filename), f"{filename}.jpg")
+                        path_to_save_cut_file = os.path.join(os.path.join(current_app.config['CUTTING_FOLDER'], self.filename), f"{filename}.jpg")
                         self.cut(start_row, start_col, path_to_save_cut_file, file)
 
                         pbar.update(1)
         else:
-            app.logger.info(f"folder {self.filename} already exists")
+            current_app.logger.info(f"folder {self.filename} already exists")
         self.cut_file = True
 
     def cut(self, start_row: int, start_col: int, path_to_save_cut_file, file):
@@ -116,7 +116,7 @@ class Predict(db.Model):
     result_all_mitoz = db.Column(db.Integer)
     result_max_mitoz_in_one_img = db.Column(db.String(128))
     count_img = db.Column(db.Integer)
-    name_img_have_max_mitoze = db.Column(db.Integer)
+    name_img_have_max_mitoz = db.Column(db.Integer)
     status = db.Column(db.String(128))
     image_id = db.Column(db.Integer, db.ForeignKey('images.id'))
     model = db.Column(db.String(128))

@@ -25,10 +25,10 @@ function myGreeting(name){
 
             let url = JSON.parse(xhr.responseText);
 //            console.log(url);
-            if(url != ""){
-            window.location.replace(`/index/${url}`)};
+//            if(url != ""){
+//            window.location.replace(`/new_analysis/${url}`);
         }else{
-            console.log("error")
+            console.log("don't have response...");
         }
     }
     xhr.send(null)

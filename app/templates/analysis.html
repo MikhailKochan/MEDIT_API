@@ -11,13 +11,17 @@
 <div class="box">
     <form action="{{url_for('main.index')}}">
           <select name="select">
-              {% for msg in data %}
-              <option value="{{ msg[0] }}">Номер исследования - {{ msg[0] }}</option>
+              {% for img in data %}
+              <option value="{{ img.id }}">Номер исследования - {{ img.analysis_number }}</option>
               {% endfor %}
         </select>
         <div>
             <button class="button" type="submit">Проверить результат</button>
         </div>
+        <div>
+            <button class="button" type="submit" name="new_analysis" value="True">Сделать новый анализ</button>
+        </div>
+
     </form>
 </div>
 

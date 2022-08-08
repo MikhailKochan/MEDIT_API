@@ -23,6 +23,35 @@ html,body{
     min-width: 100%;
     justify-content: center;
 }
+.pager {
+    display:flex;
+    justify-content: space-between;
+}
+.pager li{
+    min-width: 120px;
+    justify-content: center;
+    display:flex;
+    font-size: 15px;
+    align-items: center;
+    background: rgb(33 37 41);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 15px;
+}
+.pager .next{
+
+
+}
+.pager a{
+    min-width: 120px;
+    display:flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    margin: 2px;
+    text-decoration: none;
+    color: #eff1f4;
+
+}
 .nav-bar {
     background: rgb(25 28 31);
     display:flex;
@@ -72,7 +101,7 @@ html,body{
     width: 100%;
 
     justify-content: flex-start;
-    box-shadow: rgb(0 0 0 / 40%) 0px 30px 90px;
+    /*box-shadow: rgb(0 0 0 / 40%) 0px 30px 90px;*/
 }
 .my_content {
     height: 100%;
@@ -254,7 +283,7 @@ form p{
 }
 section .row{
     margin: 2%;
-    background: #e9f0ff;
+    background: #eff1f4;
     margin-bottom: 10px;
     list-style: none;
     padding: 15px 20px;
@@ -262,6 +291,7 @@ section .row{
     display: flex;
     align-items: center;
     justify-content: space-between;
+
 }
 section .row i{
     font-size: 30px;
@@ -277,6 +307,7 @@ section .details span{
 .progress-area .row .content{
     width: 100%;
     margin-left: 15px;
+    background: #eff1f4;
 }
 .progress-area .details{
     display: flex;
@@ -305,8 +336,10 @@ section .details span{
     width: 0px;
 }
 .uploaded-area .row .content{
+    background: #eff1f4;
     display: flex;
     align-items: center;
+    flex-direction: row;
 }
 .uploaded-area .row .details{
     display: flex;

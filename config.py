@@ -9,10 +9,16 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 
 class Config(object):
     # location where install detectron2
-    DETECTRON = 'D:/nina/detectron2_repo'
+    detectron2_repo = 'detectron2_repo'
+
+    DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 
     model = ''
-    model_output = ''
+    model_output = os.path.join(DETECTRON, 'output')
+
+    reg_data_set = DETECTRON.replace('ai_medit', 'mitoz')
+    dataset_format = 'Coco'
+
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
 
@@ -21,7 +27,9 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    UPDATE_TIME = int(10)
+    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
+
+    UPDATE_TIME = int(1) # time in second
 
     UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')
     SAVE_ZIP = os.path.join(basedir, "app/static/zip")
@@ -31,6 +39,8 @@ class Config(object):
     BASEDIR = basedir
 
     if platform == 'win32':
+        model_output = model_output.replace('/', '\\')
+        reg_data_set = reg_data_set.replace('/', '\\')
         DETECTRON = DETECTRON.replace('/', '\\')
         UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
@@ -50,7 +60,7 @@ class Config(object):
         os.mkdir(_DATASET_FOLDER)
         print(f"Directory {_DATASET_FOLDER} created")
 
-    POSTS_PER_PAGE = 3
+    POSTS_PER_PAGE = 8
 
     LANGUAGES = ['en', 'ru']
 

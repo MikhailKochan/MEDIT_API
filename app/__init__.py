@@ -1,15 +1,22 @@
 import logging
-from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+import rq
+# from raven.contrib.flask import Sentry
+from config import Config
+from redis import Redis
 from flask import Flask, request, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+
+from logging.handlers import SMTPHandler, RotatingFileHandler
 # from flask_mail import Mail
 # from flask_bootstrap import Bootstrap
 from flask_moment import Moment
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 # from flask_babel import Babel, lazy_gettext as _l
-from config import Config
 
 
 db = SQLAlchemy()
@@ -21,18 +28,33 @@ login.login_message = 'Please log in to access this page.'
 # bootstrap = Bootstrap()
 moment = Moment()
 # babel = Babel()
+# sentry = Sentry(dsn='http://2abaac024c2d415280fe49b22288f719@localhost:9000/3')
 
 
 def create_app(config_class=Config):
+    sentry_sdk.init(
+        dsn="http://2abaac024c2d415280fe49b22288f719@localhost:9000/3",
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0
+    )
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+    # bootstrap.init_app(app)
 
-    from app.view import Medit
-    Med = Medit()
+    app.redis = Redis.from_url(app.config['REDIS_URL'])
+    app.task_queue = rq.Queue('medit-task', connection=app.redis)
+
+    # sentry.init_app(app)
+
+    from app.view import medit
+    Med = medit()
     Med.init_app(app)
 
     from app.errors import bp as errors_bp
@@ -43,11 +65,6 @@ def create_app(config_class=Config):
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
-
-    from app.view import watcher, imprt
-    predictor = imprt(app)
-    # thr = threading.Thread(target=watcher, name='watcher', daemon=True)
-    # thr.start()
 
     if not app.debug:
         if app.config['MAIL_SERVER']:
@@ -77,7 +94,7 @@ def create_app(config_class=Config):
     app.logger.setLevel(logging.INFO)
     app.logger.info('MEDIT startup')
 
-    return app, predictor
+    return app
 
 
 from app import models

@@ -25,32 +25,43 @@
     Download
 </div>
 </div>
-{% for msg in data %}
+{% for prediction in data %}
 <div class="container-table">
-    <div class="box" id="datetime">{{msg.timestamp.strftime('%d/%m/%Y %H:%M:%S')}}</div>
-    <div class="box">{{msg.Images.filename}}/{{msg.Images.analysis_number }}</div>
-    {% if msg.status == 'Done' %}
-    <div class="box" id="status">Done<img src="/static/logo/green_check.png"></div>
+    <div class="box" id="datetime">{{prediction.timestamp.strftime('%d/%m/%Y %H:%M')}}</div>
+    <div class="box" id="name">{{prediction.images.filename}}/ {{prediction.images.analysis_number }}</div>
+
+    <div class="box" id="status">{% if prediction.tasks.first().complete is true %}Done<img src="/static/logo/green_check.png"></div>
     {% else %}
-        <div class="box" id="status">{{msg.status}}</div>
+        {{ prediction.tasks.first().complete }}<img src="/static/logo/load.gif"></div>
     {% endif %}
+    <div id="predict_id" hidden>
+        {{prediction.id}}
+    </div>
     <div class="box" id="result">
-        <b>{{msg.result_all_mitoz}}</b>
+        <b>{{prediction.result_all_mitoz}}</b>
     </div>
-    {% if msg.id == '' %}
     <div class="box" >
-        <a class="button2" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_cutting_file.zip" style="display:none">auto label</a>
+        <a class="button" href="#" style="display:none">predict</a><br>
+        <a class="button_del" href="#" style="display:none;background:red;">
+            {% if prediction.tasks.first().complete is true %}DELETE{% else %}STOP{% endif %}
+        </a>
     </div>
-    {% else %}
-    <div class="box" >
-        <a class="button" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_draw.zip" style="display:none">predict</a><br>
-        <a class="button2" href="/get-zip/{{ msg[1] }}_{{ msg[2] }}_cutting_file.zip" style="display:none">auto label</a>
-    </div>
-    {% endif %}
 </div>
 {% endfor %}
-<script src="/static/js/index.js"></script>
+    <ul class="pager">
+        <li class="previous" style="{% if not prev_url %}display: none{% endif %}">
+            <a href="{{ prev_url or '#' }}"><span aria-hidden="true">&larr;</span>назад
 
+            </a>
+        </li>
+        <li class="next" style="{% if not next_url %}display: none{% endif %}">
+            <a href="{{ next_url or '#' }}">вперед<span aria-hidden="true">&rarr;</span>
+            </a>
+        </li>
+    </ul>
+
+<script src="/static/js/index.js"></script>
+<!---->
 {{ super() }}
 {% endblock %}
 

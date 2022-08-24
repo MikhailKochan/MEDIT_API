@@ -11,7 +11,7 @@ class Config(object):
     # location where install detectron2
     detectron2_repo = 'detectron2_repo'
 
-    DETECTRON = basedir.replace('ai_medit', 'detectron2')
+    DETECTRON = basedir.replace('MEDIT_API/ai_medit', 'detectron2')
     if platform == 'win32':
         DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 

@@ -11,6 +11,7 @@ class Config(object):
     # location where install detectron2
     detectron2_repo = 'detectron2_repo'
 
+    DETECTRON = basedir.replace('ai_medit', 'detectron2')
     if platform == 'win32':
         DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 
@@ -18,6 +19,7 @@ class Config(object):
     model_output = os.path.join(DETECTRON, 'output')
 
     reg_data_set = DETECTRON.replace('ai_medit', 'mitoz')
+
     dataset_format = 'Coco'
 
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')

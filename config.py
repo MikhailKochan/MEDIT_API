@@ -11,16 +11,17 @@ class Config(object):
     # location where install detectron2
     detectron2_repo = 'detectron2_repo'
 
-    DETECTRON = basedir.replace('MEDIT_API', 'detectron2')
-    if platform == 'win32':
-        DETECTRON = basedir.replace('ai_medit', detectron2_repo)
+    DETECTRON = os.environ.get('DETECTRON_PATH')
+    #DETECTRON = basedir.replace('MEDIT_API', 'detectron2')
+    #if platform == 'win32':
+    #    DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 
     model = ''
     model_output = os.path.join(DETECTRON, 'output')
 
     reg_data_set = basedir.replace('ai_medit', 'mitoz')
 
-    dataset_format = 'Coco'
+    dataset_format = os.environ.get('dataset_format')
 
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))

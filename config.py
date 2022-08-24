@@ -11,7 +11,8 @@ class Config(object):
     # location where install detectron2
     detectron2_repo = 'detectron2_repo'
 
-    DETECTRON = basedir.replace('ai_medit', detectron2_repo)
+    if platform == 'win32':
+        DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 
     model = ''
     model_output = os.path.join(DETECTRON, 'output')

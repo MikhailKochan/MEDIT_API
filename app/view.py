@@ -113,12 +113,9 @@ def alchemy_watcher():
                         img = Images(new)
                         session.add(img)
                 [image.cutting() for image in query if image.cut_file is False]
-                # for img in query:
-                #     if len(img.predict.all()) < 1 and img.cut_file is True:
-                #         pred = el.make_predict(med)
-                #         print(pred)
-                #         session.add(pred)
-                # [session.add(img.make_predict(med)) for img in query if len(img.predict.all()) < 1 and img.cut_file is True]
+                # for img in query: if len(img.predict.all()) < 1 and img.cut_file is True: pred = el.make_predict(
+                # med) print(pred) session.add(pred) [session.add(img.make_predict(med)) for img in query if len(
+                # img.predict.all()) < 1 and img.cut_file is True]
                 session.commit()
                 # time.sleep(Config.__dict__[''])
         except Exception as e:
@@ -211,7 +208,7 @@ class medit:
         mitoz_metadata.thing_colors = Config.__dict__['_COLORS']
         torch.multiprocessing.freeze_support()
 
-        print('loop')
+        print('loop make predictor')
         if self.cfg is None:
             self.create_cfg()
         cfg = self.cfg

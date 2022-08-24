@@ -46,7 +46,9 @@ def progress(prediction_id):
 @login_required
 def delete(prediction_id):
     current_app.logger.info(f"user {current_user} delete predict id = {prediction_id}")
-    task = Task.query.filter_by(predict_id=prediction_id).first()
+    #TODO
+    #подумать нужно ли удалять задачи, если да добавить их в алгоритм удаления
+    # task = Task.query.filter_by(predict_id=prediction_id).first()
     Predict.query.filter_by(id=prediction_id).delete()
     db.session.commit()
     data = True

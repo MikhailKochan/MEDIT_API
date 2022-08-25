@@ -28,9 +28,9 @@ def img_prediction(pred_id):
     try:
         print(f'pred_id : {pred_id}')
         # img = Images.query.filter_by(predict=pred_id)
-        pred = Predict.query.get(pred_id)
-        img = pred.images
-        predict = img.make_predict(predict=pred, cutting=img.cut_file)
+        predict = Predict.query.get(pred_id)
+        img = predict.images
+        predict = img.make_predict(predict=predict, cutting=img.cut_file)
 
         if predict:
             # pred.result_all_mitoz = data.result_all_mitoz
@@ -41,7 +41,7 @@ def img_prediction(pred_id):
             # pred.image_id = data.image_id
             pred.create_zip()
 
-        db.session.add(pred)
+        db.session.add(predict)
         db.session.commit()
     except Exception as e:
         print(f'ERROR in img_prediction : {e}')

@@ -18,9 +18,6 @@ class Config(object):
 
     _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')
-    if not os.path.exists(_DATASET_FOLDER):
-        os.mkdir(_DATASET_FOLDER)
-        print(f"Directory {_DATASET_FOLDER} created")
 
     MODEL_NAME = ''
     _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model')
@@ -56,6 +53,17 @@ class Config(object):
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
         CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
         DRAW = DRAW.replace('/', '\\')
+
+    folder_list = []
+    folder_list.append(UPLOAD_FOLDER)
+    folder_list.append(SAVE_ZIP)
+    folder_list.append(CUTTING_FOLDER)
+    folder_list.append(DRAW)
+
+    for folder in folder_list:
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+            print(f"Directory {folder} created")
 
     CLASS_NAMES = ("mitoz", "GMCC", "osteocit")
 

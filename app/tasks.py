@@ -30,7 +30,7 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         pred = Predict.query.get(pred_id)
         img = pred.images
-        data = img.make_predict(cutting=img.cut_file)
+        data = img.make_predict(cutting=img.cut_file, predict_date=pred.timestamp)
 
         if data:
             pred.result_all_mitoz = data.result_all_mitoz

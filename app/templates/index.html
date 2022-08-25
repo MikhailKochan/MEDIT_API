@@ -41,7 +41,7 @@
         <b>{{prediction.result_all_mitoz}}</b>
     </div>
     <div class="box" >
-        <a class="button" href="#" style="display:none">predict</a><br>
+        <a class="button" href="/get-zip/{{prediction.images.filename}}_{{prediction.timestamp.strftime('%d_%m_%Y__%H_%M')}}.zip" style="display:none">predict</a><br>
         <a class="button_del" href="#" style="display:none;background:red;">
             {% if prediction.tasks.first().complete is true %}DELETE{% else %}STOP{% endif %}
         </a>

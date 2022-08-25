@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, g, jsonify, current_app, abort
+from flask import send_from_directory
 from flask_login import current_user, login_required
 from app import db
 import os
@@ -14,15 +15,27 @@ def trigger_error():
     division_by_zero = 1 / 0
 
 
+@bp.route('/get-zip/<string:filename>')
+@login_required
+def get_zip(filename):
+    try:
+        return send_from_directory(current_app.config.SAVE_ZIP, filename=filename, as_attachment=True)
+    except FileNotFoundError:
+        return abort(404)
+    # img = Images.query.filter_by(filename=key).first()
+    # if img:
+    #     data = img.id
+    # else:
+    #     data = abort(404)
+    # return jsonify(data)
+
+
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
     img = Images.query.filter_by(filename=key).first()
     if img:
         data = img.id
-    # if redis_cache.exists(key):
-    #     data = redis_cache.get(key).decode("utf-8")
-    #
     else:
         data = abort(404)
     return jsonify(data)

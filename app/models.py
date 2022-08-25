@@ -20,7 +20,6 @@ import openslide
 from tqdm import tqdm, trange
 import glob
 import cv2
-from tqdm import tqdm, trange
 from pascal_voc_writer import Writer
 import sqlite3
 from app import login, db
@@ -175,7 +174,7 @@ class Images(db.Model):
         elif self.format.lower() == '.jpg':
             pass
 
-    def make_predict(self, med=None, cutting=False):
+    def make_predict(self, predict_date: datetime, cutting=False):
         try:
             all_mitoz = 0
 
@@ -184,17 +183,7 @@ class Images(db.Model):
             progress = 0
 
             _set_task_progress(progress, all_mitoz)
-            # Visualizer = current_app.medit.Visualizer if current_app else med.Visualizer
-            #
-            # cfg = current_app.medit.cfg if current_app else med.cfg
-            #
-            # mitoz_metadata = current_app.medit.mitoz_metadata if current_app else med.mitoz_metadata
-            #
-            # ColorMode = current_app.medit.ColorMode if current_app else med.ColorMode
-            #
-            # predictor = current_app.medit.predictor if current_app else med.predictor
-            #
-            # CLASS_NAMES = current_app.config['CLASS_NAMES'] if current_app else Config.__dict__['CLASS_NAMES']
+
             Visualizer = current_app.medit.Visualizer
 
             cfg = current_app.medit.cfg
@@ -210,9 +199,11 @@ class Images(db.Model):
             path_img = glob.glob(f"{current_app.config['CUTTING_FOLDER']}/{self.filename}/*.jpg") if current_app else \
                 glob.glob(f"{Config.__dict__['CUTTING_FOLDER']}/{self.filename}/*.jpg")
 
-            path_to_save = f"{current_app.config['DRAW']}/{self.filename}/" \
-                           f"{datetime.utcnow().strftime('%d_%m_%Y__%H_%M')}" if current_app else \
-                f"{Config.__dict__['DRAW']}/{self.filename}"
+            date_now = predict_date
+
+            path_to_save_draw = f"{current_app.config['DRAW']}/{self.filename}/" \
+                                f"{datetime.utcnow().strftime('%d_%m_%Y__%H_%M')}" if current_app else \
+                                f"{Config.__dict__['DRAW']}/{self.filename}/{date_now.strftime('%d_%m_%Y__%H_%M')}"
 
             mitoz = CLASS_NAMES.index('mitoz')
 
@@ -225,8 +216,8 @@ class Images(db.Model):
 
             total = len(path_img)
 
-            if not os.path.exists(path_to_save):
-                os.mkdir(path_to_save)
+            if not os.path.exists(path_to_save_draw):
+                os.mkdir(path_to_save_draw)
                 current_app.logger.info(f"Directory {self.filename} for draw created")
             with tqdm(total=total, position=0, leave=False) as pbar:
                 for img in path_img:
@@ -250,7 +241,7 @@ class Images(db.Model):
                                        instance_mode=ColorMode.SEGMENTATION)
 
                         v = v.draw_instance_predictions(outputs)
-                        cv2.imwrite(os.path.join(path_to_save, f"{filename}.jpg"), v.get_image()[:, :, ::-1])
+                        cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"), v.get_image()[:, :, ::-1])
 
                         all_mitoz += classes.count(mitoz)
                         if classes.count(mitoz) > max_mitoz_in_one_img:
@@ -270,7 +261,6 @@ class Images(db.Model):
                                          int(y1))
                     writer.save(f'{path_to_save_xml}/{filename}.xml')
 
-                    # redis_cache.set(image.dtime, int(percent))
                     count = 1
                     if not cutting:
                         count = count / 2
@@ -281,8 +271,14 @@ class Images(db.Model):
 
                     pbar.update(1)
 
-            # create_zip(image.filename, image.dtime)
-            # create_zip(image.filename, image.dtime, "draw")
+            # path_to_save_draw папка куда сохраняем разрисованные jpg
+
+            # date_now - объект datetime и заодно название папки
+            # self.filename - имя картинки
+
+            # result_zip = create_zip(path_to_save_draw, date_now, self.filename)
+            # current_app.logger.info(result)
+
             data = Predict(
                 result_all_mitoz=all_mitoz,
                 result_max_mitoz_in_one_img=max_mitoz_in_one_img,

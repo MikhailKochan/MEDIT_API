@@ -2,8 +2,11 @@ import glob
 import time
 import os
 import torch
+import zipfile
+
 from sys import platform
 from flask import current_app
+from datetime import datetime
 
 import sqlite3
 from sqlalchemy import select, create_engine
@@ -120,6 +123,32 @@ def alchemy_watcher():
                 # time.sleep(Config.__dict__[''])
         except Exception as e:
             print(e)
+
+
+def create_zip(path_to_save_draw: str, date: datetime, image_name: str):
+    try:
+        zip_folder = Config.SAVE_ZIP
+
+        path_img = glob.glob(f"{path_to_save_draw}/*")
+
+        zip_file_name = f"{image_name}_{date.strftime('%d_%m_%Y__%H_%M')}"
+
+        zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+        with tqdm(total=len(path_img), position=0, leave=False) as pbar:
+            for file in path_img:
+                pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
+                filename = os.path.basename(file)
+                zipFile.write(file, arcname=filename)
+                pbar.update(1)
+        zipFile.close()
+
+        result = f'{zip_file_name}.zip created'
+
+    except Exeption as e:
+        result = e
+
+    else:
+        return result
 
 
 def app_job(med, img):

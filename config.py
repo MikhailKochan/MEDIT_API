@@ -16,12 +16,18 @@ class Config(object):
     #if platform == 'win32':
     #    DETECTRON = basedir.replace('ai_medit', detectron2_repo)
 
-    model = ''
-    model_output = os.path.join(DETECTRON, 'output')
+    _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
+    _DATASET_NAME = os.environ.get('DATASET_NAME')
+    if not os.path.exists(_DATASET_FOLDER):
+        os.mkdir(_DATASET_FOLDER)
+        print(f"Directory {_DATASET_FOLDER} created")
 
-    reg_data_set = basedir.replace('ai_medit', 'mitoz')
+    MODEL_NAME = ''
+    _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model')
 
-    dataset_format = os.environ.get('dataset_format')
+    REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
+
+    DATASET_FORMAT = os.environ.get('dataset_format')
 
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
@@ -58,11 +64,7 @@ class Config(object):
     if torch.cuda.is_available():
         _CUDA_SET = "cuda"
     _COLORS = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
-    _ITER = 4000
-    _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
-    if not os.path.exists(_DATASET_FOLDER):
-        os.mkdir(_DATASET_FOLDER)
-        print(f"Directory {_DATASET_FOLDER} created")
+    _ITER = 40000
 
     POSTS_PER_PAGE = 8
 

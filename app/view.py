@@ -150,56 +150,45 @@ class medit:
         # TODO add config
         # cfg.INPUT.MIN
 
-        if Config.__dict__['dataset_format'] == 'Coco':
+        if Config.__dict__['DATASET_FORMAT'] == 'Coco':
             cfg.merge_from_file(os.path.join(Config.__dict__['DETECTRON'],
                                              "configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
-        elif Config.__dict__['dataset_format'] == 'Pascal':
+        elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
             cfg.merge_from_file(os.path.join(Config.__dict__['DETECTRON'],
                                              "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml"))
 
+        cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
+        cfg.INPUT.MAX_SIZE_TRAIN = 4080
+        cfg.INPUT.MAX_SIZE_TEST = 4080
+        cfg.INPUT.MIN_SIZE_TEST = 3072
+        cfg.SOLVER.STEPS = (30000,)
         cfg.SOLVER.MAX_ITER = Config.__dict__['_ITER']
         cfg.MODEL.DEVICE = Config.__dict__['_CUDA_SET']
         cfg.DATASETS.TRAIN = ("mitoze_train",)
         cfg.DATASETS.TEST = ()
         cfg.DATALOADER.NUM_WORKERS = 2
-        cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # initialize from model zoo
-        cfg.SOLVER.IMS_PER_BATCH = 4
-        cfg.SOLVER.BASE_LR = 0.0025
-        cfg.OUTPUT_DIR = Config.__dict__['model_output']
+        # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # initialize from model zoo
+        cfg.SOLVER.IMS_PER_BATCH = 2
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
-        cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4  # 3 classes (data, fig, hazelnut)
+        cfg.SOLVER.BASE_LR = 0.001
+        cfg.OUTPUT_DIR = Config.__dict__['_MODEL_OUTPUT']
+
+        cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # 3 classes (mitoz, GMCC, ostiocit)
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
 
         cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # set the testing threshold for this model
+        # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # set the testing threshold for this model
         self.cfg = cfg
 
     def make_predictor(self):
-        # if app:
-        #     if not os.getcwd() == app.config['DETECTRON']:
-        #         os.chdir(app.config['DETECTRON'])
-        # else:
-        # if not os.getcwd() == Config.__dict__['DETECTRON'] and platform == 'win32':
-        #     os.chdir(Config.__dict__['DETECTRON'])
-
         try:
-            # if app:
-            #     if app.config['dataset_format'] == 'Coco':
-            #         register_coco_instances("mitoze_train", {},
-            #                                 f"{app.config['reg_data_set']}/train/_annotations.coco.json",
-            #                                 f"{app.config['reg_data_set']}/train")
-            #
-            #     elif app.config['dataset_format'] == 'Pascal':
-            #         register_pascal_voc("mitoze_train", app.config['reg_data_set'], "train", "2012",
-            #                             app.config['CLASS_NAMES'])
-            # else:
             if Config.__dict__['dataset_format'] == 'Coco':
                 register_coco_instances("mitoze_train", {},
-                                        f"{Config.__dict__['reg_data_set']}/train/_annotations.coco.json",
-                                        f"{Config.__dict__['reg_data_set']}/train")
+                                        f"{Config.__dict__['REG_DATA_SET']}/train/_annotations.coco.json",
+                                        f"{Config.__dict__['REG_DATA_SET']}/train")
 
             elif Config.__dict__['dataset_format'] == 'Pascal':
-                register_pascal_voc("mitoze_train", Config.__dict__['reg_data_set'], "train", "2012",
+                register_pascal_voc("mitoze_train", Config.__dict__['REG_DATA_SET'], "train_mitoz", "2012",
                                     Config.__dict__['CLASS_NAMES'])
 
         except Exception as e:

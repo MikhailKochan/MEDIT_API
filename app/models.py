@@ -23,7 +23,7 @@ import cv2
 from pascal_voc_writer import Writer
 import sqlite3
 from app import login, db
-from app.view import create_zip
+# from app.view import create_zip
 
 
 def generator_id(cls):
@@ -175,7 +175,7 @@ class Images(db.Model):
         elif self.format.lower() == '.jpg':
             pass
 
-    def make_predict(self, predict_date: datetime, cutting=False):
+    def make_predict(self, predict: Predict, cutting=False):
         try:
             all_mitoz = 0
 
@@ -200,11 +200,11 @@ class Images(db.Model):
             path_img = glob.glob(f"{current_app.config['CUTTING_FOLDER']}/{self.filename}/*.jpg") if current_app else \
                 glob.glob(f"{Config.__dict__['CUTTING_FOLDER']}/{self.filename}/*.jpg")
 
-            date_now = predict_date
+            date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
 
             path_to_save_draw = f"{current_app.config['DRAW']}/{self.filename}/" \
-                                f"{datetime.utcnow().strftime('%d_%m_%Y__%H_%M')}" if current_app else \
-                                f"{Config.__dict__['DRAW']}/{self.filename}/{date_now.strftime('%d_%m_%Y__%H_%M')}"
+                                f"{date_now}" if current_app else \
+                                f"{Config.__dict__['DRAW']}/{self.filename}/{date_now}"
 
             mitoz = CLASS_NAMES.index('mitoz')
 
@@ -277,19 +277,25 @@ class Images(db.Model):
             # date_now - объект datetime и заодно название папки
             # self.filename - имя картинки
 
-            result_zip = create_zip(path_to_save_draw, date_now, self.filename)
-            current_app.logger.info(result_zip)
+            # result_zip = create_zip(path_to_save_draw, date_now, self.filename)
+            # current_app.logger.info(result_zip)
 
-            data = Predict(
-                result_all_mitoz=all_mitoz,
-                result_max_mitoz_in_one_img=max_mitoz_in_one_img,
-                count_img=total,
-                name_img_have_max_mitoz=img_name,
-                model=cfg.MODEL.WEIGHTS,
-                image_id=self.id
-            )
+            predict(result_all_mitoz=all_mitoz,
+                    result_max_mitoz_in_one_img=max_mitoz_in_one_img,
+                    count_img=total,
+                    name_img_have_max_mitoz=img_name,
+                    model=cfg.MODEL.WEIGHTS,
+                    image_id=self.id)
+            # data = Predict(
+            #     result_all_mitoz=all_mitoz,
+            #     result_max_mitoz_in_one_img=max_mitoz_in_one_img,
+            #     count_img=total,
+            #     name_img_have_max_mitoz=img_name,
+            #     model=cfg.MODEL.WEIGHTS,
+            #     image_id=self.id
+            # )
 
-            return data
+            return predict
 
         except Exception as e:
             print(f"ERROR in predict: {e}")
@@ -354,6 +360,31 @@ class Predict(db.Model):
     def get_task_in_progress(self, name):
         return Task.query.filter_by(name=name, predict=self,
                                     complete=False).first()
+
+    def create_zip(self, path_to_save_draw: str, date: datetime, image_name: str):
+        try:
+            zip_folder = Config.SAVE_ZIP
+
+            path_img = glob.glob(f"{path_to_save_draw}/*")
+
+            zip_file_name = f"{image_name}_{date.strftime('%d_%m_%Y__%H_%M')}"
+
+            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+            with tqdm(total=len(path_img), position=0, leave=False) as pbar:
+                for file in path_img:
+                    pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
+                    filename = os.path.basename(file)
+                    zipFile.write(file, arcname=filename)
+                    pbar.update(1)
+            zipFile.close()
+
+            result = f'{zip_file_name}.zip created'
+
+        except Exeption as e:
+            result = e
+
+        else:
+            return result
 
 
 @login.user_loader

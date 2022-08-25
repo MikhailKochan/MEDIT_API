@@ -30,15 +30,17 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         pred = Predict.query.get(pred_id)
         img = pred.images
-        data = img.make_predict(cutting=img.cut_file, predict_date=pred.timestamp)
+        predict = img.make_predict(predict=pred, cutting=img.cut_file)
 
-        if data:
-            pred.result_all_mitoz = data.result_all_mitoz
-            pred.result_max_mitoz_in_one_img = data.result_max_mitoz_in_one_img
-            pred.count_img = data.count_img
-            pred.name_img_have_max_mitoz = data.name_img_have_max_mitoz
-            pred.model = data.model
-            pred.image_id = data.image_id
+        if predict:
+            # pred.result_all_mitoz = data.result_all_mitoz
+            # pred.result_max_mitoz_in_one_img = data.result_max_mitoz_in_one_img
+            # pred.count_img = data.count_img
+            # pred.name_img_have_max_mitoz = data.name_img_have_max_mitoz
+            # pred.model = data.model
+            # pred.image_id = data.image_id
+            pred.create_zip()
+
         db.session.add(pred)
         db.session.commit()
     except Exception as e:

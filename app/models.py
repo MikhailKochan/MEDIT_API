@@ -23,7 +23,7 @@ import cv2
 from pascal_voc_writer import Writer
 import sqlite3
 from app import login, db
-from view import create_zip
+from app.view import create_zip
 
 
 def generator_id(cls):

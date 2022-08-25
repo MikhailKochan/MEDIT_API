@@ -39,7 +39,7 @@ def img_prediction(pred_id):
             # pred.name_img_have_max_mitoz = data.name_img_have_max_mitoz
             # pred.model = data.model
             # pred.image_id = data.image_id
-            pred.create_zip()
+            predict.create_zip()
 
         db.session.add(predict)
         db.session.commit()

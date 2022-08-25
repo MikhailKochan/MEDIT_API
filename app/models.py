@@ -276,8 +276,8 @@ class Images(db.Model):
             # date_now - объект datetime и заодно название папки
             # self.filename - имя картинки
 
-            # result_zip = create_zip(path_to_save_draw, date_now, self.filename)
-            # current_app.logger.info(result)
+            result_zip = create_zip(path_to_save_draw, date_now, self.filename)
+            current_app.logger.info(result_zip)
 
             data = Predict(
                 result_all_mitoz=all_mitoz,

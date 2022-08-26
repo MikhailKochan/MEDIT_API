@@ -51,5 +51,7 @@ def img_prediction(pred_id):
 
     else:
         os.remove(img.file_path)
+        app.logger.info(f'{img.file_path} deleted')
         img.query.filter_by(id=img.id).delete()
         db.session.commit()
+        app.logger.info(f'{img.id} deleted on bd')

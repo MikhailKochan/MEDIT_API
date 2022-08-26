@@ -318,7 +318,7 @@ class Images(db.Model):
                                       self.filename)
                 current_app.logger.info(f"Directory {f_path} for open in openslide")
                 file = openslide.OpenSlide(f_path)
-                print(file)
+
             else:
                 return f'{self.format} not added'
 
@@ -330,11 +330,13 @@ class Images(db.Model):
 
             path_to_save_draw = os.path.join(current_app.config['BASEDIR'],
                                              f"{current_app.config['DRAW']}/{self.filename}/{date_now}")
-
+            print(1)
             if not os.path.exists(path_to_save_draw):
+                print(2)
                 os.mkdir(path_to_save_draw)
+                print(3)
                 current_app.logger.info(f"Directory {self.filename} for draw created")
-
+            print(4)
             mitoz = CLASS_NAMES.index('mitoz')
 
             with tqdm(total=total, position=0, leave=False) as pbar:

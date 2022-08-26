@@ -419,8 +419,21 @@ class Predict(db.Model):
 
     model = db.Column(db.String(128))
 
-    # def __init__(self):
-    #     self.id = generator_id(self)
+    def __init__(self,
+                 image_id=None,
+                 result_all_mitoz=None,
+                 result_max_mitoz_in_one_img=None,
+                 count_img=None,
+                 name_img_have_max_mitoz=None,
+                 model=None,
+                 ):
+
+        self.image_id = image_id
+        self.result_all_mitoz = result_all_mitoz
+        self.result_max_mitoz_in_one_img = result_max_mitoz_in_one_img
+        self.count_img = count_img
+        self.name_img_have_max_mitoz = name_img_have_max_mitoz
+        self.model = model
 
     def __repr__(self):
         return f'<Predict Images {self.images.filename} create {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}>'

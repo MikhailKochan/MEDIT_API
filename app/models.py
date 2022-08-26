@@ -339,7 +339,7 @@ class Images(db.Model):
                 current_app.logger.info(f"Directory {self.filename} for draw created")
 
             mitoz = CLASS_NAMES.index('mitoz')
-
+            all_mitoz = 0
             with tqdm(total=total, position=0, leave=False) as pbar:
                 for i in range(0, w_sum):
                     for j in range(0, h_sum):

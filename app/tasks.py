@@ -34,7 +34,7 @@ def img_prediction(pred_id):
         predict = Predict.query.get(pred_id)
         img = predict.images
 
-        os.mkdir(f"{Config.DRAW}/{img.filename}", exist_ok=True)
+        os.makedirs(f"{Config.DRAW}/{img.filename}", exist_ok=True)
 
         # data = img.make_predict(predict=predict, cutting=img.cut_file)
         data = img.alternative_predict(predict=predict)

@@ -44,7 +44,7 @@ def img_prediction(pred_id):
 
         else:
             db.session.add(predict)
-
+        db.session.commit()
     except Exception as e:
         print(f'ERROR in img_prediction : {e}')
         # _set_task_progress(100)
@@ -53,6 +53,6 @@ def img_prediction(pred_id):
     else:
         os.remove(img.file_path)
         app.logger.info(f'{img.file_path} deleted')
-        img.query.filter_by(id=img.id).delete()
-        db.session.commit()
-        app.logger.info(f'{img.id} deleted on bd')
+
+
+

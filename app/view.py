@@ -187,9 +187,6 @@ class medit:
             path_to_config = os.path.join(Config.__dict__['DETECTRON'],
                                           "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
 
-        print('det', Config.__dict__['DETECTRON'])
-        print(os.path.join(Config.__dict__['DETECTRON'], 'configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml'))
-        print('cfg', path_to_config)
         cfg.merge_from_file(path_to_config)
         cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
         cfg.INPUT.MAX_SIZE_TRAIN = 4080

@@ -1,5 +1,6 @@
 import torch
 import os
+import detectron2
 from dotenv import load_dotenv
 from sys import platform
 
@@ -8,10 +9,11 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 
 
 class Config(object):
+
     # location where install detectron2
 
-    DETECTRON = os.environ.get('DETECTRON_PATH')
-    #DETECTRON = basedir.replace('ai_medit', os.environ.get('DETECTRON_PATH'))
+    DETECTRON = detectron2.__file__
+
     _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
@@ -32,7 +34,7 @@ class Config(object):
 
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
 
-    UPDATE_TIME = int(1) # time in second
+    UPDATE_TIME = int(1)  # time in second
 
     UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')
     SAVE_ZIP = os.path.join(basedir, "app/static/zip")
@@ -44,19 +46,12 @@ class Config(object):
     if platform == 'win32':
         _MODEL_OUTPUT = _MODEL_OUTPUT.replace('/', '\\')
         REG_DATA_SET = REG_DATA_SET.replace('/', '\\')
-
-        DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
-
         UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
         CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
         DRAW = DRAW.replace('/', '\\')
 
-    folder_list = []
-    folder_list.append(UPLOAD_FOLDER)
-    folder_list.append(SAVE_ZIP)
-    folder_list.append(CUTTING_FOLDER)
-    folder_list.append(DRAW)
+    folder_list = [UPLOAD_FOLDER, SAVE_ZIP, CUTTING_FOLDER, DRAW]
 
     for folder in folder_list:
         if not os.path.exists(folder):

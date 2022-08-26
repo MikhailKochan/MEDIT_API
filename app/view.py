@@ -177,11 +177,9 @@ class medit:
 
         cfg = get_cfg()
         # TODO add config
-        # cfg.INPUT.MIN
+
         if Config.__dict__['DATASET_FORMAT'] == 'Coco':
-            # if platform == 'win32':
-            #     path_to_config = 'D:/nina/detectron2_repo/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml'
-            # else:
+
             path_to_config = os.path.join(Config.__dict__['DETECTRON'],
                                           'configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
 

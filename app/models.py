@@ -14,6 +14,7 @@ from rq import get_current_job
 from rq import Retry
 import json
 from time import time
+import zipfile
 
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')

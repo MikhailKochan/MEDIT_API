@@ -9,13 +9,9 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 
 class Config(object):
     # location where install detectron2
-    detectron2_repo = 'detectron2_repo'
 
     DETECTRON = os.environ.get('DETECTRON_PATH')
-    #DETECTRON = basedir.replace('MEDIT_API', 'detectron2')
-    #if platform == 'win32':
-    #    DETECTRON = basedir.replace('ai_medit', detectron2_repo)
-
+    #DETECTRON = basedir.replace('ai_medit', os.environ.get('DETECTRON_PATH'))
     _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
@@ -46,9 +42,11 @@ class Config(object):
     BASEDIR = basedir
 
     if platform == 'win32':
-        model_output = model_output.replace('/', '\\')
-        reg_data_set = reg_data_set.replace('/', '\\')
-        DETECTRON = DETECTRON.replace('/', '\\')
+        _MODEL_OUTPUT = _MODEL_OUTPUT.replace('/', '\\')
+        REG_DATA_SET = REG_DATA_SET.replace('/', '\\')
+
+        DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
+
         UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
         CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')

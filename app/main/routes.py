@@ -33,11 +33,13 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
+
     img = Images.query.filter_by(filename=key).first()
     if img:
         data = img.id
     else:
         data = abort(404)
+
     return jsonify(data)
 
 

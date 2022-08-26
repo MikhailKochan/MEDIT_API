@@ -30,18 +30,17 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         predict = Predict.query.get(pred_id)
         img = predict.images
-        predict = img.make_predict(predict=predict, cutting=img.cut_file)
+        data = img.make_predict(predict=predict, cutting=img.cut_file)
 
-        if predict:
-            # pred.result_all_mitoz = data.result_all_mitoz
-            # pred.result_max_mitoz_in_one_img = data.result_max_mitoz_in_one_img
-            # pred.count_img = data.count_img
-            # pred.name_img_have_max_mitoz = data.name_img_have_max_mitoz
-            # pred.model = data.model
-            # pred.image_id = data.image_id
-            predict.create_zip()
+        if data:
+            path_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
+                        f"{img.filename}/" \
+                        f"{data.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 
-        db.session.add(predict)
+            data.create_zip(path_draw)
+            db.session.add(data)
+        else:
+            db.session.add(predict)
         db.session.commit()
     except Exception as e:
         print(f'ERROR in img_prediction : {e}')

@@ -24,9 +24,11 @@ function myGreeting(name){
         if(xhr.readyState === 4 && xhr.status === 200){
 
             let url = JSON.parse(xhr.responseText);
-//            console.log(url);
-//            if(url != ""){
-//            window.location.replace(`/new_analysis/${url}`);
+
+            if(url != ""){
+            console.log(url);
+            window.location.replace(`/new_analysis/${url}`)
+            };
         }else{
             console.log("don't have response...");
         }

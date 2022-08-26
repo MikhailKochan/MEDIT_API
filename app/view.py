@@ -178,14 +178,21 @@ class medit:
         cfg = get_cfg()
         # TODO add config
         # cfg.INPUT.MIN
-
         if Config.__dict__['DATASET_FORMAT'] == 'Coco':
-            cfg.merge_from_file(os.path.join(Config.__dict__['DETECTRON'],
-                                             "configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
-        elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
-            cfg.merge_from_file(os.path.join(Config.__dict__['DETECTRON'],
-                                             "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml"))
+            # if platform == 'win32':
+            #     path_to_config = 'D:/nina/detectron2_repo/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml'
+            # else:
+            path_to_config = os.path.join(Config.__dict__['DETECTRON'],
+                                          'configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
 
+        elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
+            path_to_config = os.path.join(Config.__dict__['DETECTRON'],
+                                          "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
+
+        print('det', Config.__dict__['DETECTRON'])
+        print(os.path.join(Config.__dict__['DETECTRON'], 'configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml'))
+        print('cfg', path_to_config)
+        cfg.merge_from_file(path_to_config)
         cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
         cfg.INPUT.MAX_SIZE_TRAIN = 4080
         cfg.INPUT.MAX_SIZE_TEST = 4080
@@ -211,12 +218,12 @@ class medit:
 
     def make_predictor(self):
         try:
-            if Config.__dict__['dataset_format'] == 'Coco':
+            if Config.__dict__['DATASET_FORMAT'] == 'Coco':
                 register_coco_instances("mitoze_train", {},
                                         f"{Config.__dict__['REG_DATA_SET']}/train/_annotations.coco.json",
                                         f"{Config.__dict__['REG_DATA_SET']}/train")
 
-            elif Config.__dict__['dataset_format'] == 'Pascal':
+            elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
                 register_pascal_voc("mitoze_train", Config.__dict__['REG_DATA_SET'], "train_mitoz", "2012",
                                     Config.__dict__['CLASS_NAMES'])
 
@@ -238,62 +245,6 @@ class medit:
         self.mitoz_metadata = mitoz_metadata
 
         return predictor
-
-    # def create_config(self, register_pascal_voc, MetadataCatalog, get_cfg):
-    #     try:
-    #         register_pascal_voc("mitoze_train", "E:/mitosplus2", "train", "2012", current_app.config['CLASS_NAMES'])
-    #         mitoz_metadata = MetadataCatalog.get("mitoze_train")
-    #
-    #         mitoz_metadata.thing_colors = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
-    #         torch.multiprocessing.freeze_support()
-    #
-    #         print('loop')
-    #
-    #         num_gpu = 1
-    #         bs = (num_gpu * 2)
-    #         cfg = get_cfg()
-    #         cfg.merge_from_file("./configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
-    #         cfg.DATASETS.TRAIN = ("mitoze_train",)
-    #         cfg.DATASETS.TEST = ()  # no metrics implemented for this dataset
-    #         cfg.DATALOADER.NUM_WORKERS = 2
-    #         cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # initialize from model zoo
-    #         cfg.SOLVER.IMS_PER_BATCH = 4
-    #         cfg.SOLVER.BASE_LR = 0.02 * bs / 16
-    #         cfg.SOLVER.MAX_ITER = 4000  # 300 iterations seems good enough, but you can certainly train longer
-    #         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
-    #         cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4  # 3 classes (data, fig, hazelnut)
-    #         # cfg.OUTPUT_DIR = app.config['']
-    #         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-    #         cfg.MODEL.DEVICE = current_app.config['_CUDA_SET']
-    #         return cfg, mitoz_metadata
-    #     except Exception as e:
-    #         print(f'ERROR in create config: {e}')
-    #
-    # def load_model(self, cfg, DefaultPredictor):
-    #     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    #     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # set the testing threshold for this model
-    #     predictor = DefaultPredictor(cfg)
-    #     return predictor
-
-
-class Medit:
-    def __init__(self, app=None):
-        self.mod = ''
-        if app is not None:
-            self.init_app(app)
-
-    def init_app(self, app):
-        app.medit = self
-        # if not hasattr(app, 'extensions'):  # pragma: no cover
-        #     app.extensions = {}
-        # app.extensions['medit'] = medit
-        # app.context_processor(self.context_processor)
-
-    @staticmethod
-    def context_processor():
-        return {
-            'medit': current_app.extensions['medit']
-        }
 
 
 if __name__ == '__main__':

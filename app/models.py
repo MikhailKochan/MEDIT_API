@@ -23,6 +23,8 @@ import cv2
 from pascal_voc_writer import Writer
 import sqlite3
 from app import login, db
+
+
 # from app.view import create_zip
 
 
@@ -175,7 +177,7 @@ class Images(db.Model):
         elif self.format.lower() == '.jpg':
             pass
 
-    def make_predict(self, predict: Predict, cutting=False):
+    def make_predict(self, predict, cutting=False):
         try:
             all_mitoz = 0
 
@@ -204,7 +206,7 @@ class Images(db.Model):
 
             path_to_save_draw = f"{current_app.config['DRAW']}/{self.filename}/" \
                                 f"{date_now}" if current_app else \
-                                f"{Config.__dict__['DRAW']}/{self.filename}/{date_now}"
+                f"{Config.__dict__['DRAW']}/{self.filename}/{date_now}"
 
             mitoz = CLASS_NAMES.index('mitoz')
 
@@ -272,30 +274,12 @@ class Images(db.Model):
 
                     pbar.update(1)
 
-            # path_to_save_draw папка куда сохраняем разрисованные jpg
-
-            # date_now - объект datetime и заодно название папки
-            # self.filename - имя картинки
-
-            # result_zip = create_zip(path_to_save_draw, date_now, self.filename)
-            # current_app.logger.info(result_zip)
-
-            predict(result_all_mitoz=all_mitoz,
-                    result_max_mitoz_in_one_img=max_mitoz_in_one_img,
-                    count_img=total,
-                    name_img_have_max_mitoz=img_name,
-                    model=cfg.MODEL.WEIGHTS,
-                    image_id=self.id)
-            # data = Predict(
-            #     result_all_mitoz=all_mitoz,
-            #     result_max_mitoz_in_one_img=max_mitoz_in_one_img,
-            #     count_img=total,
-            #     name_img_have_max_mitoz=img_name,
-            #     model=cfg.MODEL.WEIGHTS,
-            #     image_id=self.id
-            # )
-
-            return predict
+            return predict(result_all_mitoz=all_mitoz,
+                           result_max_mitoz_in_one_img=max_mitoz_in_one_img,
+                           count_img=total,
+                           name_img_have_max_mitoz=img_name,
+                           model=cfg.MODEL.WEIGHTS,
+                           image_id=self.id)
 
         except Exception as e:
             print(f"ERROR in predict: {e}")
@@ -361,13 +345,17 @@ class Predict(db.Model):
         return Task.query.filter_by(name=name, predict=self,
                                     complete=False).first()
 
-    def create_zip(self, path_to_save_draw: str, date: datetime, image_name: str):
+    def create_zip(self, path_to_save_draw: str):
         try:
-            zip_folder = Config.SAVE_ZIP
+            # path_to_save_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
+            #                     f"{self.images.filename}/" \
+            #                     f"{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
+
+            zip_folder = current_app.config.SAVE_ZIP
 
             path_img = glob.glob(f"{path_to_save_draw}/*")
 
-            zip_file_name = f"{image_name}_{date.strftime('%d_%m_%Y__%H_%M')}"
+            zip_file_name = f"{self.images.filename}_{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 
             zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
             with tqdm(total=len(path_img), position=0, leave=False) as pbar:

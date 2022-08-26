@@ -19,7 +19,7 @@ def trigger_error():
 @login_required
 def get_zip(filename):
     try:
-        return send_from_directory(current_app.config.SAVE_ZIP, filename=filename, as_attachment=True)
+        return send_from_directory(current_app.config["SAVE_ZIP"], filename=filename, as_attachment=True)
     except FileNotFoundError:
         return abort(404)
     # img = Images.query.filter_by(filename=key).first()

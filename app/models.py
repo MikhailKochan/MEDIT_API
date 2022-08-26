@@ -348,7 +348,7 @@ class Images(db.Model):
                         start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                         start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
-                        filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
+                        filename = "0_im" + "_" + str(i) + "_" + str(j)
 
                         if self.format.lower() == '.svs':
 
@@ -384,11 +384,17 @@ class Images(db.Model):
 
                         pbar.update(1)
             predict.result_all_mitoz = all_mitoz
+
             predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
+
             predict.count_img = total
+
             predict.name_img_have_max_mitoz = img_name
+
             predict.model = cfg.MODEL.WEIGHTS
+
             predict.image_id = self.id
+
             return predict
 
         except Exception as e:

@@ -31,6 +31,7 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         predict = Predict.query.get(pred_id)
         img = predict.images
+        print(img)
         # data = img.make_predict(predict=predict, cutting=img.cut_file)
         data = img.alternative_predict(predict=predict)
 

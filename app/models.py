@@ -326,8 +326,8 @@ class Images(db.Model):
             s_row = int(w_rest / 2)
             total = h_sum * w_sum
 
-            path_to_save_draw = f"{current_app.config['DRAW']}/{self.filename}/" \
-                                f"{date_now}"
+            path_to_save_draw = os.path.join(current_app.config['BASEDIR'],
+                                             f"{current_app.config['DRAW']}/{self.filename}/{date_now}")
 
             if not os.path.exists(path_to_save_draw):
                 os.mkdir(path_to_save_draw)
@@ -346,6 +346,7 @@ class Images(db.Model):
                         filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
 
                         if self.format.lower() == '.svs':
+
                             img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                             img = img.convert('RGB')
 
@@ -403,7 +404,7 @@ class Predict(db.Model):
     count_img = db.Column(db.Integer)
     name_img_have_max_mitoz = db.Column(db.Integer)
 
-    tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="save-update")
+    tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="all, delete")
 
     status = db.relationship('Status', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 

@@ -30,10 +30,11 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         predict = Predict.query.get(pred_id)
         img = predict.images
-        data = img.make_predict(predict=predict, cutting=img.cut_file)
+        # data = img.make_predict(predict=predict, cutting=img.cut_file)
+        data = img.alternative_predict(predict=predict)
 
         if data:
-            path_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
+            path_draw = f"{current_app.config['DRAW']}/" \
                         f"{img.filename}/" \
                         f"{data.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 

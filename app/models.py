@@ -286,6 +286,106 @@ class Images(db.Model):
             if current_app:
                 current_app.logger.error(e)
 
+    def alternative_predict(self, predict):
+        try:
+            progress = 0
+
+            max_mitoz_in_one_img = 0
+
+            _set_task_progress(progress, 0)
+
+            Visualizer = current_app.medit.Visualizer
+
+            cfg = current_app.medit.cfg
+
+            mitoz_metadata = current_app.medit.mitoz_metadata
+
+            ColorMode = current_app.medit.ColorMode
+
+            predictor = current_app.medit.predictor
+
+            date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
+
+            CLASS_NAMES = current_app.config['CLASS_NAMES']
+            _CUT_IMAGE_SIZE = current_app.config['_CUT_IMAGE_SIZE']
+
+            h_sum = int(self.height / _CUT_IMAGE_SIZE[1])
+            w_sum = int(self.width / _CUT_IMAGE_SIZE[0])
+
+            if self.format.lower() == '.svs':
+                f_path = os.path.join(current_app.config['BASEDIR'],
+                                      current_app.config['UPLOAD_FOLDER'],
+                                      self.filename)
+                file = openslide.OpenSlide(f_path)
+            else:
+                return f'{self.format} not added'
+
+            h_rest = self.height % _CUT_IMAGE_SIZE[1]
+            w_rest = self.width % _CUT_IMAGE_SIZE[0]
+            s_col = int(h_rest / 2)
+            s_row = int(w_rest / 2)
+            total = h_sum * w_sum
+
+            path_to_save_draw = f"{current_app.config['DRAW']}/{self.filename}/" \
+                                f"{date_now}"
+
+            if not os.path.exists(path_to_save_draw):
+                os.mkdir(path_to_save_draw)
+                current_app.logger.info(f"Directory {self.filename} for draw created")
+
+            mitoz = CLASS_NAMES.index('mitoz')
+
+            with tqdm(total=total, position=0, leave=False) as pbar:
+                for i in range(0, w_sum):
+                    for j in range(0, h_sum):
+                        pbar.set_description(f"Total img: {total}. Start cutting")
+
+                        start_row = j * _CUT_IMAGE_SIZE[0] + s_row
+                        start_col = i * _CUT_IMAGE_SIZE[1] + s_col
+
+                        filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
+
+                        if self.format.lower() == '.svs':
+                            img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
+                            img = img.convert('RGB')
+
+                            outputs = predictor(img)
+
+                            outputs = outputs["instances"].to("cpu")
+
+                            classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
+
+                            if mitoz in classes:
+                                v = Visualizer(im[:, :, ::-1],
+                                               metadata=mitoz_metadata,
+                                               scale=1,
+                                               instance_mode=ColorMode.SEGMENTATION)
+
+                                v = v.draw_instance_predictions(outputs)
+                                cv2.imwrite(os.path.join(current_app.config['DRAW'], f"{filename}.jpg"),
+                                            v.get_image()[:, :, ::-1])
+
+                                all_mitoz += classes.count(mitoz)
+                                if classes.count(mitoz) > max_mitoz_in_one_img:
+                                    max_mitoz_in_one_img = classes.count(mitoz)
+                                    img_name = f"{filename}.jpg"
+
+                        progress += 1 / total * 100.0
+
+                        _set_task_progress(progress, all_mitoz=all_mitoz)
+
+                        pbar.update(1)
+
+            return predict(result_all_mitoz=all_mitoz,
+                           result_max_mitoz_in_one_img=max_mitoz_in_one_img,
+                           count_img=total,
+                           name_img_have_max_mitoz=img_name,
+                           model=cfg.MODEL.WEIGHTS,
+                           image_id=self.id)
+
+        except Exception as e:
+            current_app.logger.error(e)
+
     def __repr__(self):
         if self.timestamp:
             text = f'<Image {self.name} load on server {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}' \

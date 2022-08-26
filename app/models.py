@@ -318,6 +318,7 @@ class Images(db.Model):
                                       self.filename)
                 current_app.logger.info(f"Directory {f_path} for open in openslide")
                 file = openslide.OpenSlide(f_path)
+                print(file)
             else:
                 return f'{self.format} not added'
 

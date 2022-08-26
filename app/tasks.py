@@ -47,8 +47,8 @@ def img_prediction(pred_id):
             data.create_zip(path_draw)
             db.session.add(data)
 
-        else:
-            db.session.add(predict)
+        # else:
+        #     db.session.add(predict)
 
         db.session.commit()
         print("Вот и сказочке конец, а кто слушал - молодец.")

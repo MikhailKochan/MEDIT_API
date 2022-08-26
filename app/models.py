@@ -478,7 +478,7 @@ class Predict(db.Model):
             #                     f"{self.images.filename}/" \
             #                     f"{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 
-            zip_folder = current_app.config.SAVE_ZIP
+            zip_folder = current_app.config['SAVE_ZIP']
 
             path_img = glob.glob(f"{path_to_save_draw}/*")
 

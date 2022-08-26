@@ -316,6 +316,7 @@ class Images(db.Model):
                 f_path = os.path.join(current_app.config['BASEDIR'],
                                       current_app.config['UPLOAD_FOLDER'],
                                       self.filename)
+                current_app.logger.info(f"Directory {f_path} for open in openslide")
                 file = openslide.OpenSlide(f_path)
             else:
                 return f'{self.format} not added'

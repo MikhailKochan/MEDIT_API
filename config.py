@@ -12,7 +12,7 @@ class Config(object):
 
     # location where install detectron2
 
-    DETECTRON = detectron2.__file__
+    DETECTRON = detectron2d.__path__[0].replace('detectron2', '')
 
     _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')

@@ -40,10 +40,16 @@ def img_prediction(pred_id):
 
             data.create_zip(path_draw)
             db.session.add(data)
+
         else:
             db.session.add(predict)
-        db.session.commit()
+
     except Exception as e:
         print(f'ERROR in img_prediction : {e}')
         # _set_task_progress(100)
         app.logger.error('Unhandled exception', exc_info=sys.exc_info())
+
+    else:
+        os.remove(img.file_path)
+        img.query.filter_by(id=img.id).delete()
+        db.session.commit()

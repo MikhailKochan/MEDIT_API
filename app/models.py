@@ -354,8 +354,8 @@ class Images(db.Model):
 
                             img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                             img = img.convert('RGB')
-
-                            outputs = predictor(np.asarray(img))
+                            im = np.asarray(img)
+                            outputs = predictor()
 
                             outputs = outputs["instances"].to("cpu")
 

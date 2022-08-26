@@ -383,13 +383,13 @@ class Images(db.Model):
                         _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), all_mitoz=all_mitoz)
 
                         pbar.update(1)
-
-            return predict(result_all_mitoz=all_mitoz,
-                           result_max_mitoz_in_one_img=max_mitoz_in_one_img,
-                           count_img=total,
-                           name_img_have_max_mitoz=img_name,
-                           model=cfg.MODEL.WEIGHTS,
-                           image_id=self.id)
+            predict.result_all_mitoz = all_mitoz
+            predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
+            predict.count_img = total
+            predict.name_img_have_max_mitoz = img_name
+            predict.model = cfg.MODEL.WEIGHTS
+            predict.image_id = self.id
+            return predict
 
         except Exception as e:
             current_app.logger.error(e)

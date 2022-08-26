@@ -8,6 +8,7 @@ import os
 from decimal import Decimal as D
 import redis
 import rq
+import numpy as np
 from sys import platform
 from rq import get_current_job
 from rq import Retry
@@ -354,7 +355,7 @@ class Images(db.Model):
                             img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                             img = img.convert('RGB')
 
-                            outputs = predictor(img)
+                            outputs = predictor(np.asarray(img))
 
                             outputs = outputs["instances"].to("cpu")
 
@@ -367,7 +368,7 @@ class Images(db.Model):
                                                instance_mode=ColorMode.SEGMENTATION)
 
                                 v = v.draw_instance_predictions(outputs)
-                                cv2.imwrite(os.path.join(current_app.config['DRAW'], f"{filename}.jpg"),
+                                cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"),
                                             v.get_image()[:, :, ::-1])
 
                                 all_mitoz += classes.count(mitoz)

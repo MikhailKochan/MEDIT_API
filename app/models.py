@@ -378,7 +378,7 @@ class Images(db.Model):
 
                         progress += 1 / total * 100.0
 
-                        _set_task_progress(progress, all_mitoz=all_mitoz)
+                        _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), all_mitoz=all_mitoz)
 
                         pbar.update(1)
 

@@ -1,6 +1,5 @@
 import torch
 import os
-import detectron2
 from dotenv import load_dotenv
 from sys import platform
 
@@ -11,8 +10,7 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 class Config(object):
 
     # location where install detectron2
-
-    DETECTRON = detectron2.__path__[0][:-10]  # 10 it is len str(\\detectron2)
+    DETECTRON = os.environ.get('DETECTRON_PATH')
 
     _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')
@@ -50,6 +48,8 @@ class Config(object):
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
         CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
         DRAW = DRAW.replace('/', '\\')
+
+        DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
 
     folder_list = [UPLOAD_FOLDER, SAVE_ZIP, CUTTING_FOLDER, DRAW]
 

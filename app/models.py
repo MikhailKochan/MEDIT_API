@@ -332,7 +332,7 @@ class Predict(db.Model):
         return s
 
     def launch_task(self, name, description, *args, **kwargs):
-        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=3600, retry=Retry(max=3))
+        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
         task = Task(id=rq_job.get_id(), name=name, description=description,
                     predict_id=self.id)
         db.session.add(task)

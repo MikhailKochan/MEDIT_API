@@ -403,7 +403,7 @@ class Predict(db.Model):
     count_img = db.Column(db.Integer)
     name_img_have_max_mitoz = db.Column(db.Integer)
 
-    tasks = db.relationship('Task', backref='predict', lazy='dynamic')
+    tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="save-update")
 
     status = db.relationship('Status', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 

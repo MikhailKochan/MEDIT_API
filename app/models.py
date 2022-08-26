@@ -376,7 +376,7 @@ class Images(db.Model):
                                 all_mitoz += classes.count(mitoz)
                                 if classes.count(mitoz) > max_mitoz_in_one_img:
                                     max_mitoz_in_one_img = classes.count(mitoz)
-                                    img_name = f"{filename}.jpg"
+                                    # img_name = f"{filename}.jpg"
 
                         progress += 1 / total * 100.0
 
@@ -389,7 +389,7 @@ class Images(db.Model):
 
             predict.count_img = total
 
-            predict.name_img_have_max_mitoz = img_name
+            # predict.name_img_have_max_mitoz = img_name
 
             predict.model = cfg.MODEL.WEIGHTS
 

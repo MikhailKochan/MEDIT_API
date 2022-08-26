@@ -202,7 +202,7 @@ class medit:
         cfg.DATASETS.TEST = ()
         cfg.DATALOADER.NUM_WORKERS = 2
         # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # initialize from model zoo
-        cfg.SOLVER.IMS_PER_BATCH = 2
+        cfg.SOLVER.IMS_PER_BATCH = 4
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
         cfg.SOLVER.BASE_LR = 0.001
         cfg.OUTPUT_DIR = Config.__dict__['_MODEL_OUTPUT']

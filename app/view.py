@@ -208,7 +208,7 @@ class medit:
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
 
         cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-        # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # set the testing threshold for this model
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set the testing threshold for this model
         self.cfg = cfg
 
     def make_predictor(self):

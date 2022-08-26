@@ -6,6 +6,8 @@ from rq import get_current_job
 from app import db
 from app.models import Task, User, Images, Predict
 from app.view import app_job
+from config import Config
+
 
 app = create_app()
 app.app_context().push()
@@ -31,12 +33,14 @@ def img_prediction(pred_id):
         # img = Images.query.filter_by(predict=pred_id)
         predict = Predict.query.get(pred_id)
         img = predict.images
-        os.mkdir(f"{current_app.config['DRAW']}/{img.filename}")
+
+        os.mkdir(f"{Config.DRAW}/{img.filename}", exist_ok=True)
+
         # data = img.make_predict(predict=predict, cutting=img.cut_file)
         data = img.alternative_predict(predict=predict)
 
         if data:
-            path_draw = f"{current_app.config['DRAW']}/" \
+            path_draw = f"{Config.DRAW}/" \
                         f"{img.filename}/" \
                         f"{data.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 

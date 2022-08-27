@@ -84,6 +84,7 @@ function progress (container) {
     let timer = setInterval(progressStatus,1000);
     function progressStatus () {
     let query = getCategoryList(predict_id);
+
     if (query[0].data){
 //        console.log(query);
         width = query[0].data.progress;

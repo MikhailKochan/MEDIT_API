@@ -27,6 +27,7 @@ function myGreeting(name){
 
             if(url != ""){
             console.log(url);
+            clearInterval(myTimeout);
             window.location.replace(`/new_analysis/${url}`)
             };
         }else{
@@ -99,7 +100,7 @@ function uploadFile(name, fileOriginalName){
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
 //           const myTimeout = setTimeout(function(){myGreeting(fileOriginalName)}, 1000);
-           var id = setInterval(function(){myGreeting(fileOriginalName)}, 5000);
+           var myTimeout = setInterval(function(){myGreeting(fileOriginalName)}, 2000);
 //           myGreeting(fileOriginalName);
        }
     });

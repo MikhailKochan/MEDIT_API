@@ -47,12 +47,15 @@ def get(key):
 @login_required
 def progress(prediction_id):
     task = Task.query.filter_by(predict_id=prediction_id).first()
-    send = current_app.redis.get(task.id)
-    if send:
-        return jsonify([{
-            'name': 'task',
-            'data': json.loads(send.decode("utf-8"))
-        }])
+    if task:
+        send = current_app.redis.get(task.id)
+        if send:
+            return jsonify([{
+                'name': 'task',
+                'data': json.loads(send.decode("utf-8"))
+            }])
+        else:
+            abort(404)
     else:
         abort(404)
 

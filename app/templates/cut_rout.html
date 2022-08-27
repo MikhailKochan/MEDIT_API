@@ -36,18 +36,16 @@
     <div class="box" id="name"></div>
 
     <div class="box" id="status">
-        {% if prediction.tasks.first().complete is true %}Done<img src="/static/logo/green_check.png"></div>
-    {% else %}
-        {{ prediction.tasks.first().complete }}<img src="/static/logo/load.gif"></div>
-    {% endif %}
+        Done<img src="/static/logo/green_check.png"></div>
+
     <div id="predict_id" hidden>
         {{prediction.id}}
     </div>
     <div class="box" id="result">
-        <b>{{prediction.result_all_mitoz}}</b>
+        <b></b>
     </div>
     <div class="box" >
-        <a class="button" href="/get-zip/{{prediction.images.filename}}_{{prediction.timestamp.strftime('%d_%m_%Y__%H_%M')}}.zip" style="display:none">Скачать</a><br>
+        <a class="button" href="#" style="display:none">Скачать</a><br>
     </div>
 </div>
 

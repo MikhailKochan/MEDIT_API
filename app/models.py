@@ -460,10 +460,14 @@ class Predict(db.Model):
         return s
 
     def launch_task(self, name, description, *args, **kwargs):
-        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
-        task = Task(id=rq_job.get_id(), name=name, description=description,
-                    predict_id=self.id)
-        db.session.add(task)
+        task = self.get_task_in_progress()
+        if task:
+            return 'You can make only one task in moment'
+        else:
+            rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
+            task = Task(id=rq_job.get_id(), name=name, description=description,
+                        predict_id=self.id)
+            db.session.add(task)
         return task
 
     def get_tasks_in_progress(self):

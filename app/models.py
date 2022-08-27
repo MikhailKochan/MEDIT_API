@@ -418,7 +418,7 @@ class Predict(db.Model):
     count_img = db.Column(db.Integer)
     name_img_have_max_mitoz = db.Column(db.Integer)
 
-    tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="all, delete")
+    tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 
     status = db.relationship('Status', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 
@@ -552,7 +552,7 @@ class Task(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
-    predict_id = db.Column(db.Integer, db.ForeignKey('predict.id'))
+    predict_id = db.Column(db.Integer, db.ForeignKey('predict.id', ondelete="CASCADE"))
     complete = db.Column(db.Boolean, default=False)
 
     def get_rq_job(self):

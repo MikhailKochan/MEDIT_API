@@ -99,7 +99,7 @@ function uploadFile(name, fileOriginalName){
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
 //           const myTimeout = setTimeout(function(){myGreeting(fileOriginalName)}, 1000);
-           var id = setInterval(function(){myGreeting(fileOriginalName)}, 2000);
+           var id = setInterval(function(){myGreeting(fileOriginalName)}, 5000);
 //           myGreeting(fileOriginalName);
        }
     });

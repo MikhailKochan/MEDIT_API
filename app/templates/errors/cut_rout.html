@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!--<style>-->
+<!--    #menu_analysis{-->
+<!--        background: white;-->
+
+<!--}-->
+<!--</style>-->
+
+<div class="container-table">
+<div class="box" style="background: #eff1f4;">
+    Выберите файл
+</div>
+<div class="box" style="background: #eff1f4;">
+
+</div>
+<div class="box" style="background: #eff1f4;">
+    Status
+</div>
+<div class="box" style="background: #eff1f4;">
+
+</div>
+<div class="box" style="background: #eff1f4;">
+    Скачать
+</div>
+</div>
+
+<div class="container-table">
+    <div class="box" id="datetime">
+        <form action="{{url_for('main.cut_rout')}}">
+            <input type="file" name="file" class="input-file">
+            <button class="button" type="submit">Порезать</button>
+        </form>
+    </div>
+    <div class="box" id="name"></div>
+
+    <div class="box" id="status">
+        {% if prediction.tasks.first().complete is true %}Done<img src="/static/logo/green_check.png"></div>
+    {% else %}
+        {{ prediction.tasks.first().complete }}<img src="/static/logo/load.gif"></div>
+    {% endif %}
+    <div id="predict_id" hidden>
+        {{prediction.id}}
+    </div>
+    <div class="box" id="result">
+        <b>{{prediction.result_all_mitoz}}</b>
+    </div>
+    <div class="box" >
+        <a class="button" href="/get-zip/{{prediction.images.filename}}_{{prediction.timestamp.strftime('%d_%m_%Y__%H_%M')}}.zip" style="display:none">Скачать</a><br>
+    </div>
+</div>
+
+
+<script src="/static/js/cut_rout.js"></script>
+
+{{ super() }}
+{% endblock %}

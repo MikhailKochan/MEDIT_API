@@ -143,7 +143,7 @@ function getWork(container){
         let request = button_delete(predict_id);
         if (request == true){
             status.innerHTML = `Process killed`
-//            container.replaceChildren();
+            setInterval(container.replaceChildren(), 1500);
         }
         });
 

@@ -176,3 +176,25 @@ def pred():
     else:
         x = "False"
     return x
+
+
+@bp.route('/cuting/', methods=['POST', 'GET'])
+def cut_rout():
+    if request.method == 'POST':
+        files = request.files.getlist("file")
+        if files:
+            for file in files:
+                path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(path)
+                # print(f'file {file} save to {path}')
+                # img = Images(path)
+                # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+                #     db.session.add(img)
+                #     db.session.commit()
+                #     current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+                # else:
+                #     current_app.logger.info(f"{file.filename} already in bd")
+
+        return render_template('cut_rout.html', title='Загрузка', body='')
+    else:
+        return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')

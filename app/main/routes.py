@@ -50,9 +50,11 @@ def progress(prediction_id):
     if request.method == 'POST':
         for i in request.form.items():
             tasks = Task.query.filter(Task.images, Images.filename == i[1]).all()
+
             if tasks:
                 task = tasks[-1]
-
+            else:
+                abort(404)
     else:
         task = Task.query.filter_by(predict_id=prediction_id).first()
 
@@ -164,7 +166,6 @@ def upload():
             for file in files:
                 path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(path)
-                print(f'file {file} save to {path}')
                 img = Images(path)
                 if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
                     db.session.add(img)
@@ -191,7 +192,7 @@ def pred():
 
 @bp.route('/cutting/', methods=['POST', 'GET'])
 def cut_rout():
-    print(request.args)
+
     if request.method == 'POST':
         files = request.files.getlist("file")
         res = []

@@ -55,9 +55,9 @@ def progress(prediction_id):
         task = Task.query.filter_by(predict_id=prediction_id).first()
 
     if task:
-        print('task id')
+
         send = current_app.redis.get(task.id)
-        print(task.id)
+
         if send:
             return jsonify([{
                 'name': 'task',
@@ -187,7 +187,7 @@ def pred():
     return x
 
 
-@bp.route('/cuting/', methods=['POST', 'GET'])
+@bp.route('/cutting/', methods=['POST', 'GET'])
 def cut_rout():
     print(request.args)
     if request.method == 'POST':

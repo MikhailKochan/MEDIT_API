@@ -56,7 +56,6 @@ function progress (predict_id) {
     function progressStatus () {
 
     let query = getCategoryList(predict_id);
-    console.log(Object.keys(query[0].data.func));
 
     if (query[0].data){
         if (Object.keys(query[0].data.func) == 'cutting'){
@@ -155,7 +154,7 @@ form.onchange = ({target}) =>{
 
 function uploadFile(name, fileOriginalName){
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", '/cuting/');
+    xhr.open("POST", '/cutting/');
     xhr.upload.addEventListener("progress", ({loaded, total}) =>{
        let fileLoaded = Math.floor((loaded / total) * 100);
        let fileTotal = Math.floor(total / 1000)

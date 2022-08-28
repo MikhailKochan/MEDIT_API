@@ -190,7 +190,7 @@ def pred():
     return x
 
 
-@bp.route('/cutting/', methods=['POST', 'GET'])
+@bp.route('/cutting', methods=['POST', 'GET'])
 def cut_rout():
     try:
         if request.method == 'POST':

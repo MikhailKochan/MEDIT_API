@@ -203,7 +203,7 @@ def cut_rout():
                 file.save(path)
 
                 img = Images(path)
-                print(img.name)
+                current_app.logger.info(img.name)
                 if Images.query.filter_by(filename=img.filename).first() is None:
                     db.session.add(img)
                     db.session.commit()
@@ -212,20 +212,20 @@ def cut_rout():
                     img = Images.query.filter_by(filename=img.filename).first()
                     current_app.logger.info(f"{file.filename} already in bd")
 
-                print(img.get_task_in_progress('app.tasks.img_cutt'))
+                current_app.logger.info(img.get_task_in_progress('app.tasks.img_cutt'))
 
-                if img.get_task_in_progress('app.tasks.img_cutt'):
-                    print('Task this img in work now')
-                    flash('This img now cutting')
-                else:
-                    rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
-                                                            retry=Retry(max=3))
+                # if img.get_task_in_progress('app.tasks.img_cutt'):
+                #     current_app.logger.info('Task this img in work now')
+                #     flash('This img now cutting')
+                # else:
+                rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
+                                                        retry=Retry(max=3))
 
-                    task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
-                                description=f"start cutting img {img.filename}",
-                                image_id=img.id)
-                    db.session.add(task)
-                    current_app.logger.info(f"{task.id} add to db")
+                task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
+                            description=f"start cutting img {img.filename}",
+                            image_id=img.id)
+                db.session.add(task)
+                current_app.logger.info(f"{task.id} add to db")
 
                 db.session.commit()
 

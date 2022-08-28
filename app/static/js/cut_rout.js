@@ -178,14 +178,14 @@ function uploadFile(name, fileOriginalName){
                     <img src="/static/logo/green_check.png">
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
+                status.innerHTML = `
+                        <img src="/static/logo/load.gif">
+                    `;
            var myTimeout = setTimeout(function run(){
                 let req = getCategoryList(fileOriginalName);
                 if (req === false) {
                     setTimeout(run, 1000);
                 }else{
-                    status.innerHTML = `
-                        <img src="/static/logo/load.gif">
-                    `;
                     progress(fileOriginalName);
                 };
            }, 5000);

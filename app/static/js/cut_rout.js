@@ -177,10 +177,8 @@ function uploadFile(name, fileOriginalName){
            let uploadedHTML = `
                     <img src="/static/logo/green_check.png">
                 `;
-                uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-                status.innerHTML = `
-                        <img src="/static/logo/load.gif">
-                    `;
+           uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
+
            var myTimeout = setTimeout(function run(){
                 let req = getCategoryList(fileOriginalName);
                 if (req === false) {

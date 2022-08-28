@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!--<style>-->
-<!--    #menu_analysis{-->
-<!--        background: white;-->
+<style>
+    #menu_analysis{
+        background: white;
 
-<!--}-->
-<!--</style>-->
+}
+</style>
 
 <div class="container-table">
 <div class="box" style="background: #eff1f4;">
     Выберите файл
 </div>
 <div class="box" style="background: #eff1f4;">
-
+    Загрузка
 </div>
 <div class="box" style="background: #eff1f4;">
-    Status
+    Порезка
 </div>
 <div class="box" style="background: #eff1f4;">
-
+    Архивируем
 </div>
 <div class="box" style="background: #eff1f4;">
     Скачать
@@ -27,25 +27,32 @@
 </div>
 
 <div class="container-table">
-    <div class="box" id="datetime">
-        <form action="{{url_for('main.cut_rout')}}">
-            <input type="file" name="file" class="input-file">
-            <button class="button" type="submit">Порезать</button>
-        </form>
-    </div>
-    <div class="box" id="name"></div>
 
-    <div class="box" id="status">
-        Done<img src="/static/logo/green_check.png"></div>
+    <div class="box" id="datetime" style="justify-content: center">
+        <form action="{{url_for('main.cut_rout')}}" style="margin-top:0%" enctype="multiple / form-data">
+            <input type="file" name="file" class="input-file" hidden>
+            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
 
-    <div id="predict_id" hidden>
+    </form></div>
+    <div class="box" id="name" style="justify-content: center">
+        <section class="progress-area"></section>
+        <section class="uploaded-area"></section>
+    </div>
+
+
+    <div class="box" id="status" style="justify-content: center">
 
     </div>
-    <div class="box" id="result">
-        <b></b>
+
+    <div id="predict_id" hidden></div>
+
+
+    <div class="box" id="result" style="justify-content: center">
+
     </div>
-    <div class="box" >
-        <a class="button" href="#" style="display:none">Скачать</a><br>
+
+    <div class="box">
+        <a class="button_download" href="" style="display:none;justify-content: center">Скачать</a><br>
     </div>
 </div>
 

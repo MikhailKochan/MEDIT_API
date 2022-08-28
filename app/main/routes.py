@@ -8,6 +8,8 @@ from app.models import Images, Predict, Status, Task
 from app.main import bp
 from sqlalchemy.dialects.sqlite import insert
 import json
+from rq import get_current_job
+from rq import Retry
 
 
 @bp.route('/debug-sentry')
@@ -43,12 +45,19 @@ def get(key):
     return jsonify(data)
 
 
-@bp.route('/progress/<prediction_id>', methods=['GET'])
-@login_required
+@bp.route('/progress/<prediction_id>', methods=['GET', 'POST'])
 def progress(prediction_id):
-    task = Task.query.filter_by(predict_id=prediction_id).first()
+    if request.method == 'POST':
+        for i in request.form.items():
+            task = Task.query.filter(Task.images, Images.filename == i[1]).all()[-1]
+
+    else:
+        task = Task.query.filter_by(predict_id=prediction_id).first()
+
     if task:
+        print('task id')
         send = current_app.redis.get(task.id)
+        print(task.id)
         if send:
             return jsonify([{
                 'name': 'task',
@@ -102,7 +111,7 @@ def analysis():
 @login_required
 def index(filename):
     page = request.args.get('page', 1, type=int)
-    # print(request.args)
+    print(request.args)
 
     if filename is None:
         id = request.args.get('select')
@@ -180,21 +189,45 @@ def pred():
 
 @bp.route('/cuting/', methods=['POST', 'GET'])
 def cut_rout():
+    print(request.args)
     if request.method == 'POST':
         files = request.files.getlist("file")
+        res = []
         if files:
             for file in files:
+                print('file tyt')
                 path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(path)
-                # print(f'file {file} save to {path}')
-                # img = Images(path)
-                # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                #     db.session.add(img)
-                #     db.session.commit()
-                #     current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                # else:
-                #     current_app.logger.info(f"{file.filename} already in bd")
 
-        return render_template('cut_rout.html', title='Загрузка', body='')
+                img = Images(path)
+                print(img.name)
+                if Images.query.filter_by(filename=img.filename).first() is None:
+                    db.session.add(img)
+                    db.session.commit()
+                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+                else:
+                    img = Images.query.filter_by(filename=img.filename).first()
+                    current_app.logger.info(f"{file.filename} already in bd")
+
+                print(img.get_task_in_progress('app.tasks.img_cutt'))
+
+                if img.get_task_in_progress('app.tasks.img_cutt'):
+                    print('Task this img in work now')
+                    flash('This img now cutting')
+                else:
+                    rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
+                                                            retry=Retry(max=3))
+
+                    task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
+                                description=f"start cutting img {img.filename}",
+                                image_id=img.id)
+                    db.session.add(task)
+                    current_app.logger.info(f"{task.id} add to db")
+
+                db.session.commit()
+
+                res.append(task.id)
+
+        return render_template('cut_rout.html', title='Загрузка', body=res)
     else:
         return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')

@@ -14,8 +14,8 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 # from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
+# import sentry_sdk
+# from sentry_sdk.integrations.flask import FlaskIntegration
 # from flask_babel import Babel, lazy_gettext as _l
 
 
@@ -32,13 +32,13 @@ moment = Moment()
 
 
 def create_app(config_class=Config):
-    sentry_sdk.init(
-        dsn="http://2abaac024c2d415280fe49b22288f719@localhost:9000/3",
-        integrations=[
-            FlaskIntegration(),
-        ],
-        traces_sample_rate=1.0
-    )
+    # sentry_sdk.init(
+    #     dsn="http://2abaac024c2d415280fe49b22288f719@localhost:9000/3",
+    #     integrations=[
+    #         FlaskIntegration(),
+    #     ],
+    #     traces_sample_rate=1.0
+    # )
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -82,17 +82,17 @@ def create_app(config_class=Config):
             mail_handler.setLevel(logging.ERROR)
             app.logger.addHandler(mail_handler)
             # логи
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/medit.log', maxBytes=10240,
-                                       backupCount=10)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/medit.log', maxBytes=10240,
+                                           backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
 
-    app.logger.setLevel(logging.INFO)
-    app.logger.info('MEDIT startup')
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('MEDIT startup')
 
     return app
 

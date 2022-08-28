@@ -65,7 +65,11 @@ class Images(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     img_creation_time = db.Column(db.String(64), index=True)
     img_creation_date = db.Column(db.String(64), index=True)
+
     predict = db.relationship('Predict', backref='images', lazy='dynamic')
+
+    tasks = db.relationship('Task', backref='images', lazy='dynamic', cascade="all, delete", passive_deletes=True)
+
     filename = db.Column(db.String(128))
     cut_file = db.Column(db.Boolean, default=False, nullable=False)
     format = db.Column(db.String(64))
@@ -77,9 +81,9 @@ class Images(db.Model):
                                     lazy='dynamic')
 
     def __init__(self, path: str = None):
-        # self.id = generator_id(self)
-        # self.timestamp = datetime.utcnow()
-        # self.cut_file = False
+        self.id = generator_id(self)
+        self.timestamp = datetime.utcnow()
+        self.cut_file = False
         if path:
             self.file_path = path
             self.filename = os.path.basename(path)
@@ -105,7 +109,7 @@ class Images(db.Model):
     def cutting(self):
         try:
             progress = 0
-            _set_task_progress(progress, 0)
+            _set_task_progress(progress, 0, func='cutting')
             if current_app:
                 CUTTING_FOLDER = current_app.config['CUTTING_FOLDER']
                 _CUT_IMAGE_SIZE = current_app.config['_CUT_IMAGE_SIZE']
@@ -115,19 +119,21 @@ class Images(db.Model):
             h_sum = int(self.height / _CUT_IMAGE_SIZE[1])
             w_sum = int(self.width / _CUT_IMAGE_SIZE[0])
 
-            if h_sum and w_sum <= 1:
-                text = f"This img less than {Config.__dict__['_CUT_IMAGE_SIZE']}, cutting not need."
-                current_app.logger.info(text)
-                return None
+            f_path = os.path.join(current_app.config['BASEDIR'],
+                                  current_app.config['UPLOAD_FOLDER'],
+                                  self.filename)
+
             if self.format.lower() == '.svs':
-                f_path = os.path.join(current_app.config['BASEDIR'],
-                                      current_app.config['UPLOAD_FOLDER'],
-                                      self.filename)
+                print(3)
                 file = openslide.OpenSlide(f_path)
+
+            elif self.format.lower() == '.jpg':
+
+                file = cv2.imread(img)
+
             else:
                 return f'{self.format} not added'
-            # elif self.format.lower() == '.jpg':
-            #     return f"jpg format not add"
+
             h_rest = self.height % _CUT_IMAGE_SIZE[1]
             w_rest = self.width % _CUT_IMAGE_SIZE[0]
             s_col = int(h_rest / 2)
@@ -138,34 +144,34 @@ class Images(db.Model):
                 os.mkdir(os.path.join(CUTTING_FOLDER, self.filename))
                 if current_app:
                     current_app.logger.info(f"Directory {self.filename} created")
-                with tqdm(total=total, position=0, leave=False) as pbar:
-                    for i in range(0, w_sum):
-                        for j in range(0, h_sum):
-                            pbar.set_description(f"Total img: {total}. Start cutting")
-                            start_row = j * _CUT_IMAGE_SIZE[0] + s_row
-                            start_col = i * _CUT_IMAGE_SIZE[1] + s_col
-                            filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
-                            path_to_save_cut_file = os.path.join(os.path.join(CUTTING_FOLDER, self.filename),
-                                                                 f"{filename}.jpg")
-                            self.cut(start_row, start_col, path_to_save_cut_file, file, _CUT_IMAGE_SIZE)
+            with tqdm(total=total, position=0, leave=False) as pbar:
+                for i in range(0, w_sum):
+                    for j in range(0, h_sum):
+                        pbar.set_description(f"Total img: {total}. Start cutting")
+                        start_row = j * _CUT_IMAGE_SIZE[0] + s_row
+                        start_col = i * _CUT_IMAGE_SIZE[1] + s_col
+                        filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
+                        path_to_save_cut_file = os.path.join(os.path.join(CUTTING_FOLDER, self.filename),
+                                                             f"{filename}.jpg")
+                        self.cut(start_row, start_col, path_to_save_cut_file, file, _CUT_IMAGE_SIZE)
 
-                            progress += 0.5 / total * 100.0
+                        progress += 1 / total * 100.0
 
-                            _set_task_progress(progress)
+                        _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), func='cutting')
 
-                            pbar.update(1)
-            else:
-                if current_app:
-                    current_app.logger.info(f"folder {self.filename} already exists")
-                print(f"folder {self.filename} already exists")
-                progress = 50
+                        pbar.update(1)
+
             self.cut_file = True
+
             db.session.add(self)
             current_app.logger.info(f'finish cutting {self}, add to db')
             db.session.commit()
-            return progress
+
         except Exception as e:
             print(f"ERROR in cutting: {e}")
+
+            _set_task_progress(100, func='cutting')
+
             if current_app:
                 current_app.logger.error(e)
 
@@ -187,7 +193,7 @@ class Images(db.Model):
 
             progress = 0
 
-            _set_task_progress(progress, all_mitoz)
+            _set_task_progress(progress, all_mitoz, func='make_predict')
 
             Visualizer = current_app.medit.Visualizer
 
@@ -272,7 +278,7 @@ class Images(db.Model):
 
                     progress += count / total * 100.0
 
-                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), all_mitoz)
+                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), all_mitoz, func='cutting')
 
                     pbar.update(1)
 
@@ -294,7 +300,7 @@ class Images(db.Model):
 
             max_mitoz_in_one_img = 0
 
-            _set_task_progress(progress, 0)
+            _set_task_progress(progress, 0, func='alternative_predict')
 
             Visualizer = current_app.medit.Visualizer
 
@@ -381,9 +387,12 @@ class Images(db.Model):
 
                         progress += 1 / total * 100.0
 
-                        _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), all_mitoz=all_mitoz)
+                        _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
+                                           all_mitoz=all_mitoz,
+                                           func='cutting')
 
                         pbar.update(1)
+
             predict.result_all_mitoz = all_mitoz
 
             predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
@@ -400,6 +409,64 @@ class Images(db.Model):
 
         except Exception as e:
             current_app.logger.error(e)
+
+    def launch_task(self, name, description, *args, **kwargs):
+        task = self.get_tasks_in_progress()
+        if len(task) >= 1:
+            return 'You can make only one task in moment'
+        else:
+            rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
+            task = Task(id=rq_job.get_id(), name=name, description=description,
+                        predict_id=self.id)
+            db.session.add(task)
+        return task
+
+    def get_tasks_in_progress(self):
+        return Task.query.filter_by(predict=self, complete=False).all()
+
+    def get_task_in_progress(self, name):
+        return Task.query.filter_by(name=name, predict=self,
+                                    complete=False).first()
+
+    def create_zip(self, path_to_save: str):
+        try:
+            progress = 0
+
+            _set_task_progress(progress, func='create_zip')
+            # path_to_save_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
+            #                     f"{self.images.filename}/" \
+            #                     f"{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
+
+            zip_folder = current_app.config['SAVE_ZIP']
+
+            path_img = glob.glob(f"{path_to_save}/*")
+
+            zip_file_name = f"{self.filename}"
+
+            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+
+            total = len(path_img)
+
+            with tqdm(total=total, position=0, leave=False) as pbar:
+                for file in path_img:
+                    pbar.set_description(f"Total img: {total}. Start zip:")
+                    filename = os.path.basename(file)
+                    zipFile.write(file, arcname=filename)
+                    pbar.update(1)
+
+                    progress += 1 / total * 100.0
+
+                    _set_task_progress(progress, func='create_zip')
+
+            zipFile.close()
+            _set_task_progress(100, func='create_zip')
+            result = f'{zip_file_name}.zip created'
+
+        except Exeption as e:
+            result = e
+
+        else:
+            return result
 
     def __repr__(self):
         if self.timestamp:
@@ -523,7 +590,7 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
 
-def _set_task_progress(progress, all_mitoz=None):
+def _set_task_progress(progress, all_mitoz=None, func=None):
     job = get_current_job()
     if job:
         job_id = job.get_id()
@@ -531,16 +598,14 @@ def _set_task_progress(progress, all_mitoz=None):
         job.save_meta()
         current_app.redis.set(job_id, json.dumps({'task_id': job_id,
                                                   'mitoze': all_mitoz,
-                                                  'progress': progress}))
+                                                  'func': {f'{func}': {
+                                                      'progress': progress}}}))
         try:
             if progress >= 100:
                 task = Task.query.get(job_id)
                 task.complete = True
                 db.session.commit()
 
-            # task.predict.add_status('task_progress', {'task_id': job_id,
-            #                                           'mitoze': all_mitoz,
-            #                                           'progress': progress})
         except Exception as e:
             print(f'ERROR in set_task_progress: {e}')
             if current_app:
@@ -553,6 +618,7 @@ class Task(db.Model):
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
     predict_id = db.Column(db.Integer, db.ForeignKey('predict.id', ondelete="CASCADE"))
+    image_id = db.Column(db.Integer, db.ForeignKey('images.id', ondelete="CASCADE"))
     complete = db.Column(db.Boolean, default=False)
 
     def get_rq_job(self):

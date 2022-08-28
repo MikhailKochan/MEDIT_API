@@ -87,8 +87,8 @@ function progress (container) {
 
     if (query[0].data){
 //        console.log(query);
-        width = query[0].data.progress;
-        all_mitoz = query[0].data.mitoze;
+        width = query[0].data.func.alternative_predict.progress;
+        all_mitoz = query[0].data.func.alternative_predict.mitoze;
           let progressHTML = `
             <div class="loading">
                 <div class="percent"> </div>
@@ -113,9 +113,7 @@ function progress (container) {
         button2.style.display = "flex";
 
       } else {
-            query = getCategoryList(predict_id);
-            width = query[0].data.progress;
-            all_mitoz = query[0].data.mitoze;
+
             if(elem){
                 elem.style.width = width + '%';
                 percent.textContent = width + '%';

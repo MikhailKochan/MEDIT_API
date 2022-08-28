@@ -134,7 +134,7 @@ form.onchange = ({target}) =>{
 
 
         let  fileType = getExtension(file.name);
-        let validExtensions = ["svs", "jpeg"];
+        let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){
             if(file){
                 dateTime.innerHTML = afterCheckFileHTML;
@@ -183,13 +183,13 @@ function uploadFile(name, fileOriginalName){
                 if (req === false) {
                     setTimeout(run, 1000);
                 }else{
+                    status.innerHTML = `
+                        <img src="/static/logo/load.gif">
+                    `;
                     progress(fileOriginalName);
                 };
            }, 5000);
 
-            status.innerHTML = `
-                <img src="/static/logo/load.gif">
-            `
        }
     });
     let formData = new FormData(form);

@@ -49,7 +49,9 @@ def get(key):
 def progress(prediction_id):
     if request.method == 'POST':
         for i in request.form.items():
-            task = Task.query.filter(Task.images, Images.filename == i[1]).all()[-1]
+            tasks = Task.query.filter(Task.images, Images.filename == i[1]).all()
+            if tasks:
+                task = tasks[-1]
 
     else:
         task = Task.query.filter_by(predict_id=prediction_id).first()

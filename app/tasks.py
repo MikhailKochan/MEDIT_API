@@ -67,8 +67,8 @@ def img_prediction(pred_id):
 
         db.session.commit()
         print("Вот и сказочке конец, а кто слушал - молодец.")
-        os.remove(img.file_path)
-        app.logger.info(f'{img.file_path} deleted')
+        os.rmdir(f"{Config.DRAW}/{img.filename}")
+        app.logger.info(f'{Config.DRAW}/{img.filename} deleted')
 
     except Exception as e:
         print(f'ERROR in img_prediction : {e}')

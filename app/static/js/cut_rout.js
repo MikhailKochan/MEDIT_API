@@ -59,7 +59,11 @@ function progress (predict_id) {
     let query = getCategoryList(predict_id);
 
     if (query[0].data){
-        if (Object.keys(query[0].data.func) == 'cutting'){
+        if (query[0].data.in_queries == 'Please_wait'){
+            status.innerHTML = "Ваша задача в очереди";
+        } else{
+         if (Object.keys(query[0].data.func) == 'cutting'){
+
             width = query[0].data.func.cutting.progress;
         }else{
             status.innerHTML = "";

@@ -89,6 +89,11 @@ function progress (container) {
 
     if (query === false){
         let timer = setTimeout(progressStatus,1000);
+        } else if (query[0].data.in_queries == 'Please_wait'){
+            let progressHTML = `
+                <img src="/static/logo/load.gif">
+                `;
+            status.innerHTML = progressHTML;
         } else {
 //        console.log(query);
         width = query[0].data.func.alternative_predict.progress;

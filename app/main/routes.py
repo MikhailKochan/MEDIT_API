@@ -69,7 +69,10 @@ def progress(prediction_id):
                 'data': json.loads(send.decode("utf-8"))
             }])
         else:
-            abort(404)
+            return jsonify([{
+                'name': 'task',
+                'data': {'in_queries': 'Please_wait'}
+            }])
     else:
         abort(404)
 

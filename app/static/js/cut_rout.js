@@ -8,12 +8,12 @@ uploadedArea = document.querySelector(".uploaded-area");
 let status = document.querySelector("#status");
 
 
-function getCategoryList(img_id) {
-    var data = new FormData();
-    data.append('Image_id', img_id);
+function getProgress(task_id) {
+//    var data = new FormData();
+//    data.append('Image_id', img_id);
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", `/progress/post`, false);
-    xhr.send(data);
+    xhr.open("get", `/progress/${task_id}`, false);
+    xhr.send();
 
     if (xhr.status != 200) {
       // обработать ошибку
@@ -27,7 +27,27 @@ function getCategoryList(img_id) {
     }
 }
 
-function progress (predict_id) {
+
+function getCategoryList(img_name) {
+//    var data = new FormData();
+//    data.append('Image_id', img_id);
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", `/get/${img_name}`, false);
+    xhr.send();
+
+    if (xhr.status != 200) {
+      // обработать ошибку
+//      console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+        return false
+    } else {
+      // вывести результат
+//      clearInterval(myTimeout);
+//      console.log(JSON.parse(xhr.responseText));
+      return JSON.parse(xhr.responseText) // responseText -- текст ответа.
+    }
+}
+
+function progress (task_id) {
 
     let status = document.querySelector("#status"),
     result = document.querySelector("#result");
@@ -42,55 +62,55 @@ function progress (predict_id) {
 
     status.innerHTML = progressHTML;
 
-//    var myTimeout = setTimeout(function run(){
-//        let req = getCategoryList(fileOriginalName);
-//            if (Object.keys(req[0].data.func) == 'cutting') {
-//
-//                setTimeout(run, 1000);
-//            }else{
-//                progressStatus(fileOriginalName);
-//            };
-//        }, 1000);
-
-    let timer = setInterval(progressStatus,2000);
+    let timer = setTimeout(progressStatus, 1000);
 
     function progressStatus () {
 
-    let query = getCategoryList(predict_id);
+    let query = getProgress(task_id);
 
-    if (query[0].data){
-        if (query[0].data.in_queries == 'Please_wait'){
+//    console.log(query);
+
+    if (query != false){
+        if (query.data.in_queries == 'Please_wait'){
+
             status.innerHTML = "Ваша задача в очереди";
-        } else{
-         if (Object.keys(query[0].data.func) == 'cutting'){
+            let timer = setTimeout(progressStatus, 1000);
 
-            width = query[0].data.func.cutting.progress;
-        }else{
-            status.innerHTML = "";
-            status.innerHTML = `
-                    Done
-                    <img src="/static/logo/green_check.png">
-                `;
-            result.innerHTML = progressHTML;
+        } else {
+             if (Object.keys(query.data.func) == 'cutting'){
+                console.log(query);
+                width = query.data.func.cutting.progress;
 
-            width = query[0].data.func.create_zip.progress;
-            if (parseInt(width) >= 100) {
-                clearInterval(timer);
-                result.innerHTML = "";
-                result.innerHTML = `
-                    Done
-                    <img src="/static/logo/green_check.png">
-                `;
-                bottomCutFile.href = `/get-zip/${predict_id}.zip`
-                bottomCutFile.style.display = 'flex';
-                }
-        }
+            } else {
+                console.log(query);
+                status.innerHTML = "";
+                status.innerHTML = `
+                        Done
+                        <img src="/static/logo/green_check.png">
+                    `;
+                result.innerHTML = progressHTML;
+
+                let width = query.data.func.create_zip.progress;
+                console.log(width);
+                if (parseInt(width) >= 100) {
+
+                    result.innerHTML = "";
+                    result.innerHTML = `
+                        Done
+                        <img src="/static/logo/green_check.png">
+                    `;
+                    bottomCutFile.href = `/get-zip/${query.data.filename}.zip`
+                    bottomCutFile.style.display = 'flex';
+
+                    clearTimeout(myTimeout);
+
+                    };
+            };
 
         let elem = document.querySelector("#progress");
-        let percent = document.querySelector('.percent')
+        let percent = document.querySelector('.percent');
 
       if (parseInt(width) >= 100) {
-        clearInterval(timer);
 
         status.innerHTML = "";
         status.innerHTML = `
@@ -98,16 +118,18 @@ function progress (predict_id) {
             <img src="/static/logo/green_check.png">
         `;
         result.innerHTML = progressHTML;
-        let timer = setInterval(progressStatus,2000);
+        let timer = setTimeout(progressStatus, 1000);
       } else {
-
             if(elem){
                 elem.style.width = width + '%';
                 percent.textContent = width + '%';
         }
-
+        let timer = setTimeout(progressStatus, 1000);
       }
     }
+  }else{
+//    clearInterval(timer);
+    let timer = setTimeout(progressStatus, 1000);
   }
 }};
 
@@ -144,7 +166,7 @@ form.onchange = ({target}) =>{
             if(file){
                 dateTime.innerHTML = afterCheckFileHTML;
                 let fileName = file.name;
-                let fileOriginalName = file.name;
+                var fileOriginalName = file.name;
                 if(fileName.length >= 12){
                     let splitName = fileName.split('.');
                     fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
@@ -190,9 +212,12 @@ function uploadFile(name, fileOriginalName){
            var myTimeout = setTimeout(function run(){
                 let req = getCategoryList(fileOriginalName);
                 if (req === false) {
+                    console.log('req is false, start func run again');
                     setTimeout(run, 1000);
                 }else{
-                    progress(fileOriginalName);
+                    clearTimeout(myTimeout);
+                    console.log(req);
+                    progress(req.task_id);
                 };
            }, 5000);
 

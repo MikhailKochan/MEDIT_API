@@ -35,58 +35,76 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
-
     img = Images.query.filter_by(filename=key).first()
     if img:
-        data = img.id
+        task = img.tasks.all()
+        if task:
+            img_task = task[-1]
+            data = {'image_id': img.id,
+                    'task_id': img_task.id}
+        else:
+            data = img.id
     else:
         data = abort(404)
 
     return jsonify(data)
 
 
-@bp.route('/progress/<prediction_id>', methods=['GET', 'POST'])
-def progress(prediction_id):
-    if request.method == 'POST':
-        for i in request.form.items():
-            tasks = Task.query.filter(Task.images, Images.filename == i[1]).all()
-
-            if tasks:
-                task = tasks[-1]
-            else:
-                abort(404)
-    else:
-        task = Task.query.filter_by(predict_id=prediction_id).first()
-
-    if task:
-
-        send = current_app.redis.get(task.id)
-
-        if send:
-            # current_app.redis.delete(task.id)
-            return jsonify([{
-                'name': 'task',
-                'data': json.loads(send.decode("utf-8"))
-            }])
-        elif not send and request.method == 'GET':
-            return jsonify([{
-                'name': 'task',
-                'data': {'in_queries': 'Please_wait'}
-            }])
-        else:
-            abort(404)
+@bp.route('/progress/<task_id>', methods=['GET', 'POST'])
+def progress(task_id):
+    # print(task_id)
+    send = current_app.redis.get(task_id)
+    if send:
+        # current_app.redis.delete(task.id)
+        return jsonify({
+            'name': 'task',
+            'data': json.loads(send.decode("utf-8"))
+        })
     else:
         abort(404)
+
+    # if request.method == 'POST':
+    #     for i in request.form.items():
+    #         tasks = Task.query.filter(Task.images, Images.filename == i[1]).all()
+    #
+    #         if tasks:
+    #             task = tasks[-1]
+    #         else:
+    #             abort(404)
+    # else:
+    #     task = Task.query.filter_by(predict_id=prediction_id).first()
+    #
+    # if task:
+    #
+    #     print('TASK', task)
+    #
+    #     send = current_app.redis.get(task.id)
+    #
+    #     if send:
+    #         # current_app.redis.delete(task.id)
+    #         return jsonify([{
+    #             'name': 'task',
+    #             'data': json.loads(send.decode("utf-8"))
+    #         }])
+    #     else:
+    #         return jsonify([{
+    #             'name': 'task',
+    #             'data': {'in_queries': 'Please_wait'}
+    #         }])
+    #     # else:
+    #     #     abort(404)
+    # else:
+    #     abort(404)
 
 
 @bp.route('/del/<prediction_id>')
 @login_required
-def delete(prediction_id):
+def delete(task_id):
     current_app.logger.info(f"user {current_user} delete predict id = {prediction_id}")
-    #TODO
-    #подумать нужно ли удалять задачи, если да добавить их в алгоритм удаления
-    # task = Task.query.filter_by(predict_id=prediction_id).first()
-    Predict.query.filter_by(id=prediction_id).delete()
+    # TODO
+    # подумать нужно ли удалять задачи, если да добавить их в алгоритм удаления
+    task = Task.query.filter_by(id=task_id).first()
+    Predict.query.filter(Task, Task.id == task.id).delete()
     db.session.commit()
     data = True
     return jsonify(data)
@@ -196,6 +214,7 @@ def pred():
 
 
 @bp.route('/cutting', methods=['POST', 'GET'])
+@login_required
 def cut_rout():
     try:
         if request.method == 'POST':
@@ -203,41 +222,41 @@ def cut_rout():
             res = []
             print(files)
             if files:
-                for file in files:
+                # for file in files:
+                file = files[0]
 
-                    path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-                    current_app.logger.info(f'получил файл {file.filename}')
-                    file.save(path)
-                    current_app.logger.info(f"сохранил файл {file.filename}")
-                    img = Images(path)
-                    current_app.logger.info(f"image id :{img.name}")
-                    if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                        db.session.add(img)
-                        db.session.commit()
-                        current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                    else:
-                        img = Images.query.filter_by(filename=img.filename).first()
-                        current_app.logger.info(f"{file.filename} already in bd")
+                path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+                current_app.logger.info(f'получил файл {file.filename}')
+                file.save(path)
+                current_app.logger.info(f"сохранил файл {file.filename}")
+                img = Images(path)
+                current_app.logger.info(f"image id :{img.name}")
+                if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+                    db.session.add(img)
+                    db.session.commit()
+                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+                else:
+                    img = Images.query.filter_by(filename=img.filename).first()
+                    current_app.logger.info(f"{file.filename} already in bd")
 
-                    current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.tasks.img_cutt')}")
+                current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.tasks.img_cutt')}")
 
-                    if img.get_task_in_progress('app.tasks.img_cutt'):
-                        current_app.logger.info('Task this img in work now')
-                        flash('This img now cutting')
-                    else:
-                        rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
-                                                                retry=Retry(max=1))
+                # if img.get_task_in_progress('app.tasks.img_cutt'):
+                #     current_app.logger.info('Task this img in work now')
+                #     flash('This img now cutting')
+                # else:
+                rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=1800)
 
-                        task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
-                                    description=f"start cutting img {img.filename}",
-                                    image_id=img.id)
-                        db.session.add(task)
-                        current_app.logger.info(f"task id: {task.id} - add to db")
+                task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
+                            description=f"start cutting img {img.filename}",
+                            image_id=img.id)
 
-                        db.session.commit()
+                db.session.add(task)
+                current_app.logger.info(f"task id: {task.id} - add to db")
 
-                        res.append(task.id)
+                db.session.commit()
 
+                res.append(task.id)
             return render_template('cut_rout.html', title='Загрузка', body=res)
         else:
             return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')

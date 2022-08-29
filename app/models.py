@@ -432,36 +432,39 @@ class Images(db.Model):
         try:
             progress = 0
 
-            _set_task_progress(progress, func='create_zip')
-            # path_to_save_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
-            #                     f"{self.images.filename}/" \
-            #                     f"{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
+            _set_task_progress(progress,
+                               func='create_zip',
+                               filename=self.filename)
 
             zip_folder = current_app.config['SAVE_ZIP']
 
             path_img = glob.glob(f"{path_to_save}/*")
 
-            zip_file_name = f"{self.filename}"
-
-            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{self.filename}.zip'), 'w', zipfile.ZIP_DEFLATED)
 
             total = len(path_img)
 
             with tqdm(total=total, position=0, leave=False) as pbar:
                 for file in path_img:
                     pbar.set_description(f"Total img: {total}. Start zip:")
+
                     filename = os.path.basename(file)
                     zipFile.write(file, arcname=filename)
+
                     pbar.update(1)
 
                     progress += 1 / total * 100.0
 
                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
-                                       func='create_zip')
+                                       func='create_zip',
+                                       filename=self.filename)
 
             zipFile.close()
-            _set_task_progress(100, func='create_zip')
-            result = f'{zip_file_name}.zip created'
+            _set_task_progress(100,
+                               func='create_zip',
+                               filename=self.filename)
+
+            result = f'{self.filename}.zip created'
 
         except Exeption as e:
             result = e
@@ -591,7 +594,7 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
 
-def _set_task_progress(progress, all_mitoz=None, func=None):
+def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
     job = get_current_job()
     if job:
         job_id = job.get_id()
@@ -599,6 +602,7 @@ def _set_task_progress(progress, all_mitoz=None, func=None):
         job.save_meta()
         current_app.redis.set(job_id, json.dumps({'task_id': job_id,
                                                   'mitoze': all_mitoz,
+                                                  'filename': filename,
                                                   'func': {f'{func}': {
                                                       'progress': progress}}}))
         try:
@@ -606,7 +610,7 @@ def _set_task_progress(progress, all_mitoz=None, func=None):
                 task = Task.query.get(job_id)
                 task.complete = True
                 db.session.commit()
-                current_app.redis.delete(job_id)
+                # current_app.redis.delete(job_id)
 
         except Exception as e:
             print(f'ERROR in set_task_progress: {e}')

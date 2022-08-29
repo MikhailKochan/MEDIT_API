@@ -53,14 +53,6 @@ function getCategoryList(predict_id) {
     xhr.open("GET", `/progress/${predict_id}`, false);
     xhr.send();
 
-    // stop the engine while xhr isn't done
-//    for(; xhr.readyState !== 4;)
-//
-//    if (xhr.status == 200) {
-//
-//        console.log('SUCCESS', xhr.responseText);
-//
-//    } else console.warn('request_error');
     if (xhr.status != 200) {
       // обработать ошибку
       console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
@@ -69,7 +61,6 @@ function getCategoryList(predict_id) {
       // вывести результат
       return JSON.parse(xhr.responseText); // responseText -- текст ответа.
     }
-//    return JSON.parse(xhr.responseText)
 }
 
 function progress (container) {
@@ -89,7 +80,7 @@ function progress (container) {
 
     if (query === false){
         let timer = setTimeout(progressStatus,1000);
-        } else if (query[0].data.in_queries == 'Please_wait'){
+        } else if (query.data.in_queries == 'Please_wait'){
             if (typeof obj.width !== 'undefined'){
             let progressHTML = `
                 В очереди на выполнение
@@ -99,9 +90,9 @@ function progress (container) {
             let timer = setTimeout(progressStatus,2000);
         } else {
 //        console.log(query);
-        let width = query[0].data.func.alternative_predict.progress;
+        let width = query.data.func.alternative_predict.progress;
 
-        all_mitoz = query[0].data.mitoze;
+        all_mitoz = query.data.mitoze;
 
           let progressHTML = `
             <div class="loading">

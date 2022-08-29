@@ -35,7 +35,7 @@
         {{ prediction.tasks.first().complete }}<img src="/static/logo/load.gif"></div>
     {% endif %}
     <div id="predict_id" hidden>
-        {{prediction.id}}
+        {{prediction.tasks.first().id}}
     </div>
     <div class="box" id="result">
         <b>{{prediction.result_all_mitoz}}</b>

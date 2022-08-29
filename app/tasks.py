@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import json
+import shutil
 
 from flask import current_app
 from rq import get_current_job
@@ -90,9 +91,13 @@ def img_cutt(image_id):
     #     time.sleep(0.1)
 
     img.cutting()
+
     os.remove(f"{Config.UPLOAD_FOLDER}/{img.filename}")
 
     path_cut_file = f"{Config.CUTTING_FOLDER}/{img.filename}"
 
-    img.create_zip(path_cut_file)
-    os.rmdir(path_cut_file)
+    result = img.create_zip(path_cut_file)
+
+    print(result)
+
+    shutil.rmtree(path_cut_file)

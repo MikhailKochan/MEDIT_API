@@ -17,7 +17,7 @@ function getExtension(filename) {
 function myGreeting(name){
 
    const xhr = new XMLHttpRequest();
-    xhr.open("GET", `/get/${name}`);
+    xhr.open("GET", `/get/${name}`, false);
     xhr.onreadystatechange = handleFunc;
     xhr.send();
     function handleFunc(){

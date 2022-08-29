@@ -90,15 +90,16 @@ function progress (container) {
     if (query === false){
         let timer = setTimeout(progressStatus,1000);
         } else if (query[0].data.in_queries == 'Please_wait'){
-            if (parseInt(width) == 0){
+            if (typeof obj.width !== 'undefined'){
             let progressHTML = `
+                В очереди на выполнение
                 <img src="/static/logo/load.gif">
                 `;
             status.innerHTML = progressHTML;}
             let timer = setTimeout(progressStatus,2000);
         } else {
 //        console.log(query);
-        width = query[0].data.func.alternative_predict.progress;
+        let width = query[0].data.func.alternative_predict.progress;
 
         all_mitoz = query[0].data.mitoze;
 

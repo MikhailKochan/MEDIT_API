@@ -79,20 +79,20 @@ def img_prediction(pred_id):
 def img_cutt(image_id):
     print(image_id)
     img = Images.query.filter_by(id=image_id).first()
-    for i in range(101):
-        _set_task_progress(i, func='cutting')
-        print(i)
-        time.sleep(0.1)
-
-    for i in range(101):
-        _set_task_progress(i, func='create_zip')
-        print(i)
-        time.sleep(0.1)
-
-    # img.cutting()
-    # os.remove(f"{Config.UPLOAD_FOLDER}/{img.filename}")
+    # for i in range(101):
+    #     _set_task_progress(i, func='cutting')
+    #     print(i)
+    #     time.sleep(0.1)
     #
-    # path_cut_file = f"{Config.CUTTING_FOLDER}/{img.filename}"
-    #
-    # img.create_zip(path_cut_file)
-    # os.rmdir(path_cut_file)
+    # for i in range(101):
+    #     _set_task_progress(i, func='create_zip')
+    #     print(i)
+    #     time.sleep(0.1)
+
+    img.cutting()
+    os.remove(f"{Config.UPLOAD_FOLDER}/{img.filename}")
+
+    path_cut_file = f"{Config.CUTTING_FOLDER}/{img.filename}"
+
+    img.create_zip(path_cut_file)
+    os.rmdir(path_cut_file)

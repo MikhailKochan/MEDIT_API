@@ -124,7 +124,7 @@ class Images(db.Model):
                                   self.filename)
 
             if self.format.lower() == '.svs':
-                print(3)
+
                 file = openslide.OpenSlide(f_path)
 
             elif self.format.lower() == '.jpg':
@@ -389,7 +389,7 @@ class Images(db.Model):
 
                         _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
                                            all_mitoz=all_mitoz,
-                                           func='cutting')
+                                           func='alternative_predict')
 
                         pbar.update(1)
 
@@ -456,7 +456,8 @@ class Images(db.Model):
 
                     progress += 1 / total * 100.0
 
-                    _set_task_progress(progress, func='create_zip')
+                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
+                                       func='create_zip')
 
             zipFile.close()
             _set_task_progress(100, func='create_zip')
@@ -605,6 +606,7 @@ def _set_task_progress(progress, all_mitoz=None, func=None):
                 task = Task.query.get(job_id)
                 task.complete = True
                 db.session.commit()
+                current_app.redis.delete(job_id)
 
         except Exception as e:
             print(f'ERROR in set_task_progress: {e}')

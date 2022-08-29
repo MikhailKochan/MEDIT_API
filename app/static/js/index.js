@@ -64,6 +64,7 @@ function getCategoryList(predict_id) {
     if (xhr.status != 200) {
       // обработать ошибку
       console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+      return false
     } else {
       // вывести результат
       return JSON.parse(xhr.responseText); // responseText -- текст ответа.
@@ -81,14 +82,19 @@ function progress (container) {
 //    let query = getCategoryList(predict_id);
 
     let elem = container.querySelector("#progress");
-    let timer = setInterval(progressStatus,1000);
+    let timer = setTimeout(progressStatus,1000);
     function progressStatus () {
+
     let query = getCategoryList(predict_id);
 
-    if (query[0].data){
+    if (query === false){
+        let timer = setTimeout(progressStatus,1000);
+        } else {
 //        console.log(query);
         width = query[0].data.func.alternative_predict.progress;
-        all_mitoz = query[0].data.func.alternative_predict.mitoze;
+
+        all_mitoz = query[0].data.mitoze;
+
           let progressHTML = `
             <div class="loading">
                 <div class="percent"> </div>
@@ -97,9 +103,12 @@ function progress (container) {
                 </div>
             </div>`;
         status.innerHTML = progressHTML;
+
         let elem = container.querySelector("#progress");
         let percent = container.querySelector('.percent')
+
         result.innerHTML = `<b>${all_mitoz}</b>`
+
       if (parseInt(width) >= 100) {
         clearInterval(timer);
         status.innerHTML = "";
@@ -117,7 +126,9 @@ function progress (container) {
             if(elem){
                 elem.style.width = width + '%';
                 percent.textContent = width + '%';
-        }
+
+        };
+        let timer = setTimeout(progressStatus,1000);
 //      else{
 //        status.innerHTML = 'Process is broken';
 //        clearInterval(timer);

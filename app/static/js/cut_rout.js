@@ -5,6 +5,7 @@ fileInput = form.querySelector(".input-file"),
 dateTime = document.querySelector("#datetime"),
 progressArea = document.querySelector(".progress-area"),
 uploadedArea = document.querySelector(".uploaded-area");
+let status = document.querySelector("#status");
 
 
 function getCategoryList(img_id) {
@@ -178,7 +179,10 @@ function uploadFile(name, fileOriginalName){
                     <img src="/static/logo/green_check.png">
                 `;
            uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-
+            let loadGif = `
+                <img src="/static/logo/load.gif">
+            `
+            status.insertAdjacentHTML("afterbegin", loadGif)
            var myTimeout = setTimeout(function run(){
                 let req = getCategoryList(fileOriginalName);
                 if (req === false) {

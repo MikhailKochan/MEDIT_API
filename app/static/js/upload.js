@@ -18,26 +18,21 @@ function myGreeting(name){
 
    const xhr = new XMLHttpRequest();
     xhr.open("GET", `/get/${name}`);
-
-//        xhr.responseType = "json"
     xhr.onreadystatechange = handleFunc;
-
+    xhr.send();
     function handleFunc(){
-        if(xhr.readyState === 4 && xhr.status === 200){
-
-            let url = JSON.parse(xhr.responseText);
-
-            if(url != ""){
-            console.log(url);
-//            clearInterval(myTimeout);
-            window.location.replace(`/new_analysis/${url}`)
-            };
-        }else{
+        if(xhr.status != 200){
             console.log("don't have response...");
+            return false
+        }else{
+            let url = JSON.parse(xhr.responseText);
+            console.log(url);
+            if(url != ""){
+            window.location.replace(`/new_analysis/${url}`)
         }
     }
-    xhr.send(null)
-}
+
+}}
 
 fileInput.onchange = ({target}) =>{
 
@@ -101,11 +96,17 @@ function uploadFile(name, fileOriginalName){
                     <img src="./static/logo/load.gif">
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-           const myTimeout = setTimeout(function(){myGreeting(fileOriginalName)}, 1000);
+//           const myTimeout = setTimeout(function(){myGreeting(fileOriginalName)}, 1000);
 //           var myTimeout = setInterval(function(){myGreeting(fileOriginalName)}, 2000);
 //           myGreeting(fileOriginalName);
+            var myTimeout = setTimeout(function run(){
+                            let req = myGreeting(fileOriginalName);
+                            if (req === false) {
+                                setTimeout(run, 1000);
+                            }
+                       }, 5000);
        }
     });
     let formData = new FormData(form);
     xhr.send(formData);
-}
+};

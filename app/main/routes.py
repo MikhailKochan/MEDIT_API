@@ -63,6 +63,7 @@ def progress(prediction_id):
         send = current_app.redis.get(task.id)
 
         if send:
+            current_app.redis.delete(task.id)
             return jsonify([{
                 'name': 'task',
                 'data': json.loads(send.decode("utf-8"))
@@ -115,7 +116,6 @@ def analysis():
 @login_required
 def index(filename):
     page = request.args.get('page', 1, type=int)
-    print(request.args)
 
     if filename is None:
         id = request.args.get('select')

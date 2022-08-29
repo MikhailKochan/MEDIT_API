@@ -94,6 +94,7 @@ function progress (container) {
                 <img src="/static/logo/load.gif">
                 `;
             status.innerHTML = progressHTML;
+            let timer = setTimeout(progressStatus,2000);
         } else {
 //        console.log(query);
         width = query[0].data.func.alternative_predict.progress;
@@ -133,7 +134,7 @@ function progress (container) {
                 percent.textContent = width + '%';
 
         };
-        let timer = setTimeout(progressStatus,1000);
+        let timer = setTimeout(progressStatus,1500);
 //      else{
 //        status.innerHTML = 'Process is broken';
 //        clearInterval(timer);

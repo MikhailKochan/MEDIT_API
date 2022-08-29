@@ -68,7 +68,7 @@ def progress(prediction_id):
                 'name': 'task',
                 'data': json.loads(send.decode("utf-8"))
             }])
-        else:
+        elif send and equest.method == 'GET':
             return jsonify([{
                 'name': 'task',
                 'data': {'in_queries': 'Please_wait'}

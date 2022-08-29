@@ -109,7 +109,7 @@ function progress (predict_id) {
       }
     }
   }
-}}
+}};
 
 function getExtension(filename) {
   var parts = filename.split('.');

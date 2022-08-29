@@ -63,16 +63,18 @@ def progress(prediction_id):
         send = current_app.redis.get(task.id)
 
         if send:
-            current_app.redis.delete(task.id)
+            # current_app.redis.delete(task.id)
             return jsonify([{
                 'name': 'task',
                 'data': json.loads(send.decode("utf-8"))
             }])
-        elif send and equest.method == 'GET':
+        elif not send and request.method == 'GET':
             return jsonify([{
                 'name': 'task',
                 'data': {'in_queries': 'Please_wait'}
             }])
+        else:
+            abort(404)
     else:
         abort(404)
 
@@ -199,6 +201,7 @@ def cut_rout():
         if request.method == 'POST':
             files = request.files.getlist("file")
             res = []
+            print(files)
             if files:
                 for file in files:
 
@@ -207,8 +210,8 @@ def cut_rout():
                     file.save(path)
                     current_app.logger.info(f"сохранил файл {file.filename}")
                     img = Images(path)
-                    current_app.logger.info(img.name)
-                    if Images.query.filter_by(filename=img.filename).first() is None:
+                    current_app.logger.info(f"image id :{img.name}")
+                    if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
                         db.session.add(img)
                         db.session.commit()
                         current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
@@ -216,24 +219,24 @@ def cut_rout():
                         img = Images.query.filter_by(filename=img.filename).first()
                         current_app.logger.info(f"{file.filename} already in bd")
 
-                    current_app.logger.info(img.get_task_in_progress('app.tasks.img_cutt'))
+                    current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.tasks.img_cutt')}")
 
-                    # if img.get_task_in_progress('app.tasks.img_cutt'):
-                    #     current_app.logger.info('Task this img in work now')
-                    #     flash('This img now cutting')
-                    # else:
-                    rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
-                                                            retry=Retry(max=3))
+                    if img.get_task_in_progress('app.tasks.img_cutt'):
+                        current_app.logger.info('Task this img in work now')
+                        flash('This img now cutting')
+                    else:
+                        rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=10800,
+                                                                retry=Retry(max=1))
 
-                    task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
-                                description=f"start cutting img {img.filename}",
-                                image_id=img.id)
-                    db.session.add(task)
-                    current_app.logger.info(f"{task.id} add to db")
+                        task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
+                                    description=f"start cutting img {img.filename}",
+                                    image_id=img.id)
+                        db.session.add(task)
+                        current_app.logger.info(f"task id: {task.id} - add to db")
 
-                    db.session.commit()
+                        db.session.commit()
 
-                    res.append(task.id)
+                        res.append(task.id)
 
             return render_template('cut_rout.html', title='Загрузка', body=res)
         else:

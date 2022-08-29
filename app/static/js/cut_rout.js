@@ -52,7 +52,7 @@ function progress (predict_id) {
 //            };
 //        }, 1000);
 
-    let timer = setInterval(progressStatus,1000);
+    let timer = setInterval(progressStatus,2000);
 
     function progressStatus () {
 
@@ -98,7 +98,7 @@ function progress (predict_id) {
             <img src="/static/logo/green_check.png">
         `;
         result.innerHTML = progressHTML;
-        let timer = setInterval(progressStatus,1000);
+        let timer = setInterval(progressStatus,2000);
       } else {
 
             if(elem){

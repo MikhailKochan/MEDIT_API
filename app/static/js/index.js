@@ -90,10 +90,11 @@ function progress (container) {
     if (query === false){
         let timer = setTimeout(progressStatus,1000);
         } else if (query[0].data.in_queries == 'Please_wait'){
+            if (parseInt(width) == 0){
             let progressHTML = `
                 <img src="/static/logo/load.gif">
                 `;
-            status.innerHTML = progressHTML;
+            status.innerHTML = progressHTML;}
             let timer = setTimeout(progressStatus,2000);
         } else {
 //        console.log(query);

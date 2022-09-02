@@ -129,7 +129,7 @@ class Images(db.Model):
 
             elif self.format.lower() == '.jpg':
 
-                file = cv2.imread(img)
+                file = cv2.imread(f_path)
 
             else:
                 return f'{self.format} not added'
@@ -160,12 +160,6 @@ class Images(db.Model):
                         _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), func='cutting')
 
                         pbar.update(1)
-
-            self.cut_file = True
-
-            db.session.add(self)
-            current_app.logger.info(f'finish cutting {self}, add to db')
-            db.session.commit()
 
         except Exception as e:
             print(f"ERROR in cutting: {e}")
@@ -222,8 +216,11 @@ class Images(db.Model):
                 current_app.logger.info(f'start img.cutting()')
                 progress = self.cutting()
                 path_img = glob.glob(f"{current_app.config['CUTTING_FOLDER']}/{self.filename}/*.jpg")
-                # if len(path_img) < 1:
-                #     return f"{self.filename} have problem with cutting"
+                self.cut_file = True
+
+                db.session.add(self)
+                current_app.logger.info(f'finish cutting {self}, add to db')
+                db.session.commit()
 
             total = len(path_img)
 
@@ -347,6 +344,7 @@ class Images(db.Model):
 
             mitoz = CLASS_NAMES.index('mitoz')
             all_mitoz = 0
+
             with tqdm(total=total, position=0, leave=False) as pbar:
                 for i in range(0, w_sum):
                     for j in range(0, h_sum):
@@ -466,7 +464,7 @@ class Images(db.Model):
 
             result = f'{self.filename}.zip created'
 
-        except Exeption as e:
+        except Exception as e:
             result = e
 
         else:
@@ -571,7 +569,7 @@ class Predict(db.Model):
 
             result = f'{zip_file_name}.zip created'
 
-        except Exeption as e:
+        except Exception as e:
             result = e
 
         else:
@@ -600,23 +598,39 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
         job_id = job.get_id()
         job.meta['progress'] = progress
         job.save_meta()
-        current_app.redis.set(job_id, json.dumps({'task_id': job_id,
-                                                  'mitoze': all_mitoz,
-                                                  'filename': filename,
-                                                  'func': {f'{func}': {
-                                                      'progress': progress}}}))
+        if current_app:
+            rd = current_app.redis
+        else:
+            from redis import Redis
+            rd = Redis.from_url(Config.__dict__['REDIS_URL'])
+
+        rd.set(job_id, json.dumps({'task_id': job_id,
+                                   'mitoze': all_mitoz,
+                                   'filename': filename,
+                                   'func': {f'{func}': {
+                                             'progress': progress}}}))
         try:
             if progress >= 100:
-                task = Task.query.get(job_id)
-                task.complete = True
-                db.session.commit()
+                if current_app:
+                    task = Task.query.get(job_id)
+                    task.complete = True
+                    db.session.commit()
+                else:
+                    from sqlalchemy import select, create_engine
+                    from sqlalchemy.orm import Session
+
+                    engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
+                    with Session(engine) as session:
+                        task = session.query(Task).get(job_id)
+                        task.complete = True
+                        session.commit()
                 # current_app.redis.delete(job_id)
 
         except Exception as e:
             print(f'ERROR in set_task_progress: {e}')
             if current_app:
                 current_app.logger.error(e)
-            db.session.rollback()
+                db.session.rollback()
 
 
 class Task(db.Model):

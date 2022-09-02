@@ -52,7 +52,6 @@ def get(key):
 
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
-    # print(task_id)
     send = current_app.redis.get(task_id)
     if send:
         # current_app.redis.delete(task.id)
@@ -63,44 +62,11 @@ def progress(task_id):
     else:
         abort(404)
 
-    # if request.method == 'POST':
-    #     for i in request.form.items():
-    #         tasks = Task.query.filter(Task.images, Images.filename == i[1]).all()
-    #
-    #         if tasks:
-    #             task = tasks[-1]
-    #         else:
-    #             abort(404)
-    # else:
-    #     task = Task.query.filter_by(predict_id=prediction_id).first()
-    #
-    # if task:
-    #
-    #     print('TASK', task)
-    #
-    #     send = current_app.redis.get(task.id)
-    #
-    #     if send:
-    #         # current_app.redis.delete(task.id)
-    #         return jsonify([{
-    #             'name': 'task',
-    #             'data': json.loads(send.decode("utf-8"))
-    #         }])
-    #     else:
-    #         return jsonify([{
-    #             'name': 'task',
-    #             'data': {'in_queries': 'Please_wait'}
-    #         }])
-    #     # else:
-    #     #     abort(404)
-    # else:
-    #     abort(404)
-
 
 @bp.route('/del/<prediction_id>')
 @login_required
 def delete(task_id):
-    current_app.logger.info(f"user {current_user} delete predict id = {prediction_id}")
+    current_app.logger.info(f"user {current_user} delete predict id = {task_id}")
     # TODO
     # подумать нужно ли удалять задачи, если да добавить их в алгоритм удаления
     task = Task.query.filter_by(id=task_id).first()
@@ -241,11 +207,7 @@ def cut_rout():
 
                 current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.tasks.img_cutt')}")
 
-                # if img.get_task_in_progress('app.tasks.img_cutt'):
-                #     current_app.logger.info('Task this img in work now')
-                #     flash('This img now cutting')
-                # else:
-                rq_job = current_app.task_queue.enqueue('app.tasks.img_cutt', img.id, job_timeout=1800)
+                rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', img.id, job_timeout=1800)
 
                 task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
                             description=f"start cutting img {img.filename}",

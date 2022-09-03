@@ -9,17 +9,19 @@ from decimal import Decimal as D
 import redis
 import rq
 import numpy as np
-from sys import platform
+
 from rq import get_current_job
 from rq import Retry
 import json
 from time import time
 import zipfile
 
+from sys import platform
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 import openslide
-from tqdm import tqdm, trange
+
+from tqdm import tqdm
 import glob
 import cv2
 from pascal_voc_writer import Writer
@@ -89,7 +91,6 @@ class Images(db.Model):
             self.filename = os.path.basename(path)
             self.format = pathlib.Path(path).suffix
             if self.format.lower() == '.svs':
-                print(f"path: {path}")
                 file = openslide.OpenSlide(path)
                 self.analysis_number = file.properties['aperio.ImageID']
                 self.name = file.properties['aperio.Filename']
@@ -108,76 +109,31 @@ class Images(db.Model):
 
     def cutting(self):
         try:
-            progress = 0
-            _set_task_progress(progress, 0, func='cutting')
-            if current_app:
-                CUTTING_FOLDER = current_app.config['CUTTING_FOLDER']
-                _CUT_IMAGE_SIZE = current_app.config['_CUT_IMAGE_SIZE']
-            else:
-                CUTTING_FOLDER = Config.__dict__['CUTTING_FOLDER']
-                _CUT_IMAGE_SIZE = Config.__dict__['_CUT_IMAGE_SIZE']
-            h_sum = int(self.height / _CUT_IMAGE_SIZE[1])
-            w_sum = int(self.width / _CUT_IMAGE_SIZE[0])
 
             f_path = os.path.join(current_app.config['BASEDIR'],
                                   current_app.config['UPLOAD_FOLDER'],
                                   self.filename)
 
             if self.format.lower() == '.svs':
-
-                file = openslide.OpenSlide(f_path)
+                from app.utils.cutting.cutting_svs import cutting as start_cut
 
             elif self.format.lower() == '.jpg':
-
-                file = cv2.imread(f_path)
+                current_app.logger.info('JPG not added in APP')
+                return
 
             else:
-                return f'{self.format} not added'
+                current_app.logger.info(f'{self.format} not added in APP')
+                return
 
-            h_rest = self.height % _CUT_IMAGE_SIZE[1]
-            w_rest = self.width % _CUT_IMAGE_SIZE[0]
-            s_col = int(h_rest / 2)
-            s_row = int(w_rest / 2)
-            total = h_sum * w_sum
+            current_app.logger.info(f'start cutting {self.filename}')
 
-            if not os.path.exists(os.path.join(CUTTING_FOLDER, self.filename)):
-                os.mkdir(os.path.join(CUTTING_FOLDER, self.filename))
-                if current_app:
-                    current_app.logger.info(f"Directory {self.filename} created")
-            with tqdm(total=total, position=0, leave=False) as pbar:
-                for i in range(0, w_sum):
-                    for j in range(0, h_sum):
-                        pbar.set_description(f"Total img: {total}. Start cutting")
-                        start_row = j * _CUT_IMAGE_SIZE[0] + s_row
-                        start_col = i * _CUT_IMAGE_SIZE[1] + s_col
-                        filename = f"{self.filename}_im" + "_." + str(i) + "." + str(j)
-                        path_to_save_cut_file = os.path.join(os.path.join(CUTTING_FOLDER, self.filename),
-                                                             f"{filename}.jpg")
-                        self.cut(start_row, start_col, path_to_save_cut_file, file, _CUT_IMAGE_SIZE)
-
-                        progress += 1 / total * 100.0
-
-                        _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), func='cutting')
-
-                        pbar.update(1)
-
+            start_cut(path=f_path,
+                      CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
+                      _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
+                      )
+            current_app.logger.info(f'finish cutting {self.filename}')
         except Exception as e:
-            print(f"ERROR in cutting: {e}")
-
-            _set_task_progress(100, func='cutting')
-
-            if current_app:
-                current_app.logger.error(e)
-
-    def cut(self, start_row: int, start_col: int, path_to_save_cut_file, file, _CUT_IMAGE_SIZE):
-        # _CUT_IMAGE_SIZE = current_app.config['_CUT_IMAGE_SIZE']
-        if self.format.lower() == '.svs':
-            img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
-            img = img.convert('RGB')
-            img.save(path_to_save_cut_file)
-        # TODO add more format
-        elif self.format.lower() == '.jpg':
-            pass
+            current_app.logger.error(f"ERROR IN CUTTING: {e}")
 
     def make_predict(self, predict, cutting=False):
         try:
@@ -426,43 +382,11 @@ class Images(db.Model):
         return Task.query.filter_by(name=name, predict=self,
                                     complete=False).first()
 
-    def create_zip(self, path_to_save: str):
+    def create_zip(self, path_to_save_draw: str):
+        from app.utils.create_zip.create_zip import create_zip
         try:
-            progress = 0
 
-            _set_task_progress(progress,
-                               func='create_zip',
-                               filename=self.filename)
-
-            zip_folder = current_app.config['SAVE_ZIP']
-
-            path_img = glob.glob(f"{path_to_save}/*")
-
-            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{self.filename}.zip'), 'w', zipfile.ZIP_DEFLATED)
-
-            total = len(path_img)
-
-            with tqdm(total=total, position=0, leave=False) as pbar:
-                for file in path_img:
-                    pbar.set_description(f"Total img: {total}. Start zip:")
-
-                    filename = os.path.basename(file)
-                    zipFile.write(file, arcname=filename)
-
-                    pbar.update(1)
-
-                    progress += 1 / total * 100.0
-
-                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
-                                       func='create_zip',
-                                       filename=self.filename)
-
-            zipFile.close()
-            _set_task_progress(100,
-                               func='create_zip',
-                               filename=self.filename)
-
-            result = f'{self.filename}.zip created'
+            result = create_zip(self, path_to_save_draw)
 
         except Exception as e:
             result = e
@@ -475,7 +399,7 @@ class Images(db.Model):
             text = f'<Image {self.name} load on server {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}' \
                    f' and create {self.img_creation_date} {self.img_creation_time}>'
         else:
-            text = ''
+            text = f'<Image {self.name}'
         return text
 
 
@@ -547,27 +471,10 @@ class Predict(db.Model):
                                     complete=False).first()
 
     def create_zip(self, path_to_save_draw: str):
+        from app.utils.create_zip.create_zip import create_zip
         try:
-            # path_to_save_draw = f"{current_app.config['CUTTING_FOLDER']}/" \
-            #                     f"{self.images.filename}/" \
-            #                     f"{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
 
-            zip_folder = current_app.config['SAVE_ZIP']
-
-            path_img = glob.glob(f"{path_to_save_draw}/*")
-
-            zip_file_name = f"{self.images.filename}_{self.timestamp.strftime('%d_%m_%Y__%H_%M')}"
-
-            zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
-            with tqdm(total=len(path_img), position=0, leave=False) as pbar:
-                for file in path_img:
-                    pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
-                    filename = os.path.basename(file)
-                    zipFile.write(file, arcname=filename)
-                    pbar.update(1)
-            zipFile.close()
-
-            result = f'{zip_file_name}.zip created'
+            result = create_zip(self, path_to_save_draw)
 
         except Exception as e:
             result = e

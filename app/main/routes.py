@@ -185,8 +185,7 @@ def cut_rout():
     try:
         if request.method == 'POST':
             files = request.files.getlist("file")
-            res = []
-            print(files)
+
             if files:
                 # for file in files:
                 file = files[0]
@@ -195,31 +194,19 @@ def cut_rout():
                 current_app.logger.info(f'получил файл {file.filename}')
                 file.save(path)
                 current_app.logger.info(f"сохранил файл {file.filename}")
-                img = Images(path)
-                current_app.logger.info(f"image id :{img.name}")
-                if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                    db.session.add(img)
-                    db.session.commit()
-                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                else:
-                    img = Images.query.filter_by(filename=img.filename).first()
-                    current_app.logger.info(f"{file.filename} already in bd")
 
-                current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.new_tasks.img_cutt')}")
-
-                rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', img.id, job_timeout=1800)
+                rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)
 
                 task = Task(id=rq_job.get_id(), name="app.new_tasks.img_cutt",
-                            description=f"start cutting img {img.filename}",
-                            image_id=img.id)
+                            description=f"start cutting img {file.filename}",
+                            )
 
                 db.session.add(task)
                 current_app.logger.info(f"task id: {task.id} - add to db")
 
                 db.session.commit()
 
-                res.append(task.id)
-            return render_template('cut_rout.html', title='Загрузка', body=res)
+            return render_template('cut_rout.html', title='Загрузка')
         else:
             return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')
     except Exception as e:

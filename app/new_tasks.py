@@ -1,32 +1,19 @@
 import os
 import shutil
 
-from .models import Images
-from config import Config
 
-from sqlalchemy import select, create_engine
-from sqlalchemy.orm import Session
+def img_cutt(path):
+    from app.utils.cutting.cutting_svs import cutting
+    from app.utils.create_zip.create_zip import create_zip
 
-engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
+    path_cutting_img = cutting(path)
 
+    os.remove(path)  # Delete download svs
 
-def img_cutt(image_id):
-    print(image_id)
-    with Session(engine) as session:
-        img = session.query(Images).get(image_id)
-        # img = Images.query.filter_by(id=image_id).first()
-        path_cut_file = f"{Config.CUTTING_FOLDER}/{img.filename}"
-        if not img.cut_file:
-            img.cutting()
+    result = create_zip(path_cutting_img)  # Create zip file
 
-            os.remove(f"{Config.UPLOAD_FOLDER}/{img.filename}")
+    print(result)
 
-            result = img.create_zip(path_cut_file)
+    shutil.rmtree(path_cutting_img)  # Delete cutting folder
 
-            print(result)
-
-            shutil.rmtree(path_cut_file)
-        else:
-            if os.path.exists(path_cut_file):
-                pass
 

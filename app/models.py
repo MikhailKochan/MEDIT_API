@@ -81,7 +81,7 @@ class Images(db.Model):
                                     lazy='dynamic')
 
     def __init__(self, path: str = None):
-        self.id = generator_id(self)
+        # self.id = generator_id(self)
         self.timestamp = datetime.utcnow()
         self.cut_file = False
         if path:

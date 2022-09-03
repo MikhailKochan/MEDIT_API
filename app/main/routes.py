@@ -205,11 +205,11 @@ def cut_rout():
                     img = Images.query.filter_by(filename=img.filename).first()
                     current_app.logger.info(f"{file.filename} already in bd")
 
-                current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.tasks.img_cutt')}")
+                current_app.logger.info(f"img in progress :{img.get_task_in_progress('app.new_tasks.img_cutt')}")
 
                 rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', img.id, job_timeout=1800)
 
-                task = Task(id=rq_job.get_id(), name="app.tasks.img_cutt",
+                task = Task(id=rq_job.get_id(), name="app.new_tasks.img_cutt",
                             description=f"start cutting img {img.filename}",
                             image_id=img.id)
 

@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from models import Images
+from .models import Images
 from config import Config
 
 from sqlalchemy import select, create_engine

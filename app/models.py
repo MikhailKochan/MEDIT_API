@@ -69,7 +69,7 @@ class User(UserMixin, db.Model):
                                                 job_timeout=1800)
 
         task = Task(id=rq_job.get_id(), name=name, description=description,
-                    user_id=self.id)
+                    user=self)
 
         db.session.add(task)
         current_app.logger.info(f"task id: {task.id} - add to db")

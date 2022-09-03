@@ -49,6 +49,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     def __repr__(self):
@@ -61,13 +62,15 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def launch_task(self, name, description, path: str):
-        current_app.logger.info(f"path: {path} - add to db")
+        current_app.logger.info(f"path: {path}")
 
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 path,
                                                 job_timeout=1800)
+
         task = Task(id=rq_job.get_id(), name=name, description=description,
-                    user=self.id)
+                    user_id=self.id)
+
         db.session.add(task)
         current_app.logger.info(f"task id: {task.id} - add to db")
         return task

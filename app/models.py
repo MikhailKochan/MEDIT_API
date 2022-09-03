@@ -61,6 +61,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def launch_task(self, name, description, **kwargs):
+        current_app.logger.info(f'kwargs path {kwargs["path"]}')
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 path=kwargs['path'],
                                                 job_timeout=kwargs['job_timeout'])

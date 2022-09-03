@@ -190,7 +190,8 @@ def cut_rout():
                     file.save(path)
                     current_app.logger.info(f"сохранил файл {file.filename}")
 
-                    current_user.launch_task('img_cutt', f'{file.filename} cutting',
+                    current_user.launch_task(name='img_cutt',
+                                             description=f'{file.filename} cutting',
                                              path=path,
                                              )
                     # rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)

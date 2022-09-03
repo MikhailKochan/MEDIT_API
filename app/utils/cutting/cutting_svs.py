@@ -43,7 +43,7 @@ def cutting(f_path):
                     pbar.set_description(f"Total img: {total}. Start cutting")
                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
-                    filename = f"{filename}_im" + "_." + str(i) + "." + str(j)
+                    filename = f"{img_filename}_im" + "_." + str(i) + "." + str(j)
                     path_to_save_cut_file = os.path.join(os.path.join(CUTTING_FOLDER, filename),
                                                          f"{filename}.jpg")
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)

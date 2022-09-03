@@ -60,7 +60,8 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def launch_task(self, name, description, path):
+    def launch_task(self, name, description, path: str):
+        current_app.logger.info(f"path: {path} - add to db")
 
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 path,

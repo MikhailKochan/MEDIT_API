@@ -2,7 +2,7 @@ import os
 import shutil
 
 
-def img_cutt(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
+def img_cutt(path):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
 

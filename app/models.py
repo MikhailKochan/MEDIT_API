@@ -62,7 +62,7 @@ class User(UserMixin, db.Model):
 
     def launch_task(self, name, description, **kwargs):
         # print(kwargs.items())
-        rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name, self.id,
+        rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 path=kwargs['path'],
                                                 job_timeout=kwargs['job_timeout'])
         task = Task(id=rq_job.get_id(), name=name, description=description,

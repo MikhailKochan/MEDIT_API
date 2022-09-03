@@ -35,6 +35,7 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
+    print('key in /get', key)
     img = Images.query.filter_by(filename=key).first()
     user_tasks = current_user.get_tasks_in_progress()
     if img:

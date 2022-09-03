@@ -1,6 +1,7 @@
 import os
 
 from sys import platform
+
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 
@@ -44,7 +45,8 @@ def cutting(f_path):
                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
                     filename = f"{img_filename}_im" + "_." + str(i) + "." + str(j)
-                    path_to_save_cut_file = os.path.join(os.path.join(CUTTING_FOLDER, filename),
+                    path_to_save_cut_file = os.path.join(CUTTING_FOLDER,
+                                                         img_filename,
                                                          f"{filename}.jpg")
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                     img = img.convert('RGB')

@@ -564,7 +564,9 @@ class Task(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
     predict_id = db.Column(db.Integer, db.ForeignKey('predict.id', ondelete="CASCADE"))
     image_id = db.Column(db.Integer, db.ForeignKey('images.id', ondelete="CASCADE"))
     complete = db.Column(db.Boolean, default=False)

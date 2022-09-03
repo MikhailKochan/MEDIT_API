@@ -36,6 +36,7 @@ def get_zip(filename):
 @login_required
 def get(key):
     img = Images.query.filter_by(filename=key).first()
+    user_tasks = current_user.get_tasks_in_progress()
     if img:
         task = img.tasks.all()
         if task:
@@ -44,6 +45,8 @@ def get(key):
                     'task_id': img_task.id}
         else:
             data = img.id
+    elif user_tasks:
+        data = {'task_id': user_tasks[0].id}
     else:
         data = abort(404)
 
@@ -168,47 +171,36 @@ def upload():
         return render_template('upload.html', title='Загрузка', body='Выберите файл')
 
 
-@bp.route('/predict', methods=['POST', 'GET'])
-def pred():
-    predictor = current_app.medit.predictor
-    if predictor:
-        print(predictor)
-        x = "True"
-    else:
-        x = "False"
-    return x
-
-
 @bp.route('/cutting', methods=['POST', 'GET'])
 @login_required
 def cut_rout():
-    try:
-        if request.method == 'POST':
-            files = request.files.getlist("file")
+    if current_user.get_task_in_progress('img_cutt'):
+        flash('now images in cutting')
+    else:
+        try:
+            if request.method == 'POST':
+                files = request.files.getlist("file")
 
-            if files:
-                # for file in files:
-                file = files[0]
+                if files:
+                    # for file in files:
+                    file = files[0]
 
-                path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-                current_app.logger.info(f'получил файл {file.filename}')
-                file.save(path)
-                current_app.logger.info(f"сохранил файл {file.filename}")
+                    path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+                    current_app.logger.info(f'получил файл {file.filename}')
+                    file.save(path)
+                    current_app.logger.info(f"сохранил файл {file.filename}")
 
-                rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)
+                    current_user.launch_task('img_cutt', f'{file.filename} cutting', path=path, job_timeout=1800)
+                    # rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)
+                    #
+                    # task = Task(id=rq_job.get_id(), name="app.new_tasks.img_cutt",
+                    #             description=f"start cutting img {file.filename}",
+                    #             )
+                    #
+                    # db.session.add(task)
 
-                task = Task(id=rq_job.get_id(), name="app.new_tasks.img_cutt",
-                            description=f"start cutting img {file.filename}",
-                            )
+                    db.session.commit()
 
-                db.session.add(task)
-                current_app.logger.info(f"task id: {task.id} - add to db")
-
-                db.session.commit()
-
-            return render_template('cut_rout.html', title='Загрузка')
-        else:
-            return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')
-    except Exception as e:
-        current_app.logger.error(e)
+        except Exception as e:
+            current_app.logger.error(e)
         return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')

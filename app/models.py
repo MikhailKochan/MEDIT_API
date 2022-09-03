@@ -60,11 +60,11 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def launch_task(self, name, description, **kwargs):
-        current_app.logger.info(f'kwargs path {kwargs["path"]}')
+    def launch_task(self, name, description, path):
+
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
-                                                path=kwargs['path'],
-                                                job_timeout=kwargs['job_timeout'])
+                                                path=path,
+                                                job_timeout=1800)
         task = Task(id=rq_job.get_id(), name=name, description=description,
                     user=self.id)
         db.session.add(task)

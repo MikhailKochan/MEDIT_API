@@ -192,7 +192,6 @@ def cut_rout():
 
                     current_user.launch_task('img_cutt', f'{file.filename} cutting',
                                              path=path,
-                                             job_timeout=1800,
                                              )
                     # rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)
                     #

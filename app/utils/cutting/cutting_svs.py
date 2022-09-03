@@ -9,11 +9,11 @@ import openslide
 from decimal import Decimal as D
 from tqdm import tqdm
 
-from app.models import _set_task_progress, Images, Config
+from app.models import _set_task_progress, Config
 
 
-def cutting(f_path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
-
+def cutting(f_path):
+    CUTTING_FOLDER, _CUT_IMAGE_SIZE = Config.CUTTING_FOLDER, Config._CUT_IMAGE_SIZE
     try:
         progress = 0
         _set_task_progress(progress, 0, func='cutting')

@@ -81,3 +81,7 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['unix.mk@gmail.com']
 
+    @property
+    def CUT_IMAGE_SIZE(self):
+        return self._CUT_IMAGE_SIZE
+

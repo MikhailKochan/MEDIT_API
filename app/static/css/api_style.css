@@ -397,7 +397,7 @@ select:hover {
 }
 button {
     height: 40px;
-    width: 150px;
+    width: 100%;
     background: #eff1f4;
     box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
     text-align: center;

@@ -166,6 +166,7 @@ bottomCutFile.addEventListener("click", ()=>{
         form.reset();
         status.innerHTML = "";
         result.innerHTML = "";
+        bottomCutFile.style.display = 'none';
     }
 });
 

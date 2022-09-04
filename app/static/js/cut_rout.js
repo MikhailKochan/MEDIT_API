@@ -124,6 +124,8 @@ function progress (task_id) {
                     redisDel(task_id);
 
                     }else {
+                        let elem = document.querySelector("#progress");
+                        let percent = document.querySelector('.percent');
                         if(elem){
                             elem.style.width = width + '%';
                             percent.textContent = width + '%';

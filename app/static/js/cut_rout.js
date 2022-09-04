@@ -123,9 +123,14 @@ function progress (task_id) {
 
                     redisDel(task_id);
 
-                    clearTimeout(myTimeout);
+                    }else {
+                        if(elem){
+                            elem.style.width = width + '%';
+                            percent.textContent = width + '%';
+                    }
+                    let timer = setTimeout(progressStatus, 1000);
+                  }
 
-                    };
             };
 
         let elem = document.querySelector("#progress");

@@ -14,9 +14,15 @@ from rq import Retry
 
 @bp.route('/redis-delete/<key>')
 def redis_del_key(key):
-    current_app.redis.delete(key)
-    Task.query.filter_by(id=key).delete()
-    db.session.commit()
+    try:
+        current_app.redis.delete(key)
+        Task.query.filter_by(id=key).delete()
+        db.session.commit()
+        data = jsonify('true')
+    except Exception as e:
+        current_app.logger.error(f'ERROR in redis_del_key route: {e}')
+        data = abort(404)
+    return data
 
 
 @bp.route('/get-zip/<string:filename>')
@@ -45,7 +51,7 @@ def get(key):
     elif user_tasks:
         data = {'task_id': user_tasks[-1].id}
     else:
-        data = abort(404)
+        return abort(404)
 
     return jsonify(data)
 

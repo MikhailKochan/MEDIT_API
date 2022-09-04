@@ -166,7 +166,9 @@ bottomCutFile.addEventListener("click", ()=>{
     function clearForm () {
         document.querySelector("#name").innerHTML = "";
         dateTime.innerHTML = `
-            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
+            <form action="{{url_for('main.cut_rout')}}" style="margin-top:0%" enctype="multiple / form-data">
+            <input type="file" name="file" class="input-file" hidden>
+            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button></form>
         `;
         progressArea.innerHTML = "";
         form.reset();
@@ -176,6 +178,7 @@ bottomCutFile.addEventListener("click", ()=>{
         setTimeout(delZip, 5000)
         function delZip () {
             let key = bottomCutFile.href.split('/')[-1];
+            console.log(key);
             var xhr = new XMLHttpRequest();
             xhr.open("get", `/zip-delete/${key}`, false);
             xhr.send();

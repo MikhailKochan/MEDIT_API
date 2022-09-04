@@ -28,6 +28,7 @@ def redis_del_key(key):
 @bp.route('/zip-delete/<key>')
 @login_required
 def del_zip(key):
+    print(key)
     try:
         path = os.path.join(current_app.config["SAVE_ZIP"], key)
         os.remove(path)

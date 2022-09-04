@@ -123,15 +123,8 @@ function progress (task_id) {
 
                     redisDel(task_id);
 
-                    }else {
-                        let elem = document.querySelector("#progress");
-                        let percent = document.querySelector('.percent');
-                        if(elem){
-                            elem.style.width = width + '%';
-                            percent.textContent = width + '%';
                     }
-                    let timer = setTimeout(progressStatus, 1000);
-                  }
+
 
             };
 
@@ -152,7 +145,7 @@ function progress (task_id) {
                 elem.style.width = width + '%';
                 percent.textContent = width + '%';
         }
-        let timer = setTimeout(progressStatus, 1000);
+        let timer = setTimeout(progressStatus, 500);
       }
     }
   }else{

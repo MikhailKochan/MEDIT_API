@@ -177,11 +177,13 @@ bottomCutFile.addEventListener("click", ()=>{
         bottomCutFile.style.display = 'none';
         setTimeout(delZip, 5000)
         function delZip () {
-            let key = bottomCutFile.href.split('/')[-1];
-            console.log(key);
-            var xhr = new XMLHttpRequest();
-            xhr.open("get", `/zip-delete/${key}`, false);
-            xhr.send();
+            let bottomCutFile = document.querySelector(".button_download");
+            let key = bottomCutFile.href.split('/');
+            console.log(bottomCutFile.href);
+            console.log(bottomCutFile.href.split('/'));
+//            var xhr = new XMLHttpRequest();
+//            xhr.open("get", `/zip-delete/${key}`, false);
+//            xhr.send();
         }
     }
 });

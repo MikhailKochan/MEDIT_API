@@ -168,6 +168,8 @@ bottomCutFile.addEventListener("click", ()=>{
     bottomCutFile.click();
     setTimeout(clearForm, 1000);
     function clearForm () {
+        dateTime.innerHTML = bottomFile;
+        progressArea.innerHTML = "";
         form.reset();
         status.innerHTML = "";
         result.innerHTML = "";

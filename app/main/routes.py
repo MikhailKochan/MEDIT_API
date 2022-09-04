@@ -32,7 +32,7 @@ def del_zip(key):
     try:
         path = os.path.join(current_app.config["SAVE_ZIP"], key)
         os.remove(path)
-        return
+        return jsonify('')
     except FileNotFoundError:
         return abort(404)
 

@@ -213,11 +213,12 @@ form.onchange = ({target}) =>{
         let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){
             if(file){
+                let fileName = file.name;
                 bottomFile.style.display = 'none';
 //                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
                 imgPNG_file.style.display = 'flex';
+
                 span_name.innerHTML = `${fileName}`
-                let fileName = file.name;
                 var fileOriginalName = file.name;
                 if(fileName.length >= 12){
                     let splitName = fileName.split('.');

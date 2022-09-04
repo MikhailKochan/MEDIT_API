@@ -123,7 +123,7 @@ function progress (task_id) {
                     bottomCutFile.style.display = 'flex';
 
                     redisDel(task_id);
-
+                    return
                     }
 
 
@@ -164,7 +164,10 @@ bottomCutFile.addEventListener("click", ()=>{
     bottomCutFile.click();
     setTimeout(clearForm, 1000);
     function clearForm () {
-        dateTime.innerHTML = bottomFile;
+        document.querySelector("#name").innerHTML = "";
+        dateTime.innerHTML = `
+            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
+        `;
         progressArea.innerHTML = "";
         form.reset();
         status.innerHTML = "";

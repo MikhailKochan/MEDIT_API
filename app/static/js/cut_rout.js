@@ -165,17 +165,15 @@ bottomCutFile.addEventListener("click", ()=>{
     setTimeout(clearForm, 1000);
     function clearForm () {
         document.querySelector("#name").innerHTML = "";
-        dateTime.innerHTML = `
-            <form action="{{url_for('main.cut_rout')}}" style="margin-top:0%" enctype="multiple / form-data">
-            <input type="file" name="file" class="input-file" hidden>
-            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button></form>
-        `;
+        newContent.innerHTML = "";
+        bottomFile.style.display = 'flex';
+
         progressArea.innerHTML = "";
         form.reset();
         status.innerHTML = "";
         result.innerHTML = "";
         bottomCutFile.style.display = 'none';
-        setTimeout(delZip, 5000)
+        setTimeout(delZip, 1000)
         function delZip () {
             let bottomCutFile = document.querySelector(".button_download");
             let key = bottomCutFile.href.split('/');
@@ -212,7 +210,10 @@ form.onchange = ({target}) =>{
         let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){
             if(file){
-                dateTime.innerHTML = afterCheckFileHTML;
+                var newContent = document.createElement('div');
+                newContent.innerHTML = afterCheckFileHTML;
+                bottomFile.style.display = 'none';
+                dateTime.appendChild(newContent.firstChild);
                 let fileName = file.name;
                 var fileOriginalName = file.name;
                 if(fileName.length >= 12){

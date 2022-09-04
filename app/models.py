@@ -68,11 +68,11 @@ class User(UserMixin, db.Model):
                                                 path,
                                                 job_timeout=1800)
 
-        task = Task(id=rq_job.get_id(), name=name, description=description,
-                    user=self)
+        task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
 
         db.session.add(task)
         current_app.logger.info(f"task id: {task.id} - add to db")
+
         return task
 
     def get_tasks_in_progress(self):

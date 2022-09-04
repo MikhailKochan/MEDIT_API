@@ -12,9 +12,11 @@ from rq import get_current_job
 from rq import Retry
 
 
-@bp.route('/debug-sentry')
-def trigger_error():
-    division_by_zero = 1 / 0
+@bp.route('/redis-delete/<key>')
+def redis_del_key(key):
+    current_app.redis.delete(key)
+    Task.query.filter_by(id=key).delete()
+    db.session.commit()
 
 
 @bp.route('/get-zip/<string:filename>')
@@ -24,12 +26,6 @@ def get_zip(filename):
         return send_from_directory(current_app.config["SAVE_ZIP"], path=filename, as_attachment=True)
     except FileNotFoundError:
         return abort(404)
-    # img = Images.query.filter_by(filename=key).first()
-    # if img:
-    #     data = img.id
-    # else:
-    #     data = abort(404)
-    # return jsonify(data)
 
 
 @bp.route('/get/<string:key>')
@@ -47,7 +43,7 @@ def get(key):
         else:
             data = img.id
     elif user_tasks:
-        data = {'task_id': user_tasks[0].id}
+        data = {'task_id': user_tasks[-1].id}
     else:
         data = abort(404)
 
@@ -183,7 +179,6 @@ def cut_rout():
                 files = request.files.getlist("file")
 
                 if files:
-                    # for file in files:
                     file = files[0]
 
                     path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
@@ -195,13 +190,6 @@ def cut_rout():
                                              description=f'{file.filename} cutting',
                                              path=path,
                                              )
-                    # rq_job = current_app.task_queue.enqueue('app.new_tasks.img_cutt', path, job_timeout=1800)
-                    #
-                    # task = Task(id=rq_job.get_id(), name="app.new_tasks.img_cutt",
-                    #             description=f"start cutting img {file.filename}",
-                    #             )
-                    #
-                    # db.session.add(task)
 
                     db.session.commit()
 

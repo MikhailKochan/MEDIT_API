@@ -17,7 +17,7 @@ def cutting(f_path):
     CUTTING_FOLDER, _CUT_IMAGE_SIZE = Config.CUTTING_FOLDER, Config._CUT_IMAGE_SIZE
     try:
         progress = 0
-        _set_task_progress(progress, 0, func='cutting')
+        _set_task_progress(progress=progress, func='cutting')
 
         file = openslide.OpenSlide(f_path)
 
@@ -44,10 +44,14 @@ def cutting(f_path):
             for i in range(0, w_sum):
                 for j in range(0, h_sum):
                     pbar.set_description(f"Total img: {total}. Start cutting")
+
                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
+
                     filename = f"{img_filename[:10]}_im" + "_." + str(i) + "." + str(j)
+
                     path_to_save_cut_file = os.path.join(save_folder, f"{filename}.jpg")
+
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                     img = img.convert('RGB')
                     img.save(path_to_save_cut_file)

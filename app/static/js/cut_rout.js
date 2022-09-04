@@ -5,7 +5,8 @@ fileInput = form.querySelector(".input-file"),
 dateTime = document.querySelector("#datetime"),
 progressArea = document.querySelector(".progress-area"),
 uploadedArea = document.querySelector(".uploaded-area");
-let status = document.querySelector("#status");
+let status = document.querySelector("#status"),
+result = document.querySelector("#result");
 
 
 function getProgress(task_id) {
@@ -27,6 +28,24 @@ function getProgress(task_id) {
     }
 }
 
+function redisDel(key) {
+//    var data = new FormData();
+//    data.append('Image_id', img_id);
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", `/redis-delete/${key}`, false);
+    xhr.send();
+
+    if (xhr.status != 200) {
+      // обработать ошибку
+//      console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+        return false
+    } else {
+      // вывести результат
+//      clearInterval(myTimeout);
+//      console.log(JSON.parse(xhr.responseText));
+      return JSON.parse(xhr.responseText) // responseText -- текст ответа.
+    }
+}
 
 function getCategoryList(img_name) {
 //    var data = new FormData();
@@ -102,6 +121,8 @@ function progress (task_id) {
                     bottomCutFile.href = `/get-zip/${query.data.filename}.zip`
                     bottomCutFile.style.display = 'flex';
 
+                    redisDel(task_id);
+
                     clearTimeout(myTimeout);
 
                     };
@@ -138,7 +159,15 @@ function getExtension(filename) {
   return parts[parts.length - 1];
 };
 
-console.log(fileInput.onchange);
+bottomCutFile.addEventListener("click", ()=>{
+    bottomCutFile.click();
+    setTimeout(clearForm, 1000);
+    function clearForm () {
+        form.reset();
+        status.innerHTML = "";
+        result.innerHTML = "";
+    }
+});
 
 bottomFile.addEventListener("click", ()=>{
     fileInput.click();

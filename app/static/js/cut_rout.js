@@ -169,7 +169,7 @@ bottomCutFile.addEventListener("click", ()=>{
         document.querySelector("#name").innerHTML = "";
         imgPNG_file.style.display = "none"
         span_name.innerHTML = "";
-        bottomFile.style.display = 'flex';
+        bottomFile.style.display = 'block';
 
         progressArea.innerHTML = "";
         form.reset();

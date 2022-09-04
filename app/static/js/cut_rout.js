@@ -174,6 +174,13 @@ bottomCutFile.addEventListener("click", ()=>{
         status.innerHTML = "";
         result.innerHTML = "";
         bottomCutFile.style.display = 'none';
+        setTimeout(delZip, 5000)
+        function delZip () {
+            let key = bottomCutFile.href.split('/')[-1];
+            var xhr = new XMLHttpRequest();
+            xhr.open("get", `/zip-delete/${key}`, false);
+            xhr.send();
+        }
     }
 });
 

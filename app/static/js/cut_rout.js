@@ -181,7 +181,7 @@ bottomCutFile.addEventListener("click", ()=>{
             let bottomCutFile = document.querySelector(".button_download");
             let key = bottomCutFile.href.split('/');
             console.log(bottomCutFile.href);
-            console.log(bottomCutFile.href.split('/'));
+            console.log(bottomCutFile.href.split('/').length - 1);
 //            var xhr = new XMLHttpRequest();
 //            xhr.open("get", `/zip-delete/${key}`, false);
 //            xhr.send();

@@ -97,11 +97,11 @@ function progress (task_id) {
 
         } else {
              if (Object.keys(query.data.func) == 'cutting'){
-                console.log(query);
+//                console.log(query);
                 width = query.data.func.cutting.progress;
 
             } else {
-                console.log(query);
+//                console.log(query);
                 status.innerHTML = "";
                 status.innerHTML = `
                         Done
@@ -109,8 +109,9 @@ function progress (task_id) {
                     `;
                 result.innerHTML = progressHTML;
 
-                let width = query.data.func.create_zip.progress;
+                width = query.data.func.create_zip.progress;
                 console.log(width);
+
                 if (parseInt(width) >= 100) {
 
                     result.innerHTML = "";

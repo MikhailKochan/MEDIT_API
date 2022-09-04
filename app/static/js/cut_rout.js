@@ -2,7 +2,9 @@ const form = document.querySelector("form"),
 bottomFile = document.querySelector("button"),
 bottomCutFile = document.querySelector(".button_download"),
 fileInput = form.querySelector(".input-file"),
+span_name = document.querySelector(".span_name"),
 dateTime = document.querySelector("#datetime"),
+imgPNG_file = document.querySelector("#img_file"),
 progressArea = document.querySelector(".progress-area"),
 uploadedArea = document.querySelector(".uploaded-area");
 let status = document.querySelector("#status"),
@@ -165,7 +167,8 @@ bottomCutFile.addEventListener("click", ()=>{
     setTimeout(clearForm, 1000);
     function clearForm () {
         document.querySelector("#name").innerHTML = "";
-        newContent.innerHTML = "";
+        imgPNG_file.style.display = "none"
+        span_name.innerHTML = "";
         bottomFile.style.display = 'flex';
 
         progressArea.innerHTML = "";
@@ -210,10 +213,10 @@ form.onchange = ({target}) =>{
         let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){
             if(file){
-                var newContent = document.createElement('div');
-                newContent.innerHTML = afterCheckFileHTML;
                 bottomFile.style.display = 'none';
-                dateTime.appendChild(newContent.firstChild);
+//                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
+                imgPNG_file.style.display = 'flex';
+                span_name.innerHTML = `${fileName}`
                 let fileName = file.name;
                 var fileOriginalName = file.name;
                 if(fileName.length >= 12){

@@ -197,33 +197,33 @@ bottomFile.addEventListener("click", ()=>{
 form.onchange = ({target}) =>{
 
         let file = target.files[0];
-        let fileName = file.name;
-        if(fileName.length >= 12){
-                    let splitName = fileName.split('.');
-                    fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
-                }
-
-        let afterCheckFileHTML = `
-            <img src="/static/logo/file.png" style="border-radius:0;">
-            <span class="name">${fileName}</span>
-        `;
-
+//        let fileName = file.name;
+//        if(fileName.length >= 12){
+//                    let splitName = fileName.split('.');
+//                    fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+//                }
+//
+//        let afterCheckFileHTML = `
+//            <img src="/static/logo/file.png" style="border-radius:0;">
+//            <span class="name">${fileName}</span>
+//        `;
+//
 
         let  fileType = getExtension(file.name);
         let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){
             if(file){
                 let fileName = file.name;
-                bottomFile.style.display = 'none';
-//                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
-                imgPNG_file.style.display = 'flex';
-
-                span_name.innerHTML = `${fileName}`
                 var fileOriginalName = file.name;
                 if(fileName.length >= 12){
                     let splitName = fileName.split('.');
                     fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
-                }
+                };
+                bottomFile.style.display = 'none';
+//                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
+                imgPNG_file.style.display = 'flex';
+                span_name.innerHTML = `${fileName}`
+
                 uploadFile(fileName, fileOriginalName);
             }
         }else{

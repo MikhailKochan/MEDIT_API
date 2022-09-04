@@ -166,7 +166,10 @@ bottomCutFile.addEventListener("click", ()=>{
     bottomCutFile.click();
     setTimeout(clearForm, 1000);
     function clearForm () {
-        document.querySelector("#name").innerHTML = "";
+        document.querySelector("#name").innerHTML = `
+                        <section class="progress-area"></section>
+                        <section class="uploaded-area"></section>
+            `;
         imgPNG_file.style.display = "none"
         span_name.innerHTML = "";
         bottomFile.style.display = 'block';
@@ -180,11 +183,10 @@ bottomCutFile.addEventListener("click", ()=>{
         function delZip () {
             let bottomCutFile = document.querySelector(".button_download");
             let key = bottomCutFile.href.split('/');
-            console.log(bottomCutFile.href);
-            console.log(bottomCutFile.href.split('/').length - 1);
-//            var xhr = new XMLHttpRequest();
-//            xhr.open("get", `/zip-delete/${key}`, false);
-//            xhr.send();
+            console.log(key[key.length - 1]);
+            var xhr = new XMLHttpRequest();
+            xhr.open("get", `/zip-delete/${key[key.length - 1]}`, false);
+            xhr.send();
         }
     }
 });
@@ -197,18 +199,6 @@ bottomFile.addEventListener("click", ()=>{
 form.onchange = ({target}) =>{
 
         let file = target.files[0];
-//        let fileName = file.name;
-//        if(fileName.length >= 12){
-//                    let splitName = fileName.split('.');
-//                    fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
-//                }
-//
-//        let afterCheckFileHTML = `
-//            <img src="/static/logo/file.png" style="border-radius:0;">
-//            <span class="name">${fileName}</span>
-//        `;
-//
-
         let  fileType = getExtension(file.name);
         let validExtensions = ["svs"];
         if(validExtensions.includes(fileType)){

@@ -173,14 +173,15 @@ def upload():
         if files:
             for file in files:
                 path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(path)
-                img = Images(path)
-                if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                    db.session.add(img)
-                    db.session.commit()
-                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                else:
-                    current_app.logger.info(f"{file.filename} already in bd")
+                print(path)
+                # file.save(path)
+                # img = Images(path)
+                # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+                #     db.session.add(img)
+                #     db.session.commit()
+                #     current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+                # else:
+                #     current_app.logger.info(f"{file.filename} already in bd")
 
         return render_template('upload.html', title='Загрузка', body='')
     else:

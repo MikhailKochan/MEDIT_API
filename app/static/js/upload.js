@@ -96,9 +96,7 @@ function uploadFile(name, fileOriginalName){
                     <img src="./static/logo/load.gif">
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-//           const myTimeout = setTimeout(function(){myGreeting(fileOriginalName)}, 1000);
-//           var myTimeout = setInterval(function(){myGreeting(fileOriginalName)}, 2000);
-//           myGreeting(fileOriginalName);
+
             var myTimeout = setTimeout(function run(){
                             let req = myGreeting(fileOriginalName);
                             if (req === false) {

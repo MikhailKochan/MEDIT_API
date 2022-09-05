@@ -13,6 +13,7 @@ from rq import Retry
 
 
 @bp.route('/redis-delete/<key>')
+@login_required
 def redis_del_key(key):
     try:
         current_app.redis.delete(key)
@@ -114,8 +115,8 @@ def new_analysis(image_id):
 @bp.route('/analysis')
 @login_required
 def analysis():
-    data = Images.query.order_by(Images.timestamp.desc()).all()
-    return render_template('analysis.html', title='analysis', body='', data=data)
+    # data = Images.query.order_by(Images.timestamp.desc()).all()
+    return render_template('get_analysis.html', title='analysis', body='')
 
 
 @bp.route('/index/', defaults={'filename': None})

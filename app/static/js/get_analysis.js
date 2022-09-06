@@ -71,9 +71,9 @@ function uploadFile(name, fileOriginalName){
        let progressHTML = `
                 <li class="row">
                     <img src="./static/logo/file.png">
-                    <div class="content">
+                    <div class="content" style='background:none;'>
                         <div class="details">
-                            <span class="name">${name} • Uploading</span>
+                            <span class="name">${name}</span>
                             <span class="percent">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
@@ -85,7 +85,7 @@ function uploadFile(name, fileOriginalName){
        if(loaded == total){
            progressArea.innerHTML = "";
            let uploadedHTML = `
-                <li class="row">
+                <li class="row" style="margin:0%;margin-bottom:none;padding:none">
                     <div class="content">
                         <img src="/static/logo/file.png">
                          <div class="details">

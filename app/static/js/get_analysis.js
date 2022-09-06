@@ -48,7 +48,7 @@ form.onchange = ({target}) =>{
                     let splitName = fileName.split('.');
                     fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
                 };
-                bottomFile.style.display = 'none';
+                bottomInputFile.style.display = 'none';
 //                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
                 imgPNG_file.style.display = 'flex';
 

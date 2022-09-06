@@ -72,7 +72,7 @@ function uploadFile(name, fileOriginalName){
                     <img src="./static/logo/file.png">
                     <div class="content" style='background:none;'>
                         <div class="details">
-                            <span class="name">${name} • Uploading</span>
+                            <span class="name">${name}</span>
                             <span class="percent">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">

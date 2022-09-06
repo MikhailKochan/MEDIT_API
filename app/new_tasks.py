@@ -10,17 +10,17 @@ from app.models import Config
 def img_cutt(**kwargs):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
-    print(kwargs)
+
     print('kwargs get "path"', kwargs.get('path'))
     path = kwargs.get('path')
-
-    path_cutting_img = cutting(path)
+    print(path)
+    path_cutting_img = cutting(kwargs.get('path'))
 
     result = create_zip(path_cutting_img)  # Create zip file
 
     print(result)
 
-    os.remove(path)  # Delete download svs
+    os.remove(kwargs.get('path'))  # Delete download svs
     shutil.rmtree(path_cutting_img)  # Delete cutting folder
 
 

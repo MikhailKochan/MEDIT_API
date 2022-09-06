@@ -98,9 +98,9 @@ function progress (task_id) {
             let timer = setTimeout(progressStatus, 1000);
 
         } else {
-             if (Object.keys(query.data.func) == 'cutting'){
+             if (query.data.func == 'cutting'){
 //                console.log(query);
-                width = query.data.func.cutting.progress;
+                width = query.data.progress;
 
             } else {
 //                console.log(query);
@@ -111,7 +111,7 @@ function progress (task_id) {
                     `;
                 result.innerHTML = progressHTML;
 
-                width = query.data.func.create_zip.progress;
+                width = query.data.progress;
                 console.log(width);
 
                 if (parseInt(width) >= 100) {

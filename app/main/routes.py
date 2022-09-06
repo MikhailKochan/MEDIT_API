@@ -174,14 +174,27 @@ def upload():
             for file in files:
                 path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
                 print(path)
-                # file.save(path)
-                # img = Images(path)
-                # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                #     db.session.add(img)
-                #     db.session.commit()
-                #     current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                # else:
-                #     current_app.logger.info(f"{file.filename} already in bd")
+                file.save(path)
+                img = Images(path)
+                if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+                    db.session.add(img)
+                    db.session.commit()
+                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+                else:
+                    current_app.logger.info(f"{file.filename} already in bd")
+
+                img = Images.query.filter_by(analysis_number=img.analysis_number).first()
+
+                predict = Predict(images=img,
+                                  timestamp=datetime.utcnow)
+
+                current_user.launch_task(name='mk_pred',
+                                         description=f'{file.filename} prediction',
+                                         job_timeout=10800,
+                                         img=img,
+                                         predict=predict,
+                                         medit=current_app.medit,
+                                         )
 
         return render_template('upload.html', title='Загрузка', body='')
     else:
@@ -205,9 +218,10 @@ def cut_rout():
                     current_app.logger.info(f'получил файл {file.filename}')
                     file.save(path)
                     current_app.logger.info(f"сохранил файл {file.filename}")
-
+                    # Start new task
                     current_user.launch_task(name='img_cutt',
                                              description=f'{file.filename} cutting',
+                                             job_timeout=1800,
                                              path=path,
                                              )
 

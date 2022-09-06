@@ -61,12 +61,13 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def launch_task(self, name, description, path: str):
-        current_app.logger.info(f"path: {path}")
+    def launch_task(self, name, description, job_timeout: int = 1800, **kwargs):
+        current_app.logger.info(f"{self.username} create task")
 
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
-                                                path,
-                                                job_timeout=1800)
+                                                job_timeout=job_timeout,
+                                                **kwargs
+                                                )
 
         task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
 
@@ -528,6 +529,7 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
         job_id = job.get_id()
         job.meta['progress'] = progress
         job.save_meta()
+
         if current_app:
             rd = current_app.redis
         else:
@@ -537,8 +539,8 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
         rd.set(job_id, json.dumps({'task_id': job_id,
                                    'mitoze': all_mitoz,
                                    'filename': filename,
-                                   'func': {f'{func}': {
-                                             'progress': progress}}}))
+                                   'func': f'{func}',
+                                   'progress': progress}))
         try:
             if progress >= 100:
                 if current_app:

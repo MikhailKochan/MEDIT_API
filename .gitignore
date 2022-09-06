@@ -12,6 +12,7 @@ app/static/zip/*
 migrations
 PUT_YOUR_DATASET_HERE
 tests.py
+app/kwargs.py
 .flaskenv
 __pycache__
 .venv

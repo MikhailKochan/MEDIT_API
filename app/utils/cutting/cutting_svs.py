@@ -13,7 +13,7 @@ from tqdm import tqdm
 from app.models import _set_task_progress, Config
 
 
-def cutting(f_path, CUTTING_FOLDER=None, _CUT_IMAGE_SIZE=None):
+def cutting(path, CUTTING_FOLDER=None, _CUT_IMAGE_SIZE=None):
 
     CUTTING_FOLDER = CUTTING_FOLDER if not None else Config.CUTTING_FOLDER
     _CUT_IMAGE_SIZE = _CUT_IMAGE_SIZE if not None else Config._CUT_IMAGE_SIZE
@@ -22,7 +22,7 @@ def cutting(f_path, CUTTING_FOLDER=None, _CUT_IMAGE_SIZE=None):
         progress = 0
         _set_task_progress(progress=progress, func='cutting')
 
-        file = openslide.OpenSlide(f_path)
+        file = openslide.OpenSlide(path)
 
         height, width = file.level_dimensions[0]
 
@@ -36,7 +36,7 @@ def cutting(f_path, CUTTING_FOLDER=None, _CUT_IMAGE_SIZE=None):
         s_row = int(w_rest / 2)
 
         total = h_sum * w_sum
-        img_filename = os.path.basename(f_path)
+        img_filename = os.path.basename(path)
 
         save_folder = os.path.join(CUTTING_FOLDER, img_filename)
 

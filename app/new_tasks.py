@@ -14,7 +14,7 @@ def img_cutt(**kwargs):
     print('kwargs get "path"', kwargs.get('path'))
     path = kwargs.get('path')
     print(path)
-    path_cutting_img = cutting(kwargs.get('path'))
+    path_cutting_img = cutting(path=path)
 
     result = create_zip(path_cutting_img)  # Create zip file
 

@@ -152,8 +152,8 @@ class Images(db.Model):
             current_app.logger.info(f'start cutting {self.filename}')
 
             start_cut(path=f_path,
-                      # CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
-                      # _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
+                      CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
+                      _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
                       )
             current_app.logger.info(f'finish cutting {self.filename}')
         except Exception as e:

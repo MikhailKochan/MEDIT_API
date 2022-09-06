@@ -223,6 +223,8 @@ def cut_rout():
                                              description=f'{file.filename} cutting',
                                              job_timeout=1800,
                                              path=path,
+                                             CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
+                                             _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
                                              )
 
                     db.session.commit()

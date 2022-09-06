@@ -11,10 +11,11 @@ def img_cutt(**kwargs):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
 
-    print('kwargs get "path"', kwargs.get('path'))
-    path = kwargs.get('path')
-    print(path)
-    path_cutting_img = cutting(path=path)
+    print(kwargs)
+
+    path_cutting_img = cutting(path=kwargs.get('path'),
+                               CUTTING_FOLDER=kwargs.get('CUTTING_FOLDER'),
+                               _CUT_IMAGE_SIZE=kwargs.get('_CUT_IMAGE_SIZE'))
 
     result = create_zip(path_cutting_img)  # Create zip file
 

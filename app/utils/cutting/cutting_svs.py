@@ -13,10 +13,10 @@ from tqdm import tqdm
 from app.models import _set_task_progress, Config
 
 
-def cutting(path, CUTTING_FOLDER=None, _CUT_IMAGE_SIZE=None):
-
-    CUTTING_FOLDER = CUTTING_FOLDER if not None else Config.CUTTING_FOLDER
-    _CUT_IMAGE_SIZE = _CUT_IMAGE_SIZE if not None else Config._CUT_IMAGE_SIZE
+def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
+    #
+    # CUTTING_FOLDER = CUTTING_FOLDER if not None else Config.CUTTING_FOLDER
+    # _CUT_IMAGE_SIZE = _CUT_IMAGE_SIZE if not None else Config._CUT_IMAGE_SIZE
 
     try:
         progress = 0

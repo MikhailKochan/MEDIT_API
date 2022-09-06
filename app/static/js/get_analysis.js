@@ -86,8 +86,8 @@ function uploadFile(name, fileOriginalName){
 //           progressArea.innerHTML = `Загрузка <img src='/static/logo/check.png'>`;
            let uploadedHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
-                    <div class="content">
-                        <img src="/static/logo/file.png">
+                    <div class="content" style='background:none;'>
+                        <img src="/static/logo/file.png" style="margin-right:0px;margin-left:0px;">
                          <div class="details">
                             <span class="name">${name}</span>
                             <span class="size">${fileSize}</span>

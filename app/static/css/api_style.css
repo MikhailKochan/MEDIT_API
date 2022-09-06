@@ -282,12 +282,12 @@ form p{
     margin-top: 15px;
 }
 section .row{
-    margin: 2%;
+    /*margin: 2%;
     background: #eff1f4;
-    margin-bottom: 10px;
+    margin-bottom: 10px;*/
     list-style: none;
-    padding: 15px 20px;
-    border-radius: 5px;
+    /*padding: 15px 20px;
+    border-radius: 5px;*/
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -306,20 +306,20 @@ section .details span{
 }
 .progress-area .row .content{
     width: 100%;
-    margin-left: 15px;
-    /*background: #eff1f4;*/
+    /*margin-left: 15px;
+    background: #eff1f4;*/
 }
 .progress-area .details{
     display: flex;
     align-items: center;
-    margin-bottom: 7px;
+    /*margin-bottom: 7px;*/
     justify-content: space-between;
 }
 .progress-area .progress-bar{
     height: 6px;
     width: 100%;
     background: #fff;
-    margin-bottom: 4px;
+    /*margin-bottom: 4px;*/
     border-radius: 30px;
 }
 .progress-bar .progress{
@@ -336,14 +336,14 @@ section .details span{
     width: 0px;
 }
 .uploaded-area .row .content{
-    background: #eff1f4;
+    /*background: #eff1f4;*/
     display: flex;
     align-items: center;
     flex-direction: row;
 }
 .uploaded-area .row .details{
     display: flex;
-    margin-left: 15px;
+    /*margin-left: 15px;*/
     flex-direction: column;
 }
 .uploaded-area .fa-check{

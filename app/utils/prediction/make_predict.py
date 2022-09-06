@@ -58,10 +58,11 @@ def make_predict(img, predict, medit):
                                          f"{Config.DRAW}/{img.filename}/{date_now}")
 
         if not os.path.exists(path_to_save_draw):
-
+            if not os.path.exists(os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}")):
+                os.mkdir(os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}"))
             os.mkdir(path_to_save_draw)
 
-            # current_app.logger.info(f"Directory {img.filename} for draw created")
+            print(f"Directory {img.filename} for draw created")
 
         mitoz = CLASS_NAMES.index('mitoz')
 

@@ -11,8 +11,8 @@ def img_cutt(**kwargs):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
     print(kwargs)
-    print('kwargs["path"]', kwargs['path'])
-    path = kwargs['path']
+    print('kwargs get "path"', kwargs.get('path'))
+    path = kwargs.get('path')
 
     path_cutting_img = cutting(path)
 
@@ -28,7 +28,7 @@ def mk_pred(**kwargs):
     from app.utils.prediction.make_predict import make_predict
     from app.utils.create_zip.create_zip import create_zip
 
-    img, predict, medit = kwargs['img'], kwargs['predict'], kwargs['medit']
+    img, predict, medit = kwargs.get('img'), kwargs.get('predict'), kwargs.get('medit')
 
     predict, path = make_predict(img, predict, medit)
     if predict:

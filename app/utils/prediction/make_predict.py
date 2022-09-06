@@ -42,11 +42,8 @@ def make_predict(img: Images, predict: Predict, medit: medit):
         w_sum = int(img.width / _CUT_IMAGE_SIZE[0])
 
         if img.format.lower() == '.svs':
-            f_path = os.path.join(Config.BASEDIR,
-                                  Config.UPLOAD_FOLDER,
-                                  img.filename)
             # current_app.logger.info(f"Directory {f_path} for open in openslide")
-            file = openslide.OpenSlide(f_path)
+            file = openslide.OpenSlide(img.file_path)
 
         else:
             return f'{img.format} not added'

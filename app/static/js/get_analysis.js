@@ -50,7 +50,6 @@ form.onchange = ({target}) =>{
                 };
                 bottomInputFile.style.display = 'none';
 //                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
-                imgPNG_file.style.display = 'flex';
 
                 uploadFile(fileName, fileOriginalName);
             }
@@ -69,7 +68,7 @@ function uploadFile(name, fileOriginalName){
        let fileSize;
        (fileTotal < 1024) ? fileSize = fileTotal + "KB" : fileSize = (loaded / (1024 * 1024)).toFixed(2) + "MB";
        let progressHTML = `
-                <li class="row">
+                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
                     <img src="./static/logo/file.png">
                     <div class="content" style='background:none;'>
                         <div class="details">
@@ -83,9 +82,9 @@ function uploadFile(name, fileOriginalName){
         `;
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
-           progressArea.innerHTML = "";
+           progressArea.innerHTML = `Загрузка <img src='/static/logo/check.png'>`;
            let uploadedHTML = `
-                <li class="row" style="margin:0%;margin-bottom:none;padding:none">
+                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
                     <div class="content">
                         <img src="/static/logo/file.png">
                          <div class="details">
@@ -93,10 +92,10 @@ function uploadFile(name, fileOriginalName){
                             <span class="size">${fileSize}</span>
                         </div>
                     </div>
-                    <img src="/static/logo/check.png
+
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-
+                imgPNG_file.style.display = 'flex';
            var myTimeout = setTimeout(function run(){
                 let req = getProgress('get', fileOriginalName);
                 if (req === false) {

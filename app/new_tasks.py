@@ -10,7 +10,7 @@ from app.models import Config
 def img_cutt(**kwargs):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
-
+    print(kwargs)
     path = kwargs['path']
 
     path_cutting_img = cutting(path)

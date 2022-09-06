@@ -42,6 +42,7 @@ def make_predict(img, predict, medit):
 
         if img.format.lower() == '.svs':
             # current_app.logger.info(f"Directory {f_path} for open in openslide")
+            print('img.file_path in svs', img.file_path)
             file = openslide.OpenSlide(img.file_path)
 
         else:

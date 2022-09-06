@@ -307,7 +307,7 @@ section .details span{
 .progress-area .row .content{
     width: 100%;
     margin-left: 15px;
-    background: #eff1f4;
+    /*background: #eff1f4;*/
 }
 .progress-area .details{
     display: flex;

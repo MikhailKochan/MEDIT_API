@@ -69,7 +69,7 @@ function uploadFile(name, fileOriginalName){
        (fileTotal < 1024) ? fileSize = fileTotal + "KB" : fileSize = (loaded / (1024 * 1024)).toFixed(2) + "MB";
        let progressHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
-                    <img src="./static/logo/file.png">
+
                     <div class="content" style='background:none;'>
                         <div class="details">
                             <span class="name">${name}</span>
@@ -80,9 +80,11 @@ function uploadFile(name, fileOriginalName){
                         </div>
                 </li>
         `;
+       uploadedArea.innerHTML = `<img src="./static/logo/file.png">`
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
        progressArea.innerHTML = "";
+       uploadedArea.innerHTML = "";
 //           progressArea.innerHTML = `Загрузка <img src='/static/logo/check.png'>`;
            let uploadedHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">

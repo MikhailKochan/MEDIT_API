@@ -186,7 +186,7 @@ def upload():
                 img = Images.query.filter_by(analysis_number=img.analysis_number).first()
 
                 predict = Predict(images=img,
-                                  timestamp=datetime.utcnow)
+                                  timestamp=datetime.utcnow())
 
                 current_user.launch_task(name='mk_pred',
                                          description=f'{file.filename} prediction',

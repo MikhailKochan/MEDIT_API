@@ -11,11 +11,10 @@ import openslide
 from decimal import Decimal as D
 from tqdm import tqdm
 
-from app.models import _set_task_progress, Config, Images, Predict
-from app.view import medit
+from app.models import _set_task_progress, Config
 
 
-def make_predict(img: Images, predict: Predict, medit: medit):
+def make_predict(img, predict, medit):
     try:
         progress = 0
 

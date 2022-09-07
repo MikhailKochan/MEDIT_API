@@ -37,7 +37,7 @@ def mk_pred(**kwargs):
     print("kwargs.get('predict')", kwargs.get('predict'))
     print("kwargs.get('medit')", kwargs.get('medit'))
 
-    predict, path = make_predict(img=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
+    predict, path = make_predict(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
     print('predict: ', predict)
     print('path', path)
     # if predict:

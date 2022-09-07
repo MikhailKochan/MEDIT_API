@@ -1,4 +1,6 @@
 import os
+import sys
+
 import numpy as np
 import cv2
 from sys import platform
@@ -128,6 +130,6 @@ def make_predict(img, predict, medit):
         return predict, path_to_save_draw
 
     except Exception as e:
-        print(f'ERROR in make_predict: {e}')
+        print(f'ERROR in make_predict: {e}', sys.exc_info()[0])
         return type(e), e
         # current_app.logger.error(e)

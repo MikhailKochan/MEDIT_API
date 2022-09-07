@@ -78,7 +78,7 @@ def make_predict(img, predict, medit):
                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
-                    filename = "0_im" + "_" + str(i) + "_" + str(j)
+                    img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
 
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                     img = img.convert('RGB')
@@ -98,9 +98,9 @@ def make_predict(img, predict, medit):
                                        instance_mode=ColorMode.SEGMENTATION)
 
                         v = v.draw_instance_predictions(outputs)
-                        cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"),
+                        cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
-
+                        print('save', img_name_draw)
                         all_mitoz += classes.count(mitoz)
                         if classes.count(mitoz) > max_mitoz_in_one_img:
                             max_mitoz_in_one_img = classes.count(mitoz)

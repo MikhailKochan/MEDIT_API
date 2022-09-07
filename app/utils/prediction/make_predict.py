@@ -2,6 +2,8 @@ import os
 import numpy as np
 import cv2
 from sys import platform
+import torch
+
 
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
@@ -16,6 +18,7 @@ from app.models import _set_task_progress, Config
 
 def make_predict(img, predict, medit):
     try:
+        torch.multiprocessing.freeze_support()
         progress = 0
 
         max_mitoz_in_one_img = 0
@@ -25,7 +28,7 @@ def make_predict(img, predict, medit):
         Visualizer = medit.Visualizer
 
         cfg = medit.cfg
-
+        print("Config CUDA :", cfg.MODEL.DEVICE)
         mitoz_metadata = medit.mitoz_metadata
 
         ColorMode = medit.ColorMode
@@ -33,7 +36,6 @@ def make_predict(img, predict, medit):
         predictor = medit.predictor
 
         date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
-        print('date_now', date_now)
 
         CLASS_NAMES = Config.CLASS_NAMES
         _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
@@ -77,33 +79,31 @@ def make_predict(img, predict, medit):
 
                     filename = "0_im" + "_" + str(i) + "_" + str(j)
 
-                    if img.format.lower() == '.svs':
+                    img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
+                    img = img.convert('RGB')
 
-                        img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
-                        img = img.convert('RGB')
+                    im = np.asarray(img)
 
-                        im = np.asarray(img)
+                    outputs = predictor(im)
 
-                        outputs = predictor(im)
+                    outputs = outputs["instances"].to("cpu")
 
-                        outputs = outputs["instances"].to("cpu")
+                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
-                        classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
+                    if mitoz in classes:
+                        v = Visualizer(im[:, :, ::-1],
+                                       metadata=mitoz_metadata,
+                                       scale=1,
+                                       instance_mode=ColorMode.SEGMENTATION)
 
-                        if mitoz in classes:
-                            v = Visualizer(im[:, :, ::-1],
-                                           metadata=mitoz_metadata,
-                                           scale=1,
-                                           instance_mode=ColorMode.SEGMENTATION)
+                        v = v.draw_instance_predictions(outputs)
+                        cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"),
+                                    v.get_image()[:, :, ::-1])
 
-                            v = v.draw_instance_predictions(outputs)
-                            cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"),
-                                        v.get_image()[:, :, ::-1])
-
-                            all_mitoz += classes.count(mitoz)
-                            if classes.count(mitoz) > max_mitoz_in_one_img:
-                                max_mitoz_in_one_img = classes.count(mitoz)
-                                # img_name = f"{filename}.jpg"
+                        all_mitoz += classes.count(mitoz)
+                        if classes.count(mitoz) > max_mitoz_in_one_img:
+                            max_mitoz_in_one_img = classes.count(mitoz)
+                            # img_name = f"{filename}.jpg"
 
                     progress += 1 / total * 100.0
 
@@ -129,6 +129,6 @@ def make_predict(img, predict, medit):
         return predict, path_to_save_draw
 
     except Exception as e:
-        print(e)
+        print(f'ERROR in make_predict: {e}')
         return type(e), e
         # current_app.logger.error(e)

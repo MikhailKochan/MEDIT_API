@@ -195,6 +195,7 @@ def upload():
                                          predict=predict,
                                          medit=current_app.medit,
                                          )
+                db.session.commit()
 
         return render_template('upload.html', title='Загрузка', body='')
     else:

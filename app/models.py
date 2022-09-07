@@ -524,6 +524,7 @@ class Notification(db.Model):
 
 
 def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
+    print('in _set_task_in_progress')
     job = get_current_job()
     if job:
         job_id = job.get_id()

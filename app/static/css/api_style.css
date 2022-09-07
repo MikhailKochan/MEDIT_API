@@ -304,6 +304,10 @@ section .row i{
 section .details span{
     font-size: 14px;
 }
+.progress-area {
+    display: flex;
+    align-items: center;
+}
 .progress-area .row .content{
     width: 100%;
     /*margin-left: 15px;

@@ -24,7 +24,7 @@ def make_predict(image, predict, medit):
 
         max_mitoz_in_one_img = 0
 
-        _set_task_progress(progress, 0, func='predict')
+        _set_task_progress(progress, 0, func='predict', analysis_number=image.analysis_number)
 
         Visualizer = medit.Visualizer
 
@@ -104,7 +104,7 @@ def make_predict(image, predict, medit):
 
                         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
-                        print('save', img_name_draw)
+
                         all_mitoz += classes.count(mitoz)
                         if classes.count(mitoz) > max_mitoz_in_one_img:
                             max_mitoz_in_one_img = classes.count(mitoz)
@@ -117,7 +117,8 @@ def make_predict(image, predict, medit):
                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
                                        all_mitoz=all_mitoz,
                                        filename=fl_name,
-                                       func='predict')
+                                       func='predict',
+                                       analysis_number=image.analysis_number)
                     pbar.update(1)
 
         predict.result_all_mitoz = all_mitoz

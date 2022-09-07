@@ -29,24 +29,17 @@ def mk_pred(**kwargs):
     from app.utils.prediction.make_predict import make_predict
     from app.utils.create_zip.create_zip import create_zip
 
-    print(kwargs)
-
     img = kwargs.get('img')
 
-    print('img', img)
-    print("kwargs.get('predict')", kwargs.get('predict'))
-    print("kwargs.get('medit')", kwargs.get('medit'))
-
     predict, path = make_predict(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
-    print('predict: ', predict)
-    print('path', path)
-    # if predict:
-    #     engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
-    #     with Session(engine) as session:
-    #         session.add(predict)
-    #         session.commit()
-    #
-    #     create_zip(path_to_save=path)
-    #
-    #     os.remove(img.file_path)
-    #     shutil.rmtree(path)
+
+    if predict:
+        engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
+        with Session(engine) as session:
+            session.add(predict)
+            session.commit()
+
+        create_zip(path_to_save=path)
+
+        os.remove(img.file_path)
+        shutil.rmtree(path)

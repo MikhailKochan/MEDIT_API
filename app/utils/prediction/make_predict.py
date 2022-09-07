@@ -43,7 +43,7 @@ def make_predict(image, predict, medit):
 
         h_sum = int(image.height / _CUT_IMAGE_SIZE[1])
         w_sum = int(image.width / _CUT_IMAGE_SIZE[0])
-        print('h_sum', h_sum, 'w_sum', w_sum)
+
         if image.format.lower() == '.svs':
             f_path = os.path.join(Config.BASEDIR,
                                   Config.UPLOAD_FOLDER,
@@ -82,31 +82,26 @@ def make_predict(image, predict, medit):
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
                     img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
-                    print('img_name_draw', img_name_draw)
-                    print('file:', file)
-                    print('(start_row, start_col):', (start_row, start_col))
-                    print('_CUT_IMAGE_SIZE', _CUT_IMAGE_SIZE)
+
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                     img = img.convert('RGB')
-                    print('img', img)
+
                     im = np.asarray(img)
-                    print('im', im)
+
                     outputs = predictor(im)
-                    print('outputs', outputs)
+
                     outputs = outputs["instances"].to("cpu")
-                    print('outputs to cpu ', outputs)
+
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
-                    print('classes', classes)
-                    print('mitoz', mitoz)
+
                     if mitoz in classes:
                         v = Visualizer(im[:, :, ::-1],
                                        metadata=mitoz_metadata,
                                        scale=1,
                                        instance_mode=ColorMode.SEGMENTATION)
-                        print('v', v)
+
                         v = v.draw_instance_predictions(outputs)
-                        print('v', v)
-                        print('os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")', os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"))
+
                         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
                         print('save', img_name_draw)
@@ -116,19 +111,15 @@ def make_predict(image, predict, medit):
                             # img_name = f"{filename}.jpg"
 
                     progress += 1 / total * 100.0
-                    print('progress', progress)
-                    print('float(D(str(progress)).quantize(D("1.00")))', float(D(str(progress)).quantize(D("1.00"))))
+
                     fl_name = f'{image.filename}/{date_now}'
-                    print('fl_name', fl_name)
-                    print('before _set_task_in_progress')
+
                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
                                        all_mitoz=all_mitoz,
                                        filename=fl_name,
                                        func='predict')
-
-                    print('after _set_task_in_progress')
                     pbar.update(1)
-        print('after FOR')
+
         predict.result_all_mitoz = all_mitoz
 
         predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img

@@ -188,6 +188,10 @@ def upload():
                 predict = Predict(images=img,
                                   timestamp=datetime.utcnow())
 
+                path_1 = os.path.join(current_app.config['BASEDIR'], f"{current_app.config['DRAW']}/{img.filename}")
+                if not os.path.exists(path_1):
+                    os.mkdir(path_1)
+
                 current_user.launch_task(name='mk_pred',
                                          description=f'{file.filename} prediction',
                                          job_timeout=10800,

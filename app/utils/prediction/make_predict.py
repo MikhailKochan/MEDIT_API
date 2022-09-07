@@ -31,8 +31,9 @@ def make_predict(img, predict, medit):
         ColorMode = medit.ColorMode
 
         predictor = medit.predictor
-        print('predictor in make predict', predictor)
+
         date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
+        print('date_now', date_now)
 
         CLASS_NAMES = Config.CLASS_NAMES
         _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
@@ -54,15 +55,13 @@ def make_predict(img, predict, medit):
         s_row = int(w_rest / 2)
         total = h_sum * w_sum
 
-        path_to_save_draw = os.path.join(Config.BASEDIR,
-                                         f"{Config.DRAW}/{img.filename}/{date_now}")
+        path_to_save_draw = os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}/{date_now}")
 
         if not os.path.exists(path_to_save_draw):
-            if not os.path.exists(os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}")):
-                os.mkdir(os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}"))
+
             os.mkdir(path_to_save_draw)
 
-            print(f"Directory {img.filename} for draw created")
+            print(f"Directory {path_to_save_draw} for draw created")
 
         mitoz = CLASS_NAMES.index('mitoz')
 

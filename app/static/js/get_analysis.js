@@ -73,10 +73,10 @@ function uploadFile(name, fileOriginalName){
 
                     <div class="content" style='background:none;'>
                         <div class="details">
-                            <span class="name">${name}</span>
+                            <span class="name">${name} • </span>
                             <span class="percent">${fileLoaded}%</span>
                         </div>
-                        <div class="progress-bar">
+                        <div class="progress-bar" style="margin-top:10%;">
                             <div class="progress" style="width: ${fileLoaded}%"></div>
                         </div>
                 </li>
@@ -126,14 +126,14 @@ function progress (task_id) {
                 <div class="content" style='background:none;'>
                     <div class="details">
                         <span class="span_name"></span>
-                        <span class="percent">'0 %'</span>
+                        <span class="percent">0 %</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress" style="width: 0%"></div>
                     </div>
             </li>
     `;
-
+    imgPNG_file.style.display = 'none';
     progressArea.innerHTML = progressHTML;
 
     let timer = setTimeout(progressStatus, 1000);

@@ -82,6 +82,7 @@ def make_predict(img, predict, medit):
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
                     img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
+                    print('img_name_draw', img_name_draw)
                     print('file:', file)
                     print('(start_row, start_col):', (start_row, start_col))
                     print('_CUT_IMAGE_SIZE', _CUT_IMAGE_SIZE)
@@ -91,7 +92,7 @@ def make_predict(img, predict, medit):
                     im = np.asarray(img)
                     print('im', im)
                     outputs = predictor(im)
-
+                    print('outputs', outputs)
                     outputs = outputs["instances"].to("cpu")
 
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
@@ -101,8 +102,10 @@ def make_predict(img, predict, medit):
                                        metadata=mitoz_metadata,
                                        scale=1,
                                        instance_mode=ColorMode.SEGMENTATION)
-
+                        print('v', v)
                         v = v.draw_instance_predictions(outputs)
+                        print('v', v)
+                        print('os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")', os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"))
                         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
                         print('save', img_name_draw)

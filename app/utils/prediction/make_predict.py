@@ -94,9 +94,10 @@ def make_predict(img, predict, medit):
                     outputs = predictor(im)
                     print('outputs', outputs)
                     outputs = outputs["instances"].to("cpu")
-
+                    print('outputs to cpu ', outputs)
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
-
+                    print('classes', classes)
+                    print('mitoz', mitoz)
                     if mitoz in classes:
                         v = Visualizer(im[:, :, ::-1],
                                        metadata=mitoz_metadata,

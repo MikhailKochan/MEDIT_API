@@ -82,12 +82,14 @@ def make_predict(img, predict, medit):
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
                     img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
-
+                    print('file:', file)
+                    print('(start_row, start_col):', (start_row, start_col))
+                    print('_CUT_IMAGE_SIZE', _CUT_IMAGE_SIZE)
                     img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                     img = img.convert('RGB')
-
+                    print('img', img)
                     im = np.asarray(img)
-
+                    print('im', im)
                     outputs = predictor(im)
 
                     outputs = outputs["instances"].to("cpu")

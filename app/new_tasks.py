@@ -28,9 +28,9 @@ def img_cutt(**kwargs):
 def mk_pred(**kwargs):
     from app.utils.prediction.make_predict import make_predict
     from app.utils.create_zip.create_zip import create_zip
-    import torch
-
-    torch.multiprocessing.freeze_support()
+    # import torch
+    #
+    # torch.multiprocessing.freeze_support()
     print(kwargs)
 
     img = kwargs.get('img')

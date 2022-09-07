@@ -17,7 +17,7 @@ from tqdm import tqdm
 from app.models import _set_task_progress, Config
 
 
-def make_predict(img, predict, medit):
+def make_predict(image, predict, medit):
     try:
 
         progress = 0
@@ -41,27 +41,27 @@ def make_predict(img, predict, medit):
         CLASS_NAMES = Config.CLASS_NAMES
         _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
 
-        h_sum = int(img.height / _CUT_IMAGE_SIZE[1])
-        w_sum = int(img.width / _CUT_IMAGE_SIZE[0])
+        h_sum = int(image.height / _CUT_IMAGE_SIZE[1])
+        w_sum = int(image.width / _CUT_IMAGE_SIZE[0])
         print('h_sum', h_sum, 'w_sum', w_sum)
-        if img.format.lower() == '.svs':
+        if image.format.lower() == '.svs':
             f_path = os.path.join(Config.BASEDIR,
                                   Config.UPLOAD_FOLDER,
-                                  img.filename)
+                                  image.filename)
             # current_app.logger.info(f"Directory {f_path} for open in openslide")
             # print('img.file_path in svs', img.file_path)
             file = openslide.OpenSlide(f_path)
 
         else:
-            return f'{img.format} not added'
+            return f'{image.format} not added'
 
-        h_rest = img.height % _CUT_IMAGE_SIZE[1]
-        w_rest = img.width % _CUT_IMAGE_SIZE[0]
+        h_rest = image.height % _CUT_IMAGE_SIZE[1]
+        w_rest = image.width % _CUT_IMAGE_SIZE[0]
         s_col = int(h_rest / 2)
         s_row = int(w_rest / 2)
         total = h_sum * w_sum
 
-        path_to_save_draw = os.path.join(Config.BASEDIR, f"{Config.DRAW}/{img.filename}/{date_now}")
+        path_to_save_draw = os.path.join(Config.BASEDIR, f"{Config.DRAW}/{image.filename}/{date_now}")
 
         if not os.path.exists(path_to_save_draw):
 
@@ -118,7 +118,7 @@ def make_predict(img, predict, medit):
                     progress += 1 / total * 100.0
                     print('progress', progress)
                     print('float(D(str(progress)).quantize(D("1.00")))', float(D(str(progress)).quantize(D("1.00"))))
-                    fl_name = f'{img.filename}/{date_now}'
+                    fl_name = f'{image.filename}/{date_now}'
                     print('fl_name', fl_name)
                     print('before _set_task_in_progress')
                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),

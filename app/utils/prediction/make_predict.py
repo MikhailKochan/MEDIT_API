@@ -116,7 +116,8 @@ def make_predict(img, predict, medit):
                             # img_name = f"{filename}.jpg"
 
                     progress += 1 / total * 100.0
-
+                    print('progress', progress)
+                    print('float(D(str(progress)).quantize(D("1.00")))', float(D(str(progress)).quantize(D("1.00"))))
                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
                                        all_mitoz=all_mitoz,
                                        filename=f'{img.filename}/{date_now}',

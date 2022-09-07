@@ -539,7 +539,7 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
         rd.set(job_id, json.dumps({'task_id': job_id,
                                    'mitoze': all_mitoz,
                                    'filename': filename,
-                                   'func': f'{func}',
+                                   'func': func,
                                    'progress': progress}))
         try:
             if progress >= 100:

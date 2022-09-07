@@ -43,7 +43,7 @@ def make_predict(img, predict, medit):
 
         h_sum = int(img.height / _CUT_IMAGE_SIZE[1])
         w_sum = int(img.width / _CUT_IMAGE_SIZE[0])
-
+        print('h_sum', h_sum, 'w_sum', w_sum)
         if img.format.lower() == '.svs':
             f_path = os.path.join(Config.BASEDIR,
                                   Config.UPLOAD_FOLDER,
@@ -122,9 +122,9 @@ def make_predict(img, predict, medit):
                                        all_mitoz=all_mitoz,
                                        filename=f'{img.filename}/{date_now}',
                                        func='predict')
-
+                    print('after _set_task_in_progress')
                     pbar.update(1)
-
+        print('after FOR')
         predict.result_all_mitoz = all_mitoz
 
         predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img

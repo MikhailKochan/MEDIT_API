@@ -31,7 +31,7 @@ def make_predict(img, predict, medit):
         ColorMode = medit.ColorMode
 
         predictor = medit.predictor
-
+        print('predictor in make predict', predictor)
         date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
 
         CLASS_NAMES = Config.CLASS_NAMES
@@ -71,7 +71,7 @@ def make_predict(img, predict, medit):
         with tqdm(total=total, position=0, leave=False) as pbar:
             for i in range(0, w_sum):
                 for j in range(0, h_sum):
-                    pbar.set_description(f"Total img: {total}. Start cutting")
+                    pbar.set_description(f"Total img: {total}. Start predict")
 
                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col

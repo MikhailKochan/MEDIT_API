@@ -52,7 +52,7 @@ def get_zip(filename):
 def get(key):
     print('key in /get', key)
     # img = Images.query.filter_by(filename=key).first()
-    user_tasks = current_user.get_task_in_progress()
+    user_tasks = current_user.get_tasks_in_progress()
     # if img:
     #     task = img.tasks.all()
     #     if task:

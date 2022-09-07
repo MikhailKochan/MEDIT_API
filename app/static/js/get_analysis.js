@@ -93,7 +93,7 @@ function uploadFile(name, fileOriginalName){
                         <img src="/static/logo/file.png" style="margin-right:10px;margin-left:0px;">
                          <div class="details">
                             <span class="name">${name} • </span>
-                            <span class="size">${fileSize}</span>
+                            <span class="size">$ {fileSize}</span>
                         </div>
                     </div>
 

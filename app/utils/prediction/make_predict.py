@@ -2,7 +2,6 @@ import os
 import numpy as np
 import cv2
 from sys import platform
-import torch
 
 
 if platform == 'win32':
@@ -18,7 +17,7 @@ from app.models import _set_task_progress, Config
 
 def make_predict(img, predict, medit):
     try:
-        torch.multiprocessing.freeze_support()
+
         progress = 0
 
         max_mitoz_in_one_img = 0

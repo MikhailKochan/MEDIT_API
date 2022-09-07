@@ -7,6 +7,7 @@ dateTime = document.querySelector("#datetime"),
 imgPNG_file = document.querySelector("#img_file"),
 progressArea = document.querySelector(".progress-area"),
 result = document.querySelector("#result"),
+status = document.querySelector("#status"),
 uploadedArea = document.querySelector(".uploaded-area");
 
 function getProgress(url, key) {
@@ -126,7 +127,7 @@ function progress (task_id) {
                 <div class="content" style='background:none;'>
                     <div class="details">
                         <span class="span_name"></span>
-                        <span class="percent">0 %</span>
+                        <span class="percent">0%</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress" style="width: 0%"></div>
@@ -154,16 +155,16 @@ function progress (task_id) {
                 let timer = setTimeout(progressStatus, 5000);
 
             } else {
-
+                status.innerHTML = `${query.data.analysis_number}`;
                 span_name.innerHTML = `${query.data.func} • `;
                 result.innerHTML = `<b>${query.data.mitoz}</b>`;
                 let width = query.data.progress;
-                console.log(width);
+
               if (parseInt(width) >= 100) {
 
                 progressArea.innerHTML = "";
                 progressArea.innerHTML = `
-                    Done
+                    <span style="margin:5px;">Done</span>
                     <img src="/static/logo/green_check.png">
                 `;
                 if (query.data.func != "create_zip"){

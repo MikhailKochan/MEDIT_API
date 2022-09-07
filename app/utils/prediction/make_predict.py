@@ -130,7 +130,7 @@ def make_predict(image, predict, medit):
 
         predict.model = cfg.MODEL.WEIGHTS
 
-        predict.image_id = img.id
+        predict.image_id = image.id
 
         return predict, path_to_save_draw
 

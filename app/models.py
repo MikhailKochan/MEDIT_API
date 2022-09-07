@@ -523,7 +523,7 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
 
-def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
+def _set_task_progress(progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
 
     job = get_current_job()
     if job:
@@ -538,9 +538,10 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None):
             rd = Redis.from_url(Config.__dict__['REDIS_URL'])
 
         rd.set(job_id, json.dumps({'task_id': job_id,
-                                   'mitoze': all_mitoz,
+                                   'mitoz': all_mitoz,
                                    'filename': filename,
                                    'func': func,
+                                   'analysis_number': analysis_number,
                                    'progress': progress}))
         try:
             if progress >= 100:

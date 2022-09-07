@@ -38,14 +38,15 @@ def mk_pred(**kwargs):
     print("kwargs.get('medit')", kwargs.get('medit'))
 
     predict, path = make_predict(img=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
-
-    if predict:
-        engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
-        with Session(engine) as session:
-            session.add(predict)
-            session.commit()
-
-        create_zip(path_to_save=path)
-
-        os.remove(img.file_path)
-        shutil.rmtree(path)
+    print('predict: ', predict)
+    print('path', path)
+    # if predict:
+    #     engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
+    #     with Session(engine) as session:
+    #         session.add(predict)
+    #         session.commit()
+    #
+    #     create_zip(path_to_save=path)
+    #
+    #     os.remove(img.file_path)
+    #     shutil.rmtree(path)

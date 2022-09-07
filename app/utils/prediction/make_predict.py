@@ -130,4 +130,5 @@ def make_predict(img, predict, medit):
 
     except Exception as e:
         print(e)
+        return type(e), e
         # current_app.logger.error(e)

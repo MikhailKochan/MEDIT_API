@@ -93,7 +93,7 @@ function uploadFile(name, fileOriginalName){
                         <img src="/static/logo/file.png" style="margin-right:10px;margin-left:0px;">
                          <div class="details">
                             <span class="name">${name} • </span>
-                            <span class="size">$ {fileSize}</span>
+                            <span class="size"> ${fileSize}</span>
                         </div>
                     </div>
 
@@ -155,10 +155,10 @@ function progress (task_id) {
 
             } else {
 
-                span_name.innerHTML = query.data.func;
+                span_name.innerHTML = `${query.data.func} • `;
                 result.innerHTML = `<b>${query.data.mitoz}</b>`;
                 let width = query.data.progress;
-
+                console.log(width);
               if (parseInt(width) >= 100) {
 
                 progressArea.innerHTML = "";
@@ -167,6 +167,7 @@ function progress (task_id) {
                     <img src="/static/logo/green_check.png">
                 `;
                 if (query.data.func != "create_zip"){
+                    console.log('we in != create_zip');
                     let timer = setTimeout(progressStatus, 500);
                 }else{
                     bottomCutFile.href = `/get-zip/${query.data.filename}.zip`
@@ -175,6 +176,7 @@ function progress (task_id) {
                     return
                 };
               } else {
+                    console.log('we in width != 100');
                     if(elem){
                         elem.style.width = width + '%';
                         percent.textContent = width + '%';

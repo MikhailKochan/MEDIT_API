@@ -91,7 +91,7 @@ function uploadFile(name, fileOriginalName){
            let uploadedHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
                     <div class="content" style='background:none;'>
-                        <img src="/static/logo/file.png" style="margin-right:10px;margin-left:0px;">
+                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:0px;">
                          <div class="details">
                             <span class="name">${name} • </span>
                             <span class="size"> ${fileSize}</span>
@@ -126,7 +126,7 @@ function progress (task_id) {
 
                 <div class="content" style='background:none;'>
                     <div class="details">
-                        <span class="span_name"></span>
+                        <span class="span_name"style="margin:5%;"></span><br>
                         <span class="percent">0%</span>
                     </div>
                     <div class="progress-bar">
@@ -164,7 +164,7 @@ function progress (task_id) {
 
                 progressArea.innerHTML = "";
                 progressArea.innerHTML = `
-                    <span style="margin:5px;">Done</span>
+                    <span style="margin:5%;">Done</span>
                     <img src="/static/logo/green_check.png">
                 `;
                 if (query.data.func != "create_zip"){

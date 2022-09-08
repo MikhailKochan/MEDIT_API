@@ -40,6 +40,6 @@ def mk_pred(**kwargs):
             session.commit()
 
         create_zip(path_to_save=path)
-
-        os.remove(img.file_path)
         shutil.rmtree(path)
+    os.remove(img.file_path)
+

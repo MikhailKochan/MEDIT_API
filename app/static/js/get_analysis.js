@@ -72,7 +72,7 @@ function uploadFile(name, fileOriginalName){
        let progressHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
 
-                    <div class="content" style='background:none;'>
+                    <div class="content" style='background:none;width:180px'>
                         <div class="details">
                             <span class="name">${name} • </span>
                             <span class="percent">${fileLoaded}%</span>
@@ -82,7 +82,7 @@ function uploadFile(name, fileOriginalName){
                         </div>
                 </li>
         `;
-       uploadedArea.innerHTML = `<img src="./static/logo/file.png">`
+       uploadedArea.innerHTML = `<img src="./static/logo/file.png"><span class="name">Загрузка...</span>`
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
        progressArea.innerHTML = "";
@@ -126,7 +126,7 @@ function progress (task_id) {
 
                 <div class="content" style='background:none;'>
                     <div class="details">
-                        <span class="span_name"style="margin:5%;"></span><br>
+                        <span class="span_name"style="margin:5%;"></span>
                         <span class="percent">0%</span>
                     </div>
                     <div class="progress-bar">
@@ -155,10 +155,14 @@ function progress (task_id) {
                 let timer = setTimeout(progressStatus, 5000);
 
             } else {
-                status.innerHTML = `${query.data.analysis_number}`;
+
                 span_name.innerHTML = `${query.data.func} • `;
-                result.innerHTML = `<b>${query.data.mitoz}</b>`;
                 let width = query.data.progress;
+
+                if (query.data.func != "create_zip"){
+                status.innerHTML = `${query.data.analysis_number}`;
+                result.innerHTML = `<b>${query.data.mitoz}</b>`;
+                };
 
               if (parseInt(width) >= 100) {
 
@@ -167,17 +171,17 @@ function progress (task_id) {
                     <span style="margin:5%;">Done</span>
                     <img src="/static/logo/green_check.png">
                 `;
-                if (query.data.func != "create_zip"){
-                    console.log('we in != create_zip');
-                    let timer = setTimeout(progressStatus, 500);
-                }else{
-                    bottomCutFile.href = `/get-zip/${query.data.filename}.zip`
-                    bottomCutFile.style.display = 'flex';
+                if (query.data.func == "create_zip"){
+                    console.log('we in == create_zip');
+                    bottomDownloadFile.href = `/get-zip/${query.data.filename}.zip`
+                    bottomDownloadFile.style.display = 'flex';
                     getProgress('redis-delete', task_id);
                     return
+                }else{
+                    let timer = setTimeout(progressStatus, 500);
                 };
               } else {
-                    console.log('we in width != 100');
+//                    console.log('we in width != 100');
                     if(elem){
                         elem.style.width = width + '%';
                         percent.textContent = width + '%';
@@ -190,3 +194,32 @@ function progress (task_id) {
         }
     }
 };
+
+//bottomCutFile.addEventListener("click", ()=>{
+//    bottomCutFile.click();
+//    setTimeout(clearForm, 1000);
+//    function clearForm () {
+//        document.querySelector("#name").innerHTML = `
+//                        <section class="progress-area"></section>
+//                        <section class="uploaded-area"></section>
+//            `;
+//        imgPNG_file.style.display = "none"
+//        span_name.innerHTML = "";
+//        bottomFile.style.display = 'block';
+//
+//        progressArea.innerHTML = "";
+//        form.reset();
+//        status.innerHTML = "";
+//        result.innerHTML = "";
+//        bottomCutFile.style.display = 'none';
+//        setTimeout(delZip, 1000)
+//        function delZip () {
+//            let bottomCutFile = document.querySelector(".button_download");
+//            let key = bottomCutFile.href.split('/');
+//            console.log(key[key.length - 1]);
+//            var xhr = new XMLHttpRequest();
+//            xhr.open("get", `/zip-delete/${key[key.length - 1]}`, false);
+//            xhr.send();
+//        }
+//    }
+//});

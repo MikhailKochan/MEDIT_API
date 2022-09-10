@@ -126,11 +126,11 @@ function progress (task_id) {
 
                 <div class="content" style='background:none;'>
                     <div class="details">
-                        <span class="span_name"style="margin:5%;"></span>
-                        <span class="percent">0%</span>
+                        <span class="span_name"style=""></span>
+                        <span class="percent"style="width:50px;padding-left: 5px">0%</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress" style="width: 0%"></div>
+                        <div class="progress" style="margin-top:5px;width:0%"></div>
                     </div>
             </li>
     `;

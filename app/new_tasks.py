@@ -33,16 +33,17 @@ def mk_pred(**kwargs):
 
     predict, path = make_predict(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
 
-    if predict:
+    try:
         engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
-        try:
-            with Session(engine) as session:
+        with Session(engine) as session:
+            if predict:
                 session.add(predict)
                 session.commit()
-        except Exception as e:
-            print('ERROR in mk_pred new_tasks', e)
-        result = create_zip(path_to_save=path)
-        print(result)
-        shutil.rmtree(path)
-    os.remove(img.file_path)
+            result = create_zip(path_to_save=path)
+            print(result)
+            shutil.rmtree(path)
+            os.remove(img.file_path)
+    except Exception as e:
+        print('ERROR in mk_pred new_tasks', e)
+
 

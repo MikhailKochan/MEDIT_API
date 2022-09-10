@@ -72,7 +72,7 @@ function uploadFile(name, fileOriginalName){
        let progressHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
 
-                    <div class="content" style='background:none;width:180px'>
+                    <div class="content" style='background:none;width:120px'>
                         <div class="details">
                             <span class="name">${name} • </span>
                             <span class="percent">${fileLoaded}%</span>
@@ -108,7 +108,7 @@ function uploadFile(name, fileOriginalName){
                     setTimeout(run, 1000);
                 }else{
                     clearTimeout(myTimeout);
-                    console.log(req);
+//                    console.log(req);
                     progress(req.task_id);
                 };
            }, 5000);

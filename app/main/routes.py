@@ -50,7 +50,7 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
-    print('key in /get', key)
+    # print('key in /get', key)
     # img = Images.query.filter_by(filename=key).first()
     user_tasks = current_user.get_tasks_in_progress()
     # if img:
@@ -189,6 +189,7 @@ def upload():
                                   timestamp=datetime.utcnow())
 
                 path_1 = os.path.join(current_app.config['BASEDIR'], f"{current_app.config['DRAW']}/{img.filename}")
+
                 if not os.path.exists(path_1):
                     os.mkdir(path_1)
 

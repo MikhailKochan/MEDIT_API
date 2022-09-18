@@ -50,13 +50,10 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
-    task = Task.query.filter(Task.images, Images.filename == key).first()
-    if task:
-        print('task after search filter in rout /get:', task, task.id, task.image_id, task.complete)
-    user_tasks = current_user.get_tasks_in_progress()
+    user_tasks = Task.query.filter(Task.images, Images.filename == key).first()
+
     if user_tasks:
-        print('task_id', user_tasks[-1].id)
-        data = {'task_id': user_tasks[-1].id}
+        data = {'task_id': user_tasks.id}
     else:
         return abort(404)
 

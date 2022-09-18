@@ -100,7 +100,7 @@ function uploadFile(name, fileOriginalName){
                     <div class="content" style='background:none;'>
                         <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
                          <div class="details">
-                            <span class="name">${name} • </span>
+                            <span class="name">${name}</span>
                             <span class="size"> ${fileSize}</span>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ function progress (task_id) {
                     console.log('we in == create_zip');
                     bottomDownloadFile.href = `/get-zip/${query.data.filename}.zip`
                     bottomDownloadFile.style.display = 'flex';
-                    getProgress('redis-delete', task_id);
+//                    getProgress('redis-delete', task_id);
                     return
                 }else{
                     let timer = setTimeout(progressStatus, 500);

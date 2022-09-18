@@ -67,19 +67,29 @@ function uploadFile(name, fileOriginalName){
        let fileSize;
        (fileTotal < 1024) ? fileSize = fileTotal + "KB" : fileSize = (loaded / (1024 * 1024)).toFixed(2) + "MB";
        let progressHTML = `
-                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                            <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
 
-                    <div class="content" style='background:none;width:120px'>
-                        <div class="details">
-                            <span class="name">${name} • </span>
-                            <span class="percent">${fileLoaded}%</span>
-                        </div>
-                        <div class="progress-bar" style="margin-top:10%;">
-                            <div class="progress" style="width: ${fileLoaded}%"></div>
-                        </div>
-                </li>
-        `;
-       uploadedArea.innerHTML = `<img src="./static/logo/file.png"><span class="name">Загрузка...</span>`
+                                        <div class="content" style='background:none;width:120px'>
+                                            <div class="details">
+                                                <span class="name"style="margin-left:3px;margin-right:3px">Загрузка</span>
+                                                <span class="percent"style="width:50px">${fileLoaded}%</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress" style="margin-top:5px;width: ${fileLoaded}%"></div>
+                                            </div>
+                                    </li>
+                            `;
+
+       uploadedArea.innerHTML = `
+                                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                                    <div class="content" style='background:none;'>
+                                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
+                                         <div class="details">
+                                            <span class="name">${name} • </span>
+                                        </div>
+                                    </div>
+                                 </li>
+                                 `
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
        progressArea.innerHTML = "";
@@ -90,7 +100,7 @@ function uploadFile(name, fileOriginalName){
                     <div class="content" style='background:none;'>
                         <img src="/static/logo/file.png" style="margin-right:10%;margin-left:0px;">
                          <div class="details">
-                            <span class="name">${name} • </span>
+                            <span class="name">${name}</span>
                             <span class="size"> ${fileSize}</span>
                         </div>
                     </div>

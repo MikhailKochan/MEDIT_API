@@ -60,7 +60,7 @@ form.onchange = ({target}) =>{
 
 function uploadFile(name, fileOriginalName){
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", '/upload');
+    xhr.open("POST", '/cutting');
     xhr.upload.addEventListener("progress", ({loaded, total}) =>{
        let fileLoaded = Math.floor((loaded / total) * 100);
        let fileTotal = Math.floor(total / 1000)
@@ -71,7 +71,7 @@ function uploadFile(name, fileOriginalName){
 
                     <div class="content" style='background:none;width:120px'>
                         <div class="details">
-                            <span class="name">${name} • </span>
+                            <span class="name">Загрузка</span>
                             <span class="percent"style="width:50px;padding-left: 5px">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
@@ -80,7 +80,16 @@ function uploadFile(name, fileOriginalName){
                 </li>
         `;
 
-       uploadedArea.innerHTML = `<img src="./static/logo/file.png"><span class="name">Загрузка...</span>`
+       uploadedArea.innerHTML = `
+                                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                                    <div class="content" style='background:none;'>
+                                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:0px;">
+                                         <div class="details">
+                                            <span class="name">${name} • </span>
+                                        </div>
+                                    </div>
+                                 </li>
+                                 `
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
        progressArea.innerHTML = "";
@@ -95,7 +104,7 @@ function uploadFile(name, fileOriginalName){
                             <span class="size"> ${fileSize}</span>
                         </div>
                     </div>
-
+                </li>
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
                 imgPNG_file.style.display = 'flex';

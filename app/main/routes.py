@@ -51,7 +51,8 @@ def get_zip(filename):
 @login_required
 def get(key):
     task = Task.query.filter(Task.images, Images.filename == key).first()
-    print('task after search filter in rout /get:', task, task.id, task.image_id, task.complete)
+    if task:
+        print('task after search filter in rout /get:', task, task.id, task.image_id, task.complete)
     user_tasks = current_user.get_tasks_in_progress()
     if user_tasks:
         print('task_id', user_tasks[-1].id)
@@ -189,7 +190,7 @@ def upload():
             os.mkdir(path_to_save_draw_img)
 
         current_user.launch_task(name='mk_pred',
-                                 description=f'{file.filename} prediction',
+                                 description=f'{img.filename} prediction',
                                  job_timeout=10800,
                                  img=img,
                                  predict=predict,

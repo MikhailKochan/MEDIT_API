@@ -71,8 +71,8 @@ function uploadFile(name, fileOriginalName){
 
                     <div class="content" style='background:none;width:120px'>
                         <div class="details">
-                            <span class="name">Загрузка</span>
-                            <span class="percent"style="width:50px;padding-left: 5px">${fileLoaded}%</span>
+                            <span class="name"style="margin-left:3px;margin-right:3px">Загрузка</span>
+                            <span class="percent"style="width:50px">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress" style="margin-top:5px;width: ${fileLoaded}%"></div>
@@ -83,7 +83,7 @@ function uploadFile(name, fileOriginalName){
        uploadedArea.innerHTML = `
                                  <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
                                     <div class="content" style='background:none;'>
-                                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:0px;">
+                                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
                                          <div class="details">
                                             <span class="name">${name} • </span>
                                         </div>
@@ -98,7 +98,7 @@ function uploadFile(name, fileOriginalName){
            let uploadedHTML = `
                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
                     <div class="content" style='background:none;'>
-                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:0px;">
+                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
                          <div class="details">
                             <span class="name">${name} • </span>
                             <span class="size"> ${fileSize}</span>

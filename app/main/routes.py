@@ -247,7 +247,7 @@ def cut_rout():
                                      description=f'{img.filename} cutting',
                                      img=img,
                                      job_timeout=1800,
-                                     path=path,
+                                     path=img.file_path,
                                      CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
                                      _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
                                      )

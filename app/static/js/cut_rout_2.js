@@ -72,13 +72,14 @@ function uploadFile(name, fileOriginalName){
                     <div class="content" style='background:none;width:120px'>
                         <div class="details">
                             <span class="name">${name} • </span>
-                            <span class="percent">${fileLoaded}%</span>
+                            <span class="percent"style="width:50px;padding-left: 5px">${fileLoaded}%</span>
                         </div>
-                        <div class="progress-bar" style="margin-top:10%;">
-                            <div class="progress" style="width: ${fileLoaded}%"></div>
+                        <div class="progress-bar">
+                            <div class="progress" style="margin-top:5px;width: ${fileLoaded}%"></div>
                         </div>
                 </li>
         `;
+
        uploadedArea.innerHTML = `<img src="./static/logo/file.png"><span class="name">Загрузка...</span>`
        progressArea.innerHTML = progressHTML;
        if(loaded == total){
@@ -191,32 +192,3 @@ function progress (task_id) {
         }
     }
 };
-
-//bottomCutFile.addEventListener("click", ()=>{
-//    bottomCutFile.click();
-//    setTimeout(clearForm, 1000);
-//    function clearForm () {
-//        document.querySelector("#name").innerHTML = `
-//                        <section class="progress-area"></section>
-//                        <section class="uploaded-area"></section>
-//            `;
-//        imgPNG_file.style.display = "none"
-//        span_name.innerHTML = "";
-//        bottomFile.style.display = 'block';
-//
-//        progressArea.innerHTML = "";
-//        form.reset();
-//        status.innerHTML = "";
-//        result.innerHTML = "";
-//        bottomCutFile.style.display = 'none';
-//        setTimeout(delZip, 1000)
-//        function delZip () {
-//            let bottomCutFile = document.querySelector(".button_download");
-//            let key = bottomCutFile.href.split('/');
-//            console.log(key[key.length - 1]);
-//            var xhr = new XMLHttpRequest();
-//            xhr.open("get", `/zip-delete/${key[key.length - 1]}`, false);
-//            xhr.send();
-//        }
-//    }
-//});

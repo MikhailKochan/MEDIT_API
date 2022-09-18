@@ -64,12 +64,20 @@ class User(UserMixin, db.Model):
     def launch_task(self, name, description, job_timeout: int = 1800, **kwargs):
         current_app.logger.info(f"{self.username} create task")
 
+        image = kwargs.get('img')
+        predict = kwargs.get('predict')
+
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 job_timeout=job_timeout,
                                                 **kwargs
                                                 )
 
         task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
+
+        if images:
+            task.images = image
+        if predict:
+            task.predict = predict
 
         db.session.add(task)
         current_app.logger.info(f"task id: {task.id} - add to db")
@@ -529,6 +537,8 @@ def _set_task_progress(progress, all_mitoz=None, func=None, filename=None, analy
     if job:
         job_id = job.get_id()
         job.meta['progress'] = progress
+        job.meta['function'] = func
+        job.meta['filename'] = filename
         job.save_meta()
 
         if current_app:
@@ -576,6 +586,7 @@ class Task(db.Model):
 
     predict_id = db.Column(db.Integer, db.ForeignKey('predict.id', ondelete="CASCADE"))
     image_id = db.Column(db.Integer, db.ForeignKey('images.id', ondelete="CASCADE"))
+
     complete = db.Column(db.Boolean, default=False)
 
     def get_rq_job(self):
@@ -589,6 +600,10 @@ class Task(db.Model):
     def get_progress(self):
         job = self.get_rq_job()
         return job.meta.get('progress', 0) if job is not None else 100
+
+    def get_filename(self):
+        job = self.get_rq_job()
+        return job.meta.get('filename')
 
 
 class Status(db.Model):

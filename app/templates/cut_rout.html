@@ -13,19 +13,18 @@
     Выберите файл
 </div>
 <div class="box" style="background: #eff1f4;">
-    Загрузка
+    Обработка
 </div>
 <div class="box" style="background: #eff1f4;">
-    Порезка
+
 </div>
 <div class="box" style="background: #eff1f4;">
-    Архивируем
+
 </div>
 <div class="box" style="background: #eff1f4;">
     Скачать
 </div>
 </div>
-
 <div class="container-table">
 
     <div class="box" id="datetime" style="justify-content: center">
@@ -33,12 +32,12 @@
             <input type="file" name="file" class="input-file" hidden>
             <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
         </form>
-        <img id="img_file" src="/static/logo/file.png" style="border-radius:0;display:none;">
-        <span class="span_name"></span>
-    </div>
-    <div class="box" id="name" style="justify-content: center">
-        <section class="progress-area"></section>
         <section class="uploaded-area"></section>
+    </div>
+
+    <div class="box" id="name" style="justify-content: center">
+        <img id="img_file" src="/static/logo/load.gif" style="border-radius:0;display:none;">
+        <section class="progress-area"></section>
     </div>
 
 
@@ -52,12 +51,11 @@
     </div>
 
     <div class="box">
-        <a class="button_download" href="" style="display:none;justify-content: center">Скачать</a><br>
+        <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
     </div>
 </div>
 
-
-<script src="/static/js/cut_rout.js"></script>
+<script src="/static/js/cut_rout_2.js"></script>
 
 {{ super() }}
 {% endblock %}

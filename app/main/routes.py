@@ -50,18 +50,11 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
-    # print('key in /get', key)
-    # img = Images.query.filter_by(filename=key).first()
+    task = Task.query.filter(Task.images, Images.filename == key).first()
+    print('task after search filter in rout /get:', task, task.id, task.image_id, task.complete)
     user_tasks = current_user.get_tasks_in_progress()
-    # if img:
-    #     task = img.tasks.all()
-    #     if task:
-    #         img_task = task[-1]
-    #         data = {'image_id': img.id,
-    #                 'task_id': img_task.id}
-    #     else:
-    #         data = img.id
     if user_tasks:
+        print('task_id', user_tasks[-1].id)
         data = {'task_id': user_tasks[-1].id}
     else:
         return abort(404)
@@ -79,7 +72,7 @@ def progress(task_id):
             'data': json.loads(send.decode("utf-8"))
         })
     else:
-        abort(404)
+        return abort(404)
 
 
 @bp.route('/del/<prediction_id>')
@@ -169,72 +162,97 @@ def index(filename):
 @login_required
 def upload():
     if request.method == 'POST':
-        files = request.files.getlist("file")
-        if files:
-            for file in files:
-                path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-                print(path)
-                file.save(path)
-                img = Images(path)
-                if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                    db.session.add(img)
-                    db.session.commit()
-                    current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-                else:
-                    current_app.logger.info(f"{file.filename} already in bd")
+        img = file_save_and_add_to_db(request)
+        # files = request.files.getlist("file")
+        # if files:
+        #     for file in files:
+        #         path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+        #         print(path)
+        #         file.save(path)
+        #         img = Images(path)
+        #         if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+        #             db.session.add(img)
+        #             db.session.commit()
+        #             current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+        #         else:
+        #             current_app.logger.info(f"{file.filename} already in bd")
+        #
+        #         img = Images.query.filter_by(analysis_number=img.analysis_number).first()
 
-                img = Images.query.filter_by(analysis_number=img.analysis_number).first()
+        predict = Predict(images=img,
+                          timestamp=datetime.utcnow())
 
-                predict = Predict(images=img,
-                                  timestamp=datetime.utcnow())
+        path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
+                                             f"{current_app.config['DRAW']}/{img.filename}")
 
-                path_1 = os.path.join(current_app.config['BASEDIR'], f"{current_app.config['DRAW']}/{img.filename}")
+        if not os.path.exists(path_to_save_draw_img):
+            os.mkdir(path_to_save_draw_img)
 
-                if not os.path.exists(path_1):
-                    os.mkdir(path_1)
-
-                current_user.launch_task(name='mk_pred',
-                                         description=f'{file.filename} prediction',
-                                         job_timeout=10800,
-                                         img=img,
-                                         predict=predict,
-                                         medit=current_app.medit,
-                                         )
-                db.session.commit()
+        current_user.launch_task(name='mk_pred',
+                                 description=f'{file.filename} prediction',
+                                 job_timeout=10800,
+                                 img=img,
+                                 predict=predict,
+                                 medit=current_app.medit,
+                                 )
+        db.session.commit()
 
         return render_template('upload.html', title='Загрузка', body='')
     else:
         return render_template('upload.html', title='Загрузка', body='Выберите файл')
 
 
+def file_save_and_add_to_db(request):
+    files = request.files.getlist("file")
+    if files:
+        for file in files:
+            path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+            current_app.logger.info(f'получил файл {file.filename}')
+            file.save(path)
+            current_app.logger.info(f"сохранил файл {file.filename}")
+            img = Images(path)
+            if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+                db.session.add(img)
+                db.session.commit()
+                current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+            else:
+                current_app.logger.info(f"{file.filename} already in bd")
+            img = Images.query.filter_by(analysis_number=img.analysis_number).first()
+            return img
+
+
 @bp.route('/cutting', methods=['POST', 'GET'])
 @login_required
 def cut_rout():
-    if current_user.get_task_in_progress('img_cutt'):
-        flash('now images in cutting')
-    else:
-        try:
-            if request.method == 'POST':
-                files = request.files.getlist("file")
+    """
+        Что мне надо?
+        - отображать все задычи по порезке изображения пользователя
+        - добавлять новую задачу в очередь
+        - отображать статус задачи (выполняется или задача в очереди)
+    Returns:
 
-                if files:
-                    file = files[0]
+    """
+    # if current_user.get_task_in_progress('img_cutt'):
+    #     data = current_user.get_task_in_progress('img_cutt')
+    #     flash('now images in cutting')
+    #     return render_template('cut_rout.html', title='Порезка SVS', body='')
+    # else:
+    try:
+        if request.method == 'POST':
+            img = file_save_and_add_to_db(request)
 
-                    path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-                    current_app.logger.info(f'получил файл {file.filename}')
-                    file.save(path)
-                    current_app.logger.info(f"сохранил файл {file.filename}")
-                    # Start new task
-                    current_user.launch_task(name='img_cutt',
-                                             description=f'{file.filename} cutting',
-                                             job_timeout=1800,
-                                             path=path,
-                                             CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
-                                             _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
-                                             )
+            # Start new task
+            current_user.launch_task(name='img_cutt',
+                                     description=f'{img.filename} cutting',
+                                     img=img,
+                                     job_timeout=1800,
+                                     path=path,
+                                     CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
+                                     _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
+                                     )
 
-                    db.session.commit()
-
-        except Exception as e:
-            current_app.logger.error(e)
-        return render_template('cut_rout.html', title='Загрузка', body='Выберите файл')
+            db.session.commit()
+        return render_template('cut_rout.html', title='Порезка SVS', body='')
+    except Exception as e:
+        current_app.logger.error(e)
+    return render_template('cut_rout.html', title='Порезка SVS', body='Выберите файл')

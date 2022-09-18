@@ -11,15 +11,11 @@ def img_cutt(**kwargs):
     from app.utils.cutting.cutting_svs import cutting
     from app.utils.create_zip.create_zip import create_zip
 
-    print(kwargs)
-
     path_cutting_img = cutting(path=kwargs.get('path'),
                                CUTTING_FOLDER=kwargs.get('CUTTING_FOLDER'),
                                _CUT_IMAGE_SIZE=kwargs.get('_CUT_IMAGE_SIZE'))
 
     result = create_zip(path_cutting_img)  # Create zip file
-
-    print(result)
 
     os.remove(kwargs.get('path'))  # Delete download svs
     shutil.rmtree(path_cutting_img)  # Delete cutting folder

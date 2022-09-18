@@ -74,7 +74,7 @@ class User(UserMixin, db.Model):
 
         task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
 
-        if images:
+        if image:
             task.images = image
         if predict:
             task.predict = predict

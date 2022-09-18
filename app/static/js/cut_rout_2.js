@@ -157,10 +157,10 @@ function progress (task_id) {
                 span_name.innerHTML = `${query.data.func} • `;
                 let width = query.data.progress;
 
-                if (query.data.func != "create_zip"){
-                status.innerHTML = `${query.data.analysis_number}`;
-                result.innerHTML = `<b>${query.data.mitoz}</b>`;
-                };
+//                if (query.data.func != "create_zip"){
+//                status.innerHTML = `${query.data.analysis_number}`;
+//                result.innerHTML = `<b>${query.data.mitoz}</b>`;
+//                };
 
               if (parseInt(width) >= 100) {
 

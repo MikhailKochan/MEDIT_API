@@ -256,9 +256,9 @@ def cut_rout():
                                      )
 
             db.session.commit()
-            return render_template('cut_rout.html',
-                                   title='Порезка SVS',
-                                   body=data if data else 'Выберите файл')
+        return render_template('cut_rout.html',
+                               title='Порезка SVS',
+                               body=data if data else 'Выберите файл')
         # if data:
         #     return render_template('cut_rout.html', title='Порезка SVS', body=data)
     except Exception as e:

@@ -206,5 +206,6 @@ function progress (task_id) {
 };
 
 if (data_enable) {
-    progress(data_enable)
+    console.log(data_enable);
+    progress(data_enable);
 };

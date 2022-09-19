@@ -25,6 +25,55 @@
     Скачать
 </div>
 </div>
+{% if data %}
+    {% for task in data%}
+        <div class="container-table">
+
+        <div class="box" style="justify-content: center">
+            <section class="uploaded-area">
+                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                    <div class="content" style='background:none;'>
+                        <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
+                         <div class="details">
+                            <span class="name">{{ task.get_filename() }}</span>
+                        </div>
+                    </div>
+                 </li>
+            </section>
+        </div>
+
+        <div class="box" style="justify-content: center">
+            <section class="progress-area">
+                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                    <div class="content" style='background:none;width:120px'>
+                        <div class="details">
+                            <span class="name"style="margin-left:3px;margin-right:3px"></span>
+                            <span class="percent"style="width:50px">{{ task.get_progress() }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="margin-top:5px;width: {{ task.get_progress }}"></div>
+                        </div>
+                    </div>
+                </li>
+            </section>
+        </div>
+
+
+        <div class="box" style="justify-content: center">
+
+        </div>
+
+
+        <div class="box" style="justify-content: center">
+
+        </div>
+
+        <div class="box">
+            <a class="button_download" href="{{ url_for('main.get_zip') + '/' + task.images.filename + '.zip' }}" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
 <div class="container-table">
 
     <div class="box" id="datetime" style="justify-content: center">
@@ -54,54 +103,8 @@
         <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
     </div>
 </div>
+{% endif %}
 
-{% for task in data%}
-    <div class="container-table">
-
-    <div class="box" style="justify-content: center">
-        <section class="uploaded-area">
-            <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
-                <div class="content" style='background:none;'>
-                    <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
-                     <div class="details">
-                        <span class="name">{{ task.get_filename() }}</span>
-                    </div>
-                </div>
-             </li>
-        </section>
-    </div>
-
-    <div class="box" style="justify-content: center">
-        <section class="progress-area">
-            <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
-                <div class="content" style='background:none;width:120px'>
-                    <div class="details">
-                        <span class="name"style="margin-left:3px;margin-right:3px"></span>
-                        <span class="percent"style="width:50px">{{ task.get_progress() }}%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress" style="margin-top:5px;width: {{ task.get_progress }}"></div>
-                    </div>
-                </div>
-            </li>
-        </section>
-    </div>
-
-
-    <div class="box" style="justify-content: center">
-
-    </div>
-
-
-    <div class="box" style="justify-content: center">
-
-    </div>
-
-    <div class="box">
-        <a class="button_download" href="{{ url_for('main.get_zip') + '/' + task.images.filename + '.zip' }}" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
-    </div>
-</div>
-{% endfor %}
 
 <script src="/static/js/cut_rout_2.js"></script>
 

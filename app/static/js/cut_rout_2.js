@@ -44,9 +44,9 @@ form.onchange = ({target}) =>{
             if(file){
                 let fileName = file.name;
                 var fileOriginalName = file.name;
-                if(fileName.length >= 12){
+                if(fileName.length >= 8){
                     let splitName = fileName.split('.');
-                    fileName = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+                    fileName = splitName[0].substring(0, 8) + "... ." + splitName[splitName.length - 1];
                 };
                 bottomInputFile.style.display = 'none';
 //                dateTime.insertAdjacentHTML('beforeend', afterCheckFileHTML);
@@ -205,6 +205,18 @@ function progress (task_id) {
 };
 
 if (data_enable) {
-    console.log(data_enable);
-//    progress(data_enable.textContent.trim());
+    let name = data_enable.textContent.trim().split('/n')[1];
+    progress(data_enable.textContent.trim().split('/n')[0]);
+    bottomInputFile.style.display = 'none';
+    uploadedArea.innerHTML = `
+         <li class="row">
+            <div class="content" style='background:none;'>
+                <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
+                 <div class="details">
+                    <span class="name">${name}</span>
+                </div>
+            </div>
+         </li>
+     `;
+
 };

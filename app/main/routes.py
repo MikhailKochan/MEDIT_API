@@ -242,6 +242,7 @@ def cut_rout():
     if current_user.get_task_in_progress('img_cutt'):
         data = current_user.get_task_in_progress('img_cutt')
         flash('now images is cutting')
+        print(data)
         return render_template('cut_rout.html', title='Порезка SVS', body=data)
     try:
         if request.method == 'POST':

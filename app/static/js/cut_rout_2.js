@@ -8,9 +8,8 @@ imgPNG_file = document.querySelector("#img_file"),
 progressArea = document.querySelector(".progress-area"),
 result = document.querySelector("#result"),
 status = document.querySelector("#status"),
+data_enable = document.querySelector(".data_enable"),
 uploadedArea = document.querySelector(".uploaded-area");
-
-console.log(document.querySelectorAll('.container-table'));
 
 function getProgress(url, key) {
     var xhr = new XMLHttpRequest();
@@ -204,4 +203,8 @@ function progress (task_id) {
             let timer = setTimeout(progressStatus, 1000);
         }
     }
+};
+
+if (data_enable) {
+    progress(data_enable)
 };

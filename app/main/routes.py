@@ -50,10 +50,17 @@ def get_zip(filename):
 @bp.route('/get/<string:key>')
 @login_required
 def get(key):
-    user_tasks = Task.query.filter(Task.images, Images.filename == key).first()
+    """
+    Args:
+        key:
+            key its filename
+    Returns:
+            Task.id
+    """
+    user_task = Task.query.filter(Task.user == current_user, Task.images, Images.filename == key).first()
 
-    if user_tasks:
-        data = {'task_id': user_tasks.id}
+    if user_task:
+        data = {'task_id': user_task.id}
     else:
         return abort(404)
 
@@ -230,11 +237,10 @@ def cut_rout():
     Returns:
 
     """
-    # if current_user.get_task_in_progress('img_cutt'):
-    #     data = current_user.get_task_in_progress('img_cutt')
-    #     flash('now images in cutting')
-    #     return render_template('cut_rout.html', title='Порезка SVS', body='')
-    # else:
+    if current_user.get_task_in_progress('img_cutt'):
+        data = current_user.get_task_in_progress('img_cutt')
+        flash('now images is cutting')
+
     try:
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
@@ -250,7 +256,11 @@ def cut_rout():
                                      )
 
             db.session.commit()
-        return render_template('cut_rout.html', title='Порезка SVS', body='')
+            return render_template('cut_rout.html',
+                                   title='Порезка SVS',
+                                   body=data if data else 'Выберите файл')
+        # if data:
+        #     return render_template('cut_rout.html', title='Порезка SVS', body=data)
     except Exception as e:
         current_app.logger.error(e)
-    return render_template('cut_rout.html', title='Порезка SVS', body='Выберите файл')
+

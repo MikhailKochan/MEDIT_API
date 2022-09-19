@@ -54,7 +54,34 @@
         <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
     </div>
 </div>
+{% if data %}
+{% for task in data%}
+    <div class="container-table">
 
+    <div class="box" style="justify-content: center">
+        <section class="uploaded-area"></section>
+    </div>
+
+    <div class="box" style="justify-content: center">
+        <section class="progress-area"></section>
+    </div>
+
+
+    <div class="box" style="justify-content: center">
+
+    </div>
+
+
+    <div class="box" style="justify-content: center">
+
+    </div>
+
+    <div class="box">
+        <a class="button_download" href="{{ url_for('main.get_zip') + task.images.filename + '.zip' }}" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
 <script src="/static/js/cut_rout_2.js"></script>
 
 {{ super() }}

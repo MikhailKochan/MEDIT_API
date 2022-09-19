@@ -10,6 +10,8 @@ result = document.querySelector("#result"),
 status = document.querySelector("#status"),
 uploadedArea = document.querySelector(".uploaded-area");
 
+console.log(document.querySelectorAll('.container-table'));
+
 function getProgress(url, key) {
     var xhr = new XMLHttpRequest();
     xhr.open("get", `/${url}/${key}`, false);
@@ -182,7 +184,7 @@ function progress (task_id) {
                     console.log('we in == create_zip');
                     bottomDownloadFile.href = `/get-zip/${query.data.filename}.zip`
                     bottomDownloadFile.style.display = 'flex';
-//                    getProgress('redis-delete', task_id);
+                    getProgress('redis-delete', task_id);
                     return
                 }else{
                     let timer = setTimeout(progressStatus, 500);

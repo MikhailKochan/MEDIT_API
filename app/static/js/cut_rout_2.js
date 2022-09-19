@@ -79,6 +79,7 @@ function uploadFile(name, fileOriginalName){
                         <div class="progress-bar">
                             <div class="progress" style="margin-top:5px;width: ${fileLoaded}%"></div>
                         </div>
+                    </div>
                 </li>
         `;
 
@@ -141,6 +142,7 @@ function progress (task_id) {
                     <div class="progress-bar">
                         <div class="progress" style="margin-top:5px;width:0%"></div>
                     </div>
+                </div>
             </li>
     `;
     imgPNG_file.style.display = 'none';

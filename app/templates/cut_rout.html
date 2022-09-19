@@ -52,11 +52,15 @@
     </div>
 
     <div class="box">
-        <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+        <a class="button_download" href="" style="display:none;justify-content:flex-start">
+            <img src="/static/logo/download.png" style="margin-right:0px;margin-left:0px" alt="#">Скачать</a><br>
     </div>
 </div>
 {% if data %}
-    <div class="data_enable" hidden>{{ data.id }}</div>
+<div class="data_enable" hidden>
+    <span>{{ data.id }}</span>
+    <span>{{ data.images.filename }}</span>
+</div>
 <!--    <div class="container-table">-->
 <!--        <div class="box" style="justify-content: center">-->
 <!--            -->

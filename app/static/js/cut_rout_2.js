@@ -68,11 +68,11 @@ function uploadFile(name, fileOriginalName){
        let fileSize;
        (fileTotal < 1024) ? fileSize = fileTotal + "KB" : fileSize = (loaded / (1024 * 1024)).toFixed(2) + "MB";
        let progressHTML = `
-                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                <li class="row">
 
                     <div class="content" style='background:none;width:120px'>
                         <div class="details">
-                            <span class="name"style="margin-left:3px;margin-right:3px">Загрузка</span>
+                            <span class="name"style="margin-left:5px;margin-right:3px">Загрузка</span>
                             <span class="percent"style="width:50px">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
@@ -83,11 +83,11 @@ function uploadFile(name, fileOriginalName){
         `;
 
        uploadedArea.innerHTML = `
-                                 <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                                 <li class="row">
                                     <div class="content" style='background:none;'>
                                         <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
                                          <div class="details">
-                                            <span class="name">${name} • </span>
+                                            <span class="name">${name}</span>
                                         </div>
                                     </div>
                                  </li>
@@ -96,9 +96,8 @@ function uploadFile(name, fileOriginalName){
        if(loaded == total){
        progressArea.innerHTML = "";
        uploadedArea.innerHTML = "";
-//           progressArea.innerHTML = `Загрузка <img src='/static/logo/check.png'>`;
            let uploadedHTML = `
-                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">
+                <li class="row">
                     <div class="content" style='background:none;'>
                         <img src="/static/logo/file.png" style="margin-right:10%;margin-left:3px;">
                          <div class="details">
@@ -206,6 +205,6 @@ function progress (task_id) {
 };
 
 if (data_enable) {
-    console.log(data_enable.textContent.trim());
-    progress(data_enable.textContent.trim());
+    console.log(data_enable);
+//    progress(data_enable.textContent.trim());
 };

@@ -205,8 +205,8 @@ function progress (task_id) {
 };
 
 if (data_enable) {
-    let name = data_enable.textContent.trim().split('/n')[1];
-    progress(data_enable.textContent.trim().split('/n')[0]);
+    let name = data_enable.textContent.trim().split('\n')[1];
+    progress(data_enable.textContent.trim().split('\n')[0]);
     bottomInputFile.style.display = 'none';
     uploadedArea.innerHTML = `
          <li class="row">

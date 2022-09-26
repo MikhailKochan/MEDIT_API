@@ -4,7 +4,6 @@ progressArea = document.querySelector(".progress-area"),
 uploadedArea = document.querySelector(".uploaded-area");
 
 
-
 form.addEventListener("click", ()=>{
     fileInput.click();
 });
@@ -15,7 +14,6 @@ function getExtension(filename) {
 };
 
 function myGreeting(name){
-
    const xhr = new XMLHttpRequest();
     xhr.open("GET", `/get/${name}`, false);
     xhr.onreadystatechange = handleFunc;
@@ -31,7 +29,6 @@ function myGreeting(name){
             window.location.replace(`/new_analysis/${url}`)
         }
     }
-
 }}
 
 fileInput.onchange = ({target}) =>{

@@ -69,14 +69,22 @@ def get(key):
 
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
-    send = current_app.redis.get(task_id)
-    if send:
-        # current_app.redis.delete(task.id)
-        return jsonify({
-            'name': 'task',
-            'data': json.loads(send.decode("utf-8"))
-        })
-    else:
+    try:
+        send = current_app.redis.get(task_id)
+        # print('send in progress route: ', send)
+        if send:
+            # current_app.redis.delete(task.id)
+            return jsonify({
+                'name': 'task',
+                'data': json.loads(send.decode("utf-8"))
+            })
+        else:
+            return jsonify({
+                'name': 'task',
+                'data': {'in_queries': 'Please_wait'}
+            })
+    except Exception as e:
+        current_app.logger.info(f"ERROR in progress rout: {e}")
         return abort(404)
 
 
@@ -168,21 +176,6 @@ def index(filename):
 def upload():
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
-        # files = request.files.getlist("file")
-        # if files:
-        #     for file in files:
-        #         path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-        #         print(path)
-        #         file.save(path)
-        #         img = Images(path)
-        #         if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-        #             db.session.add(img)
-        #             db.session.commit()
-        #             current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-        #         else:
-        #             current_app.logger.info(f"{file.filename} already in bd")
-        #
-        #         img = Images.query.filter_by(analysis_number=img.analysis_number).first()
 
         predict = Predict(images=img,
                           timestamp=datetime.utcnow())
@@ -198,7 +191,7 @@ def upload():
                                  job_timeout=10800,
                                  img=img,
                                  predict=predict,
-                                 medit=current_app.medit,
+                                 # medit=current_app.medit,
                                  )
         db.session.commit()
 
@@ -243,7 +236,7 @@ def cut_rout():
         data = current_user.get_task_in_progress('img_cutt')
         flash('now images is cutting')
         print(data)
-        return render_template('cut_rout_test.html', title='Порезка SVS', data=data)
+        # return render_template('cut_rout_test.html', title='Порезка SVS', data=data)
     try:
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)

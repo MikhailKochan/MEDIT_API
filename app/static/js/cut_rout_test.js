@@ -87,27 +87,36 @@ function uploadFile(name, fileOriginalName){
 
            let uploadedHTML = `
                 <li class="row" id="${fileOriginalName}">
-                <img src="./static/logo/file.png">
+                    <img src="./static/logo/file.png">
+                    <span>${name}</span>
                     <div class="content" style="justify-content:space-around">
-                         <div class="details">
-                            <span class="name">${name} • Uploading <img class='fa-check' src="./static/logo/green_check.png"></span>
+                         <div class="details" >
+                            <span class="name" style="display:flex;align-items:center;width:100%;justify-content: space-between;"> • Uploading <img class='fa-check' src="./static/logo/green_check.png"></span>
                             <span class="size">${fileSize}</span>
                         </div>
                         <div class="details"style="flex-direction:row">
-                            <span class="func_name">Cutting • </span>
-                            <span class="percent">0%</span>
+                            <span class="func_name"> • Cutting</span>
+                            <span class="percent"></span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress" style="width: 0%"></div>
                         </div>
+                    </div>
+                    <div class="box" style="display:none;width:40%;align-items:center;justify-content:center;height: 100%">
+                        <a class="button_download" href="" style="justify-content:center">Скачать</a>
+                    </div>
                 </li>
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
-                let workArea = document.querySelector("#" + `${fileOriginalName.replaceAll('.', '\\.')}`);
-                console.log(workArea);
+
+//                console.log(workArea);
+//                console.log(workArea.children[1].children[1].children[0]);
+//                console.log(workArea.children[1].children[1].children[1]);
+//                console.log(workArea.children[2]);
                 bottomInputFile.style.pointerEvents = 'auto';
-                bottomInputFile.style.background = '#eff1f4'
+                bottomInputFile.style.background = '#eff1f4';
                 var myTimeout = setTimeout(function run(){
+                    let workArea = document.querySelector("#" + `${fileOriginalName.replaceAll('.', '\\.')}`);
                     let req = getProgress('get', fileOriginalName);
                     if (req === false) {
                         console.log('req is false, start func run again');
@@ -116,7 +125,7 @@ function uploadFile(name, fileOriginalName){
                         clearTimeout(myTimeout);;
                         progress(req.task_id, workArea);
                     };
-                }, 5000);
+                }, 1000);
        }
     });
     let formData = new FormData(form);
@@ -125,24 +134,30 @@ function uploadFile(name, fileOriginalName){
 
 function progress (task_id, workArea) {
 
-    let timer = setTimeout(progressStatus, 1000);
+    let timer = setTimeout(function() {
+        progressStatus(workArea);
+    }, 1000);
 
     function progressStatus (workArea) {
 
         let query = getProgress('progress', task_id);
 
-        let elem = workArea.querySelector(".progress");
-        let percent = workArea.querySelector('.percent');
+        let span_func_name = workArea.children[2].children[1].children[0];
+        let elem = workArea.children[2].children[2].children[0];
+        let percent = workArea.children[2].children[1].children[1];
+        let bottomDownloadFile = workArea.children[3];
 
         if (query != false){
             if (query.data.in_queries == 'Please_wait'){
 
                 percent.innerHTML = "В очереди";
-                let timer = setTimeout(progressStatus, 5000);
+                let timer = setTimeout(function() {
+                        progressStatus(workArea);
+                    }, 5000);
 
             } else {
 
-//                span_name.innerHTML = `${query.data.func} • `;
+                span_func_name.innerHTML = ` • ${query.data.func}`;
                 let width = query.data.progress;
 
               if (parseInt(width) >= 100) {
@@ -152,14 +167,19 @@ function progress (task_id, workArea) {
 //                    <span style="margin:5%;">Done</span>
 //                    <img src="/static/logo/green_check.png">
 //                `;
-                if (query.data.func == "create_zip"){
-                    console.log('we in == create_zip');
-                    bottomDownloadFile.href = `/get-zip/${query.data.filename}.zip`
+                if (query.data.func == "Create_zip"){
+//                    console.log('we in == Create_zip');
+                    workArea.children[2].children[2].style.display = 'none';
+                    span_func_name.innerHTML = ` • Cutting`
+                    percent.innerHTML = `<img class='fa-check' src="/static/logo/green_check.png">`;
+                    bottomDownloadFile.children[0].href = `/get-zip/${query.data.filename}.zip`;
                     bottomDownloadFile.style.display = 'flex';
                     getProgress('redis-delete', task_id);
                     return
                 }else{
-                    let timer = setTimeout(progressStatus, 500);
+                    let timer = setTimeout(function() {
+                        progressStatus(workArea);
+                    }, 500);
                 };
               } else {
 //                    console.log('we in width != 100');
@@ -167,11 +187,15 @@ function progress (task_id, workArea) {
                         elem.style.width = width + '%';
                         percent.textContent = width + '%';
                     };
-                    let timer = setTimeout(progressStatus, 500);
+                    let timer = setTimeout(function() {
+                        progressStatus(workArea);
+                    }, 500);
               }
             };
         }else{
-            let timer = setTimeout(progressStatus, 1000);
+            let timer = setTimeout(function() {
+                progressStatus(workArea);
+            }, 2000);
         }
     }
 };

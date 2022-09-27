@@ -14,7 +14,7 @@ def create_zip(path_to_save: str):
         folder_name = os.path.basename(path_to_save)
 
         _set_task_progress(progress,
-                           func='create_zip',
+                           func='Create_zip',
                            filename=folder_name)
 
         zip_folder = Config.__dict__['SAVE_ZIP']
@@ -37,12 +37,12 @@ def create_zip(path_to_save: str):
                 progress += 1 / total * 100.0
 
                 _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
-                                   func='create_zip',
+                                   func='Create_zip',
                                    filename=folder_name)
 
         zipFile.close()
         _set_task_progress(100,
-                           func='create_zip',
+                           func='Create_zip',
                            filename=folder_name)
 
         result = f'{folder_name}.zip created'

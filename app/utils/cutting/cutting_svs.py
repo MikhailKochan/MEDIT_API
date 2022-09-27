@@ -20,7 +20,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
 
     try:
         progress = 0
-        _set_task_progress(progress=progress, func='cutting')
+        _set_task_progress(progress=progress, func='Cutting')
 
         file = openslide.OpenSlide(path)
 
@@ -61,7 +61,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
 
                     progress += 1 / total * 100.0
 
-                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), func='cutting')
+                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))), func='Cutting')
 
                     pbar.update(1)
 
@@ -69,4 +69,4 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE):
     except Exception as e:
         print(f"ERROR in cutting: {e}")
 
-        _set_task_progress(100, func='cutting')
+        _set_task_progress(100, func='Cutting')

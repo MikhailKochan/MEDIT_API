@@ -215,9 +215,9 @@ img {
     background: #0f78c3;
 }
 form {
-    margin-top: 5%;
+    width: 90%;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     flex-direction: column;
 }

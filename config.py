@@ -32,6 +32,9 @@ class Config(object):
 
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
 
+    CELERY_BROKER_URL = os.environ.get('REDIS_URL') + '/0' or 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL') + '/0' or 'redis://localhost:6379/0'
+
     UPDATE_TIME = int(1)  # time in second
 
     UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')

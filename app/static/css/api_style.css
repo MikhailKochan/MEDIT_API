@@ -121,6 +121,7 @@ html,body{
     background: #eff1f4;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-between;
     box-shadow: inset -1px 0 0 rgb(0 0 0 / 10%);
 }
@@ -153,12 +154,12 @@ img {
     margin-top: 10%;
 }
 .menu_logo {
-    margin-left: 10px;
     margin-bottom: 10%;
     height: 60px;
     width: 82%;
     background: black;
     display: flex;
+    justify-content: center;
     align-items: center;
     border-radius: 22px;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
@@ -285,6 +286,7 @@ form p{
 section .row{
     width: 90%;
     min-height: 80px;
+    max-width: 600px;
     background: #eff1f4;
     margin-top: 10px;
     list-style: none;
@@ -303,7 +305,9 @@ section .row i{
     font-size: 30px;
     color: #6990f2;
 }
-section .details span{
+
+section .details span {
+    margin-left: 5px;
     font-size: 14px;
 }
 .progress-area {
@@ -384,7 +388,6 @@ section .details span{
     flex-direction: column;
     align-items: flex-start;
     margin-top: 7px;
-    justify-content: space-between;
 }
 .uploaded-area .progress-bar{
     height: 6px;

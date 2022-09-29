@@ -89,7 +89,7 @@ class User(UserMixin, db.Model):
 
     def get_task_in_progress(self, name):
         return Task.query.filter_by(name=name, user=self,
-                                    complete=False).first()
+                                    complete=False).all()
 
 
 class Images(db.Model):

@@ -2,8 +2,10 @@ const form = document.querySelector("form"),
 fileInput = form.querySelector(".input-file"),
 bottomInputFile = document.querySelector("button"),
 progressArea = document.querySelector(".progress-area"),
+data_enable = document.querySelectorAll(".data_enable"),
 uploadedArea = document.querySelector(".uploaded-area");
 
+//console.log(data_enable);
 
 bottomInputFile.addEventListener("click", ()=>{
 //    bottomInputFile.style.boxShadow = 'rgba(50, 50, 93, 0.25) 0px 10px 30px -12px inset, rgba(0, 0, 0, 0.3) 0px 8px 10px -10px inset';
@@ -33,7 +35,6 @@ function getProgress(url, key) {
 
 
 fileInput.onchange = ({target}) =>{
-
 //    for (var i = 0; i < target.files.length; ++i) {
         let file = target.files[0];
         if(file){
@@ -70,7 +71,7 @@ function uploadFile(name, fileOriginalName){
                     <img src="./static/logo/file.png">
                     <div class="content">
                         <div class="details">
-                            <span class="name">${name} • Uploading</span>
+                            <span class="name">${name}Uploading • </span>
                             <span class="percent">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
@@ -84,18 +85,17 @@ function uploadFile(name, fileOriginalName){
        if(loaded == total){
            progressArea.innerHTML = "";
 
-
            let uploadedHTML = `
                 <li class="row" id="${fileOriginalName}">
                     <img src="./static/logo/file.png">
                     <span>${name}</span>
                     <div class="content" style="justify-content:space-around">
                          <div class="details" >
-                            <span class="name" style="display:flex;align-items:center;width:100%;justify-content: space-between;"> • Uploading <img class='fa-check' src="./static/logo/green_check.png"></span>
+                            <span class="name" style="display:flex;align-items:center;width:100%;">Uploading • <img class='fa-check' src="./static/logo/green_check.png"></span>
                             <span class="size">${fileSize}</span>
                         </div>
                         <div class="details"style="flex-direction:row">
-                            <span class="func_name"> • Cutting</span>
+                            <span class="func_name">Cutting • </span>
                             <span class="percent"></span>
                         </div>
                         <div class="progress-bar">
@@ -109,12 +109,9 @@ function uploadFile(name, fileOriginalName){
                 `;
                 uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
 
-//                console.log(workArea);
-//                console.log(workArea.children[1].children[1].children[0]);
-//                console.log(workArea.children[1].children[1].children[1]);
-//                console.log(workArea.children[2]);
                 bottomInputFile.style.pointerEvents = 'auto';
                 bottomInputFile.style.background = '#eff1f4';
+
                 var myTimeout = setTimeout(function run(){
                     let workArea = document.querySelector("#" + `${fileOriginalName.replaceAll('.', '\\.')}`);
                     let req = getProgress('get', fileOriginalName);
@@ -125,7 +122,7 @@ function uploadFile(name, fileOriginalName){
                         clearTimeout(myTimeout);;
                         progress(req.task_id, workArea);
                     };
-                }, 1000);
+                }, 5000);
        }
     });
     let formData = new FormData(form);
@@ -153,24 +150,19 @@ function progress (task_id, workArea) {
                 percent.innerHTML = "В очереди";
                 let timer = setTimeout(function() {
                         progressStatus(workArea);
-                    }, 5000);
+                    }, 10000);
 
             } else {
 
-                span_func_name.innerHTML = ` • ${query.data.func}`;
+                span_func_name.innerHTML = `${query.data.func} • `;
                 let width = query.data.progress;
 
               if (parseInt(width) >= 100) {
 
-//                progressArea.innerHTML = "";
-//                progressArea.innerHTML = `
-//                    <span style="margin:5%;">Done</span>
-//                    <img src="/static/logo/green_check.png">
-//                `;
                 if (query.data.func == "Create_zip"){
 //                    console.log('we in == Create_zip');
                     workArea.children[2].children[2].style.display = 'none';
-                    span_func_name.innerHTML = ` • Cutting`
+                    span_func_name.innerHTML = `Cutting • `
                     percent.innerHTML = `<img class='fa-check' src="/static/logo/green_check.png">`;
                     bottomDownloadFile.children[0].href = `/get-zip/${query.data.filename}.zip`;
                     bottomDownloadFile.style.display = 'flex';
@@ -199,3 +191,45 @@ function progress (task_id, workArea) {
         }
     }
 };
+
+if (data_enable) {
+    for (var i = 0; i < data_enable.length; ++i) {
+        let fileOriginalName = data_enable[i].textContent.trim().split('\n')[1].replace(/\s+/g,''),
+        task_id = data_enable[i].textContent.trim().split('\n')[0].replace(/\s+/g,''),
+        name = fileOriginalName;
+//        console.log(fileOriginalName);
+        if(fileOriginalName.length >= 12){
+                    let splitName = fileOriginalName.split('.');
+                    name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+                };
+
+        let uploadedHTML = `
+                <li class="row" id="${fileOriginalName}">
+                    <img src="./static/logo/file.png">
+                    <span>${name}</span>
+                    <div class="content" style="justify-content:space-around">
+                         <div class="details" >
+                            <span class="name" style="display:flex;align-items:center;width:100%;">Uploading • <img class='fa-check' src="./static/logo/green_check.png"></span>
+
+                        </div>
+                        <div class="details"style="flex-direction:row">
+                            <span class="func_name">Cutting • </span>
+                            <span class="percent"></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="box" style="display:none;width:40%;align-items:center;justify-content:center;height: 100%">
+                        <a class="button_download" href="" style="justify-content:center">Скачать</a>
+                    </div>
+                </li>
+                `;
+        uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
+        let id_element = fileOriginalName.replaceAll('.', '\\.');
+//        console.log(id_element);
+        let workArea = document.querySelector("#" + `${id_element}`);
+//        console.log(workArea);
+        progress(task_id, workArea);
+    };
+}

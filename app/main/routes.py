@@ -231,13 +231,13 @@ def cut_rout():
 
     """
     data = None
-
-    if current_user.get_task_in_progress('img_cutt'):
-        data = current_user.get_task_in_progress('img_cutt')
-        flash('now images is cutting')
-        print(data)
-        # return render_template('cut_rout_test.html', title='Порезка SVS', data=data)
     try:
+        if current_user.get_task_in_progress('img_cutt'):
+            data = current_user.get_task_in_progress('img_cutt')
+            flash('now images is cutting')
+            print(data)
+            # return render_template('cut_rout_test.html', title='Порезка SVS', data=data)
+
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
 
@@ -252,13 +252,13 @@ def cut_rout():
                                      )
 
             db.session.commit()
-        # return render_template('cut_rout.html', title='Порезка SVS', body=data if data else 'Выберите файл')
-        if data:
-            return render_template('cut_rout_test.html', title='Порезка SVS', body=data)
-        else:
-            return render_template('cut_rout_test.html',
-                                   title='Порезка SVS',
-                                   body='Выберите файл')
+        return render_template('cut_rout_test.html', title='Порезка SVS', body=data if data else None)
+        # if data:
+        #     return render_template('cut_rout_test.html', title='Порезка SVS', body=data)
+        # else:
+        #     return render_template('cut_rout_test.html',
+        #                            title='Порезка SVS',
+        #                            body='Выберите файл')
     except Exception as e:
         current_app.logger.error(e)
 

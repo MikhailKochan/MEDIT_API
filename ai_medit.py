@@ -1,10 +1,11 @@
-from app import create_app, db, models
+from app import create_app, db, models, ext_celery
 from app.models import User, Predict, Images, Task, Notification, Status
 from app.view import watcher
 import threading
 
 
 app = create_app()
+celery = ext_celery.celery
 
 
 # thr = threading.Thread(target=watcher, name='watcher', daemon=True)
@@ -20,5 +21,5 @@ def make_shell_context():
             'Images': Images,
             'Task': Task,
             'Notification': Notification,
-            # 'predictor': app.medit.predictor,
+            'predictor': app.medit.predictor,
             'Status': Status}

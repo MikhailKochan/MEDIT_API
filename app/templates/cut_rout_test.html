@@ -10,10 +10,9 @@
 <div class="container-table" style="justify-content:center">
     <form action="{{url_for('main.cut_rout')}}" enctype="multiple / form-data">
         <input type="file" name="file" class="input-file" hidden>
-        <button class="button" type="button" style="height:60px;width:600px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
-
+        <button class="button" type="button" style="height:60px;max-width:600px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
             <img src="/static/logo/upload.png" alt="#">
-            <a>Выбрать файл</a>
+            <p>Выбрать файл</p>
         </button>
     </form>
 </div>
@@ -23,11 +22,13 @@
     <section class="uploaded-area"></section>
 </div>
 
-{% if data %}
-<div class="data_enable" hidden>
-    <span>{{ data.id }}</span>
-    <span>{{ data.images.filename }}</span>
-</div>
+{% if body %}
+    {% for task in body %}
+        <div class="data_enable" hidden>
+            <span>{{task.id}}</span>
+            <span>{{task.images.filename}}</span>
+        </div>
+    {% endfor %}
 {% endif %}
 
 

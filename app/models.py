@@ -139,9 +139,8 @@ class Images(db.Model):
         db.session.add(n)
         return n
 
-    def cutting(self):
+    def cutting(self, celery_job=None):
         try:
-
             f_path = os.path.join(current_app.config['BASEDIR'],
                                   current_app.config['UPLOAD_FOLDER'],
                                   self.filename)
@@ -159,11 +158,14 @@ class Images(db.Model):
 
             current_app.logger.info(f'start cutting {self.filename}')
 
-            start_cut(path=f_path,
-                      CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
-                      _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
-                      )
+            save_folder = start_cut(path=f_path,
+                                    CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
+                                    _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
+                                    job=celery_job)
+
             current_app.logger.info(f'finish cutting {self.filename}')
+
+            return save_folder
         except Exception as e:
             current_app.logger.error(f"ERROR IN CUTTING: {e}")
 
@@ -396,36 +398,6 @@ class Images(db.Model):
         except Exception as e:
             current_app.logger.error(e)
 
-    def launch_task(self, name, description, *args, **kwargs):
-        task = self.get_tasks_in_progress()
-        if len(task) >= 1:
-            return 'You can make only one task in moment'
-        else:
-            rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
-            task = Task(id=rq_job.get_id(), name=name, description=description,
-                        predict_id=self.id)
-            db.session.add(task)
-        return task
-
-    def get_tasks_in_progress(self):
-        return Task.query.filter_by(predict=self, complete=False).all()
-
-    def get_task_in_progress(self, name):
-        return Task.query.filter_by(name=name, predict=self,
-                                    complete=False).first()
-
-    def create_zip(self, path_to_save_draw: str):
-        from app.utils.create_zip.create_zip import create_zip
-        try:
-
-            result = create_zip(self, path_to_save_draw)
-
-        except Exception as e:
-            result = e
-
-        else:
-            return result
-
     def __repr__(self):
         if self.timestamp:
             text = f'<Image {self.name} load on server {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}' \
@@ -484,24 +456,6 @@ class Predict(db.Model):
             return
         return s
 
-    def launch_task(self, name, description, *args, **kwargs):
-        task = self.get_tasks_in_progress()
-        if len(task) >= 1:
-            return 'You can make only one task in moment'
-        else:
-            rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, job_timeout=10800, retry=Retry(max=3))
-            task = Task(id=rq_job.get_id(), name=name, description=description,
-                        predict_id=self.id)
-            db.session.add(task)
-        return task
-
-    def get_tasks_in_progress(self):
-        return Task.query.filter_by(predict=self, complete=False).all()
-
-    def get_task_in_progress(self, name):
-        return Task.query.filter_by(name=name, predict=self,
-                                    complete=False).first()
-
     def create_zip(self, path_to_save_draw: str):
         from app.utils.create_zip.create_zip import create_zip
         try:
@@ -531,9 +485,8 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
 
-def _set_task_progress(progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
+def _set_task_progress(job, progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
 
-    job = get_current_job()
     if job:
         job_id = job.get_id()
         job.meta['progress'] = progress

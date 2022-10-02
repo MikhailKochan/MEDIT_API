@@ -71,7 +71,9 @@ def get(key):
 def progress(task_id):
     try:
         send = current_app.redis.get(task_id)
+
         # print('send in progress route: ', send)
+
         if send:
             # current_app.redis.delete(task.id)
             return jsonify({
@@ -191,7 +193,7 @@ def upload():
                                  job_timeout=10800,
                                  img=img,
                                  predict=predict,
-                                 # medit=current_app.medit,
+                                 medit=current_app.medit,
                                  )
         db.session.commit()
 
@@ -233,10 +235,8 @@ def cut_rout():
     data = None
     try:
         if current_user.get_task_in_progress('img_cutt'):
-            data = current_user.get_task_in_progress('img_cutt')
+            # data = current_user.get_task_in_progress('img_cutt')
             flash('now images is cutting')
-            print(data)
-            # return render_template('cut_rout_test.html', title='Порезка SVS', data=data)
 
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
@@ -252,13 +252,66 @@ def cut_rout():
                                      )
 
             db.session.commit()
-        return render_template('cut_rout_test.html', title='Порезка SVS', body=data if data else None)
-        # if data:
-        #     return render_template('cut_rout_test.html', title='Порезка SVS', body=data)
-        # else:
-        #     return render_template('cut_rout_test.html',
-        #                            title='Порезка SVS',
-        #                            body='Выберите файл')
+        return render_template('cut_rout_test.html', title='Порезка SVS', body=data)
+
     except Exception as e:
         current_app.logger.error(e)
 
+
+@bp.route('/cutting_celery', methods=['POST', 'GET'])
+@login_required
+def cutting_rout_celery():
+    try:
+        data = None
+
+        if current_user.get_task_in_progress('img_cutt'):
+            data = current_user.get_task_in_progress('img_cutt')
+            flash('now images is cutting')
+        if request.method == 'GET':
+            return render_template('cut_rout.html', title='Порезка SVS', body=data)
+        if request.method == 'POST':
+            img = file_save_and_add_to_db(request)
+            from app.celery_task.celery_task import cutting_task
+            celery_job = cutting_task.apply_async()
+            task = Task(id=celery_job.id, name=f'Cutting {img.filename}', user=current_user, images=img)
+            db.session.add(task)
+            db.session.commit()
+            return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
+        return render_template('cut_rout.html', title='Порезка SVS', body=data)
+
+    except Exception as e:
+        current_app.logger.error(e)
+
+
+@bp.route('/status/<task_id>')
+def taskstatus(task_id):
+    from app.celery_task.celery_task import cutting_task
+    task = cutting_task.AsyncResult(task_id)
+    # print(task.info)
+    # print(dir(task))
+    if task.state == 'PENDING':
+        # job did not start yet
+        response = {
+            'state': task.state,
+            'progress': 0,
+            'status': 'Pending...'
+        }
+    elif task.state != 'FAILURE':
+        response = {
+            'state': task.state,
+            'progress': task.info.get('progress', 0),
+            'function': task.info.get('function', ''),
+            'filename': task.info.get('filename', ''),
+            'all_mitoz': task.info.get('all_mitoz', ''),
+            'analysis_number': task.info.get('analysis_number', '')
+        }
+        if 'result' in task.info:
+            response['result'] = task.info['result']
+    else:
+        # something went wrong in the background job
+        response = {
+            'state': task.state,
+            'progress': 1,
+            'status': str(task.info),  # this is the exception raised
+        }
+    return jsonify(response)

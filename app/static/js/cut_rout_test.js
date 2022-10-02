@@ -71,7 +71,7 @@ function uploadFile(name, fileOriginalName){
                     <img src="./static/logo/file.png">
                     <div class="content">
                         <div class="details">
-                            <span class="name">${name}Uploading • </span>
+                            <span class="name">${name} • Uploading</span>
                             <span class="percent">${fileLoaded}%</span>
                         </div>
                         <div class="progress-bar">
@@ -133,7 +133,7 @@ function progress (task_id, workArea) {
 
     let timer = setTimeout(function() {
         progressStatus(workArea);
-    }, 1000);
+    }, 2000);
 
     function progressStatus (workArea) {
 
@@ -171,7 +171,7 @@ function progress (task_id, workArea) {
                 }else{
                     let timer = setTimeout(function() {
                         progressStatus(workArea);
-                    }, 500);
+                    }, 2000);
                 };
               } else {
 //                    console.log('we in width != 100');
@@ -181,7 +181,7 @@ function progress (task_id, workArea) {
                     };
                     let timer = setTimeout(function() {
                         progressStatus(workArea);
-                    }, 500);
+                    }, 2000);
               }
             };
         }else{

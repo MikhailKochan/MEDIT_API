@@ -2,106 +2,41 @@
 
 {% block content %}
 <style>
-    #menu_cutting{
-        background: white;
-
+#menu_cutting{
+    background: white;
 }
 </style>
 
-<div class="container-table">
-<div class="box" style="background: #eff1f4;">
-    Выберите файл
+
+<div class="container-table" style="justify-content:center">
+    <form action="{{url_for('main.cutting_rout_celery')}}" method="post">
+        <input type="file" name="file" class="input-file" accept=".svs" hidden>
+        <input id="submit" type="submit" value="Загрузить" hidden/>
+        <button id="inputSVS" class="button" type="button" style="height:60px;max-width:600px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
+            <img src="/static/logo/upload.png" alt="#">
+            <p>Выбрать файл</p>
+        </button>
+    </form>
 </div>
-<div class="box" style="background: #eff1f4;">
-    Обработка
+
+<div class="wrapper" style="align-items: center">
+    <section class="progress-area"></section>
+    <section class="uploaded-area"></section>
 </div>
-<div class="box" style="background: #eff1f4;">
 
-</div>
-<div class="box" style="background: #eff1f4;">
-
-</div>
-<div class="box" style="background: #eff1f4;">
-    Скачать
-</div>
-</div>
-<div class="container-table">
-
-    <div class="box" id="datetime" style="justify-content: center">
-        <form action="{{url_for('main.cut_rout')}}" style="margin-top:0%" enctype="multiple / form-data">
-            <input type="file" name="file" class="input-file" hidden>
-            <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
-        </form>
-        <section class="uploaded-area"></section>
-
-    </div>
-
-    <div class="box" id="name" style="justify-content: center">
-        <img id="img_file" src="/static/logo/load.gif" style="border-radius:0;display:none;">
-        <section class="progress-area"></section>
-    </div>
-
-
-    <div class="box" id="status" style="justify-content: center">
-
-    </div>
-
-
-    <div class="box" id="result" style="justify-content: center">
-
-    </div>
-
-    <div class="box">
-        <a class="button_download" href="" style="display:none;justify-content:flex-start">
-            <img src="/static/logo/download.png" style="margin-right:0px;margin-left:0px" alt="#">Скачать</a><br>
-    </div>
-</div>
-{% if data %}
-<div class="data_enable" hidden>
-    <span>{{ data.id }}</span>
-    <span>{{ data.images.filename }}</span>
-</div>
-<!--    <div class="container-table">-->
-<!--        <div class="box" style="justify-content: center">-->
-<!--            -->
-<!--        </div>-->
-
-<!--        <div class="box" style="justify-content: center">-->
-<!--            <section class="progress-area">-->
-<!--                <li class="row" style="margin:0%;margin-bottom:0px;padding:0px">-->
-<!--                    <div class="content" style='background:none;width:120px'>-->
-<!--                        <div class="details">-->
-<!--                            <span class="name"style="margin-left:3px;margin-right:3px"></span>-->
-<!--                            <span class="percent"style="width:50px">{{ data.get_progress() }}%</span>-->
-<!--                        </div>-->
-<!--                        <div class="progress-bar">-->
-<!--                            <div class="progress" style="margin-top:5px;width: {{ data.get_progress() }}"></div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--            </section>-->
-<!--        </div>-->
-
-
-<!--        <div class="box" style="justify-content: center">-->
-
-<!--        </div>-->
-
-
-<!--        <div class="box" style="justify-content: center">-->
-
-<!--        </div>-->
-
-<!--        <div class="box">-->
-<!--            <a class="button_download" href="{{ url_for('main.get_zip', filename=data.images.filename + '.zip') }}" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>-->
-<!--        </div>-->
-<!--    </div>-->
-
-
+{% if body %}
+    {% for task in body %}
+        <div class="data_enable" hidden>
+            <span>{{task.id}}</span>
+            <span>{{task.images.filename}}</span>
+        </div>
+    {% endfor %}
 {% endif %}
 
-
-<script src="/static/js/cut_rout_2.js"></script>
+<!--<script src="/static/js/jquery-3.6.3.min.js"></script>-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://malsup.github.io/jquery.form.js"></script>
+<script src="/static/js/cut_rout_jquery.js"></script>
 
 {{ super() }}
 {% endblock %}

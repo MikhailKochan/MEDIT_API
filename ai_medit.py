@@ -21,5 +21,6 @@ def make_shell_context():
             'Images': Images,
             'Task': Task,
             'Notification': Notification,
-            'predictor': app.medit.predictor,
+            # 'predictor': app.medit.predictor,
+            'celery': celery,
             'Status': Status}

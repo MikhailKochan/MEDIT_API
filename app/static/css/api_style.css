@@ -307,6 +307,8 @@ section .row i{
 }
 
 section .details span {
+    display: flex;
+    align-items: center;
     margin-left: 5px;
     font-size: 14px;
 }
@@ -320,7 +322,7 @@ section .details span {
     width: 100%;
     margin-left: 15px;
     background: #eff1f4;
-    justify-content: space-around;
+    justify-content: space-evenly;
 }
 .progress-area .details{
     display: flex;
@@ -379,14 +381,17 @@ section .details span {
     width: 100%;
 }
 .uploaded-area .row .content{
+    display: flex;
+    justify-content: space-evenly;
     width: 100%;
     margin-left: 15px;
     background: #eff1f4;
 }
 .uploaded-area .details{
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 7px;
 }
 .uploaded-area .progress-bar{

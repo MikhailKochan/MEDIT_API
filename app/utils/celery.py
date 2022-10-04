@@ -15,9 +15,10 @@ def make_celery(app):
 
         def __call__(self, *args, **kwargs):
             with app.app_context():
-                # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
-                # db_sess = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
-                # db.session = db_sess
+
+                engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
+                db_sess = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
+                db.session = db_sess
 
                 return TaskBase.__call__(self, *args, **kwargs)
 

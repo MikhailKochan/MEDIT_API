@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 from sys import platform
 
-
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 
@@ -17,14 +16,18 @@ from tqdm import tqdm
 from app.models import _set_task_progress, Config
 
 
-def make_predict(image, predict, medit):
+def make_predict(image, predict, medit, job):
     try:
 
         progress = 0
 
         max_mitoz_in_one_img = 0
 
-        _set_task_progress(progress, 0, func='predict', analysis_number=image.analysis_number)
+        _set_task_progress(job=job,
+                           progress=progress,
+                           all_mitoz=0,
+                           func='predict',
+                           analysis_number=image.analysis_number)
 
         Visualizer = medit.Visualizer
 
@@ -114,11 +117,13 @@ def make_predict(image, predict, medit):
 
                     fl_name = f'{image.filename}/{date_now}'
 
-                    _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
-                                       all_mitoz=all_mitoz,
-                                       filename=fl_name,
-                                       func='predict',
-                                       analysis_number=image.analysis_number)
+                    _set_task_progress(
+                        job=job,
+                        progress=float(D(str(progress)).quantize(D("1.00"))),
+                        all_mitoz=all_mitoz,
+                        filename=fl_name,
+                        func='predict',
+                        analysis_number=image.analysis_number)
                     pbar.update(1)
 
         predict.result_all_mitoz = all_mitoz

@@ -263,7 +263,6 @@ def cut_rout():
 def cutting_rout_celery():
     try:
         data = None
-
         if current_user.get_task_in_progress('img_cutt'):
             data = current_user.get_task_in_progress('img_cutt')
             flash('now images is cutting')

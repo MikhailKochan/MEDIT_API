@@ -65,6 +65,7 @@ class Config(object):
     CLASS_NAMES = ("mitoz", "GMCC", "osteocit")
 
     _CUT_IMAGE_SIZE = (4080, 3072)
+    CUT_IMAGE_SIZE = (4080, 3072)
     _CUDA_SET = "cpu"
     if torch.cuda.is_available():
         _CUDA_SET = "cuda"

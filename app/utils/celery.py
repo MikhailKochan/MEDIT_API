@@ -1,14 +1,25 @@
-from celery import current_app as current_celery_app
+from celery import current_app as current_celery_app, Task
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 
 def make_celery(app):
     celery = current_celery_app
     celery.config_from_object(app.config, namespace="CELERY")
+    TaskBase = celery.Task
 
-    class ContextTask(celery.Task):
+    from app import db
+
+    class ContextTask(TaskBase):
+        abstract = True
+
         def __call__(self, *args, **kwargs):
             with app.app_context():
-                return self.run(*args, **kwargs)
+                # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
+                # db_sess = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
+                # db.session = db_sess
+
+                return TaskBase.__call__(self, *args, **kwargs)
 
     celery.Task = ContextTask
     return celery
@@ -29,3 +40,13 @@ def _set_celery_task_progress(job, progress, all_mitoz=None, func=None, filename
             # if current_app:
             #     current_app.logger.error(e)
             # db.session.rollback()
+
+
+class DatabaseTask(Task):
+    _db = None
+
+    @property
+    def db(self):
+        if self._db is None:
+            self._db = Database.connect()
+        return self._db

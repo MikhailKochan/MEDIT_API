@@ -124,7 +124,8 @@ def new_analysis(image_id):
 @login_required
 def analysis():
     # data = Images.query.order_by(Images.timestamp.desc()).all()
-    return render_template('get_analysis.html', title='analysis', body='')
+    # return render_template('get_analysis.html', title='analysis', body='')
+    return redirect(url_for('main.cutting_rout_celery'))
 
 
 @bp.route('/index/', defaults={'filename': None})

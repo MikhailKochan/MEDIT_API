@@ -5,6 +5,7 @@ import time
 from celery import shared_task
 # from app import celery
 from app.models import Task, Images, User
+from app import db
 
 
 @shared_task(bind=True)

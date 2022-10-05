@@ -17,9 +17,9 @@ from app.models import Config
 
 
 def make_predict(image, predict, medit, job=None):
-    # import torch
+    import torch
     # torch.multiprocessing.set_start_method('spawn')
-
+    torch.cuda.empty_cache()
     if job:
         from app.utils.celery import _set_celery_task_progress as _set_task_progress
     else:
@@ -102,7 +102,7 @@ def make_predict(image, predict, medit, job=None):
 
                 outputs = predictor(im)
 
-                outputs = outputs["instances"].to("cpu")
+                outputs = outputs["instances"].to(cfg.MODEL.DEVICE)
 
                 classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 

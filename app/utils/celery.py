@@ -20,8 +20,8 @@ def make_celery(app):
                 # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
                 # db_sess = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
                 # db.session = db_sess
-                # medit = Medit()
-                # medit.init_app(app)
+                medit = Medit()
+                medit.init_app(app)
 
                 return TaskBase.__call__(self, *args, **kwargs)
 

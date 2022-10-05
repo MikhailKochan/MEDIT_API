@@ -337,6 +337,7 @@ def predict_rout_celery():
             img = file_save_and_add_to_db(request)
             predict = Predict(images=img,
                               timestamp=datetime.utcnow())
+
             from app.celery_task.celery_task import make_predict_task
             celery_job = make_predict_task.apply_async()
 

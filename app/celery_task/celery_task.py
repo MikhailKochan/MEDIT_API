@@ -3,7 +3,7 @@ import shutil
 import random
 import time
 from celery import shared_task
-# from app import celery
+from flask import current_app
 from app.models import Task, Images, User
 from app import db
 
@@ -35,23 +35,45 @@ def cutting_task(self):
 
 
 @shared_task(bind=True)
+def make_predict(self):
+    from app.utils.create_zip.create_zip import create_zip
+    task = Task.query.get(self.request.id)
+    # print('task', task)
+    if task:
+        img = task.images
+        predict = task.predict
+        if img and os.path.isfile(img.file_path):
+            predict, path_predict_img = img.make_predict(predict, celery_job=self)
+            if path_predict_img:
+                create_zip(path_to_save=path_predict_img, job=self)
+                shutil.rmtree(path_predict_img)  # Delete cutting folder
+            os.remove(img.file_path)  # Delete download svs
+
+            db.session.add(predict)
+            task.complete = True
+            db.session.commit()
+            return {'progress': 100,
+                    'status': 'Task completed!',
+                    'result': 'ready to download',
+                    'filename': img.filename,
+                    }
+    else:
+        self.update_state(state='FAILURE')
+        return {'progress': 0, 'status': 'FAILED', 'result': 'EXCEPTION IN CUTTING TASK', }
+
+
+@shared_task(bind=True)
 def test(self):
+    task = Task(id=self.request.id)
     u = User.query.filter_by(username='Vasa').all()
     if u:
         User.query.filter_by(username='Vasa').delete()
         db.session.commit()
     u = User(username='Vasa')
+    db.session.add(task)
     db.session.add(u)
     db.session.commit()
     return 'Done'
-
-
-@shared_task(bind=True)
-def make_predict(self):
-    task = Task.query.get(self.request.id)
-    # print('task', task)
-    if task:
-        img = task.images
 
 
 def test_test(image: Images, *args, **kwargs):

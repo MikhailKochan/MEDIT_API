@@ -27,6 +27,7 @@ var detailsElement = `
           <div class="details"style="flex-direction:row">
             <span class="func_name">Cutting • </span>
             <span class="percent"></span>
+            <span class="all_mitoz"></span>
         </div>
 `
 
@@ -40,10 +41,10 @@ $('document').ready(function(){
         })
 
         $('form').submit(function(event){
-//                console.log('3');
+
                 if($('.input-file').val())
                 {
-//                    console.log('4');
+
                     let file = $('.input-file')[0].files[0],
                     fileOriginalName = file.name,
                     name = file.name;
@@ -82,11 +83,11 @@ $('document').ready(function(){
                             },
                             resetForm: true,
                     });
-//                    console.log('5');
+
                 }
-//                console.log('6');
+
             });
-//        console.log('7');
+
         });
 
 
@@ -95,15 +96,17 @@ function update_progress(status_url, element_id) {
     $.getJSON(status_url, function(data) {
         // update UI
         percent = parseInt(data['progress']);
-        // #af508986-801c-4468-bafa-25a8eced0300 > div.content > div:nth-child(2) > span.percent
+
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
 
+        if (data['all_mitoz'] != ''){
+            $(`#${element_id} > div.content > div:nth-child(2) > span.all_mitoz).text(`Всего митозов • ${data['all_mitoz']}`)
+        }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
             if ('result' in data) {
-                console.log(data);
-                // show result #\36 f826662-1738-405a-899d-583eb07fa688 > div.box > a
+
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`Cutting • `);
                 $(`#${element_id} > div.content > div.progress-bar`).hide()
                 $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);

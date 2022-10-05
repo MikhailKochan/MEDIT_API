@@ -17,6 +17,7 @@ from time import time
 import zipfile
 
 from sys import platform
+
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 import openslide
@@ -169,10 +170,26 @@ class Images(db.Model):
         except Exception as e:
             current_app.logger.error(f"ERROR IN CUTTING: {e}")
 
-    def make_predict(self, predict, cutting=False):
+    def make_predict(self, predict, celery_job=None):
         try:
-            pass
+            if self.format.lower() == '.svs':
+                from app.utils.prediction.make_predict import make_predict as start_predict
 
+            elif self.format.lower() == '.jpg':
+                return current_app.logger.info('JPG not added in APP')
+
+            else:
+                return current_app.logger.info(f'{self.format} not added in APP')
+
+            current_app.logger.info(f'start predict {self.filename}')
+
+            predict, path = start_predict(image=self,
+                                          predict=predict,
+                                          medit=current_app.medit,
+                                          job=celery_job)
+
+            current_app.logger.info(f'finish predict {self.filename}')
+            return predict, path
         except Exception as e:
             print(f"ERROR in predict: {e}")
             if current_app:
@@ -224,7 +241,6 @@ class Images(db.Model):
                                              f"{current_app.config['DRAW']}/{self.filename}/{date_now}")
 
             if not os.path.exists(path_to_save_draw):
-
                 os.mkdir(path_to_save_draw)
 
                 current_app.logger.info(f"Directory {self.filename} for draw created")
@@ -383,7 +399,6 @@ class Notification(db.Model):
 
 
 def _set_task_progress(job, progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
-
     if job:
         job_id = job.get_id()
         job.meta['progress'] = progress

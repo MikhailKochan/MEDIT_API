@@ -273,7 +273,12 @@ def cutting_rout_celery():
             img = file_save_and_add_to_db(request)
             from app.celery_task.celery_task import cutting_task
             celery_job = cutting_task.apply_async()
-            task = Task(id=celery_job.id, name=f'Cutting {img.filename}', user=current_user, images=img)
+
+            task = Task(id=celery_job.id,
+                        name='img_cutt',
+                        description=f'Cutting {img.filename}',
+                        user=current_user,
+                        images=img)
             db.session.add(task)
             db.session.commit()
             return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
@@ -315,3 +320,37 @@ def taskstatus(task_id):
             'status': str(task.info),  # this is the exception raised
         }
     return jsonify(response)
+
+
+@bp.route('/predict_celery', methods=['POST', 'GET'])
+@login_required
+def predict_rout_celery():
+    try:
+        data = None
+        if current_user.get_task_in_progress('img_predict'):
+            data = current_user.get_task_in_progress('img_predict')
+            flash('now images in predict')
+        if request.method == 'GET':
+            return render_template('make_predict.html', title='analysis', body=data)
+        if request.method == 'POST':
+
+            img = file_save_and_add_to_db(request)
+            predict = Predict(images=img,
+                              timestamp=datetime.utcnow())
+            from app.celery_task.celery_task import make_predict
+            celery_job = make_predict.apply_async()
+
+            task = Task(id=celery_job.id,
+                        name='img_predict',
+                        description=f'Predict {img.filename}',
+                        user=current_user,
+                        images=img,
+                        predict=predict)
+            db.session.add(predict)
+            db.session.add(task)
+            db.session.commit()
+            return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
+        return render_template('make_predict.html', title='Порезка SVS', body=data)
+
+    except Exception as e:
+        current_app.logger.error(e)

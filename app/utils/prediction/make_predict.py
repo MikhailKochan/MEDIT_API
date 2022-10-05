@@ -11,12 +11,18 @@ if platform == 'win32':
 import openslide
 
 from decimal import Decimal as D
-from tqdm import tqdm
+# from tqdm import tqdm
 
-from app.models import _set_task_progress, Config
+from app.models import Config
 
 
-def make_predict(image, predict, medit, job):
+def make_predict(image, predict, medit, job=None):
+    if job:
+        from app.utils.celery import _set_celery_task_progress as _set_task_progress
+    else:
+        from rq import get_current_job
+        from app.models import _set_task_progress
+        job = get_current_job()
     try:
 
         progress = 0
@@ -26,7 +32,7 @@ def make_predict(image, predict, medit, job):
         _set_task_progress(job=job,
                            progress=progress,
                            all_mitoz=0,
-                           func='predict',
+                           func='Predict',
                            analysis_number=image.analysis_number)
 
         Visualizer = medit.Visualizer
@@ -76,55 +82,55 @@ def make_predict(image, predict, medit, job):
 
         all_mitoz = 0
 
-        with tqdm(total=total, position=0, leave=False) as pbar:
-            for i in range(0, w_sum):
-                for j in range(0, h_sum):
-                    pbar.set_description(f"Total img: {total}. Start predict")
+        # with tqdm(total=total, position=0, leave=False) as pbar:
+        for i in range(0, w_sum):
+            for j in range(0, h_sum):
+                # pbar.set_description(f"Total img: {total}. Start predict")
 
-                    start_row = j * _CUT_IMAGE_SIZE[0] + s_row
-                    start_col = i * _CUT_IMAGE_SIZE[1] + s_col
+                start_row = j * _CUT_IMAGE_SIZE[0] + s_row
+                start_col = i * _CUT_IMAGE_SIZE[1] + s_col
 
-                    img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
+                img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
 
-                    img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
-                    img = img.convert('RGB')
+                img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
+                img = img.convert('RGB')
 
-                    im = np.asarray(img)
+                im = np.asarray(img)
 
-                    outputs = predictor(im)
+                outputs = predictor(im)
 
-                    outputs = outputs["instances"].to("cpu")
+                outputs = outputs["instances"].to("cpu")
 
-                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
+                classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
-                    if mitoz in classes:
-                        v = Visualizer(im[:, :, ::-1],
-                                       metadata=mitoz_metadata,
-                                       scale=1,
-                                       instance_mode=ColorMode.SEGMENTATION)
+                if mitoz in classes:
+                    v = Visualizer(im[:, :, ::-1],
+                                   metadata=mitoz_metadata,
+                                   scale=1,
+                                   instance_mode=ColorMode.SEGMENTATION)
 
-                        v = v.draw_instance_predictions(outputs)
+                    v = v.draw_instance_predictions(outputs)
 
-                        cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
-                                    v.get_image()[:, :, ::-1])
+                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
+                                v.get_image()[:, :, ::-1])
 
-                        all_mitoz += classes.count(mitoz)
-                        if classes.count(mitoz) > max_mitoz_in_one_img:
-                            max_mitoz_in_one_img = classes.count(mitoz)
-                            # img_name = f"{filename}.jpg"
+                    all_mitoz += classes.count(mitoz)
+                    if classes.count(mitoz) > max_mitoz_in_one_img:
+                        max_mitoz_in_one_img = classes.count(mitoz)
+                        # img_name = f"{filename}.jpg"
 
-                    progress += 1 / total * 100.0
+                progress += 1 / total * 100.0
 
-                    fl_name = f'{image.filename}/{date_now}'
+                fl_name = f'{image.filename}/{date_now}'
 
-                    _set_task_progress(
-                        job=job,
-                        progress=float(D(str(progress)).quantize(D("1.00"))),
-                        all_mitoz=all_mitoz,
-                        filename=fl_name,
-                        func='predict',
-                        analysis_number=image.analysis_number)
-                    pbar.update(1)
+                _set_task_progress(
+                    job=job,
+                    progress=float(D(str(progress)).quantize(D("1.00"))),
+                    all_mitoz=all_mitoz,
+                    filename=fl_name,
+                    func='Predict',
+                    analysis_number=image.analysis_number)
+                # pbar.update(1)
 
         predict.result_all_mitoz = all_mitoz
 

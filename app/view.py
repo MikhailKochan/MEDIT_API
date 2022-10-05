@@ -159,7 +159,7 @@ def app_job(med, img):
         session.commit()
 
 
-class medit:
+class Medit:
     def __init__(self, app=None):
         self.predictor = None
         self.Visualizer = None

@@ -183,6 +183,12 @@ class Images(db.Model):
 
             current_app.logger.info(f'start predict {self.filename}')
 
+            path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
+                                                 f"{current_app.config['DRAW']}/{self.filename}")
+
+            if not os.path.exists(path_to_save_draw_img):
+                os.mkdir(path_to_save_draw_img)
+
             predict, path = start_predict(image=self,
                                           predict=predict,
                                           medit=current_app.medit,

@@ -45,13 +45,8 @@ def make_predict_task(self):
         img = task.images
         predict = task.predict
         if img and os.path.isfile(img.file_path):
+
             predict, path_predict_img = img.make_predict(predict, celery_job=self)
-
-            path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
-                                                 f"{current_app.config['DRAW']}/{img.filename}")
-
-            if not os.path.exists(path_to_save_draw_img):
-                os.mkdir(path_to_save_draw_img)
 
             if path_predict_img:
                 create_zip(path_to_save=path_predict_img, job=self)

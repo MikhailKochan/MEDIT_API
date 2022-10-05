@@ -35,8 +35,11 @@ def cutting_task(self):
 
 
 @shared_task(bind=True)
-def make_predict(self):
+def make_predict_task(self):
+    import torch
     from app.utils.create_zip.create_zip import create_zip
+
+    torch.multiprocessing.set_start_method('spawn')
     task = Task.query.get(self.request.id)
     # print('task', task)
     if task:

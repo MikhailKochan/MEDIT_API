@@ -234,7 +234,7 @@ class Medit:
         cfg = self.cfg
 
         predictor = DefaultPredictor(cfg)
-
+        torch.multiprocessing.set_start_method('spawn')
         self.Visualizer = Visualizer
         self.ColorMode = ColorMode
         self.mitoz_metadata = mitoz_metadata

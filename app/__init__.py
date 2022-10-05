@@ -58,8 +58,7 @@ def create_app(config_class=Config):
     app.task_queue = rq.Queue('medit-task', connection=app.redis)
 
     # sentry.init_app(app)
-    import torch
-    torch.multiprocessing.set_start_method('spawn')
+
     # from app.view import Medit
     # Med = Medit()
     # Med.init_app(app)

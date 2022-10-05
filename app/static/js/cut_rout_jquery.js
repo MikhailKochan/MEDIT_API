@@ -101,7 +101,7 @@ function update_progress(status_url, element_id) {
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
 
-        if (data['all_mitoz'] != ''){
+        if (data['all_mitoz'] != '' && data['all_mitoz'] != 'undefined'){
             $(`#${element_id} > div.content > div:nth-child(2) > span.all_mitoz`).text(`Всего митозов • ${data['all_mitoz']}`)
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {

@@ -227,7 +227,7 @@ class Medit:
         mitoz_metadata = MetadataCatalog.get("mitoze_train")
         mitoz_metadata.thing_colors = Config.__dict__['_COLORS']
         torch.multiprocessing.freeze_support()
-
+        torch.multiprocessing.set_start_method('spawn')
         print('loop make predictor')
         if self.cfg is None:
             self.create_cfg()

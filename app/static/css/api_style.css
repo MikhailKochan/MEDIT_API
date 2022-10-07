@@ -390,7 +390,7 @@ section .details span {
 .uploaded-area .details{
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     align-items: center;
     margin-top: 7px;
 }

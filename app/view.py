@@ -186,7 +186,8 @@ class Medit:
         elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
             path_to_config = os.path.join(Config.__dict__['DETECTRON'],
                                           "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
-
+        else:
+            return 'need set DATASET_FORMAT in .env and config'
         cfg.merge_from_file(path_to_config)
         cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
         cfg.INPUT.MAX_SIZE_TRAIN = 4080
@@ -234,7 +235,7 @@ class Medit:
         cfg = self.cfg
 
         predictor = DefaultPredictor(cfg)
-        # torch.multiprocessing.set_start_method('spawn')
+
         self.Visualizer = Visualizer
         self.ColorMode = ColorMode
         self.mitoz_metadata = mitoz_metadata

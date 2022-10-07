@@ -2,12 +2,30 @@ import os
 import shutil
 import random
 import time
+import json
 
 from celery import shared_task
 from flask import current_app
 # from app import celery
 from app.models import Task, Images, User
 from app import db
+
+
+def _set_task_progress(job, **kwargs):
+    if job:
+        job_id = job.get_id()
+        if current_app:
+            rd = current_app.redis
+        else:
+            from redis import Redis
+            rd = Redis.from_url(Config.__dict__['REDIS_URL'])
+        data = rd.get(job_id)
+        if data:
+            send = json.loads(data)
+        else:
+            send = {}
+        send.update(kwargs)
+        rd.set(job_id, json.dumps(send))
 
 
 def test_test(image: Images, *args, **kwargs):

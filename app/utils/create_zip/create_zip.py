@@ -48,10 +48,6 @@ def create_zip(path_to_save: str, job=None):
                                filename=folder_name)
 
         zipFile.close()
-        _set_task_progress(job=job,
-                           progress=100,
-                           func='Create zip',
-                           filename=folder_name)
 
     except Exception as e:
         print('ERROR in create_zip', e)

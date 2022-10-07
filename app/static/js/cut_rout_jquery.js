@@ -95,18 +95,22 @@ function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
+        console.log(data['state']);
         percent = parseInt(data['progress']);
 
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
 
-        if (data['all_mitoz'] != '' && data['all_mitoz']){
+        if ('all_mitoz' in data){
+            console.log(data['all_mitoz'])
+            $(`#${element_id} > div.content > div:nth-child(2) > span.all_mitoz`).show();
             $(`#${element_id} > div.content > div:nth-child(2) > span.all_mitoz`).text(`Всего митозов • ${data['all_mitoz']}`)
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+            console.log('1');
             if ('result' in data) {
-
+                console.log('2');
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
                 $(`#${element_id} > div.content > div.progress-bar`).hide()
                 $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
@@ -115,11 +119,13 @@ function update_progress(status_url, element_id) {
             }
             else {
                 // something unexpected happened
+                console.log('3');
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
             }
         }
         else {
             // rerun in 2 seconds
+            console.log('4');
             setTimeout(function() {
                 update_progress(status_url, element_id);
             }, 2000);

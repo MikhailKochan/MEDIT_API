@@ -419,9 +419,11 @@ def _set_task_progress(job, progress, all_mitoz=None, func=None, filename=None, 
             rd = Redis.from_url(Config.__dict__['REDIS_URL'])
 
         rd.set(job_id, json.dumps({'task_id': job_id,
+                                   'state': 'PROGRESS',
                                    'mitoz': all_mitoz,
                                    'filename': filename,
                                    'func': func,
+                                   'function': func,
                                    'analysis_number': analysis_number,
                                    'progress': progress}))
         try:

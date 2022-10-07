@@ -69,22 +69,23 @@ def get(key):
 
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
+    print('task_id', task_id)
     try:
         send = current_app.redis.get(task_id)
 
-        # print('send in progress route: ', send)
+        print('send in progress route: ', send)
 
         if send:
             # current_app.redis.delete(task.id)
-            return jsonify({
-                'name': 'task',
-                'data': json.loads(send.decode("utf-8"))
-            })
+            return jsonify(json.loads(send.decode("utf-8")))
+                           # {'name': 'task',
+                           #  'data': json.loads(send.decode("utf-8"))})
+            # return jsonify({
+            #     'name': 'task',
+            #     'data': json.loads(send.decode("utf-8"))
+            # })
         else:
-            return jsonify({
-                'name': 'task',
-                'data': {'in_queries': 'Please_wait'}
-            })
+            return jsonify({'state': 'PENDING'})
     except Exception as e:
         current_app.logger.info(f"ERROR in progress rout: {e}")
         return abort(404)
@@ -222,6 +223,41 @@ def file_save_and_add_to_db(request):
             return img
 
 
+@bp.route('/predict', methods=['POST', 'GET'])
+@login_required
+def predict_rout():
+    data = None
+    if current_user.get_task_in_progress('img_test'):
+        data = current_user.get_task_in_progress('img_test')
+        flash('now images is cutting')
+    if request.method == 'GET':
+        return render_template('predict_rout.html', title='Порезка SVS', body=data)
+    if request.method == 'POST':
+        img = file_save_and_add_to_db(request)
+
+        # predict = Predict(images=img,
+        #                   timestamp=datetime.utcnow())
+        #
+        # path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
+        #                                      f"{current_app.config['DRAW']}/{img.filename}")
+        #
+        # if not os.path.exists(path_to_save_draw_img):
+        #     os.mkdir(path_to_save_draw_img)
+
+        task = current_user.launch_task(name='img_test',
+                                        description=f'{img.filename} prediction',
+                                        job_timeout=10800,
+                                        img=img,
+                                        # predict=predict,
+                                        # medit=current_app.medit,
+                                        )
+        db.session.commit()
+        print(task)
+        return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.progress', task_id=task.id)}
+    # else:
+    #     return render_template('predict_rout.html', title='Анализ', body=data)
+
+
 @bp.route('/cutting', methods=['POST', 'GET'])
 @login_required
 def cut_rout():
@@ -307,7 +343,7 @@ def taskstatus(task_id):
             'progress': task.info.get('progress', 0),
             'function': task.info.get('function', ''),
             'filename': task.info.get('filename', ''),
-            'all_mitoz': task.info.get('all_mitoz', ''),
+            'all_mitoz': task.info.get('all_mitoz'),
             'analysis_number': task.info.get('analysis_number', '')
         }
         if 'result' in task.info:

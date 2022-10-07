@@ -22,7 +22,7 @@ def make_predict(image, predict, medit, job=None):
         from app.utils.celery import _set_celery_task_progress as _set_task_progress
     else:
         from rq import get_current_job
-        from app.models import _set_task_progress
+        from app.new_tasks import _set_task_progress
         job = get_current_job()
     try:
 
@@ -31,6 +31,7 @@ def make_predict(image, predict, medit, job=None):
         max_mitoz_in_one_img = 0
 
         _set_task_progress(job=job,
+                           state='PROGRESS',
                            progress=progress,
                            all_mitoz=0,
                            func='Predict',
@@ -127,10 +128,7 @@ def make_predict(image, predict, medit, job=None):
                 _set_task_progress(
                     job=job,
                     progress=float(D(str(progress)).quantize(D("1.00"))),
-                    all_mitoz=all_mitoz,
-                    filename=fl_name,
-                    func='Predict',
-                    analysis_number=image.analysis_number)
+                    all_mitoz=all_mitoz)
                 # pbar.update(1)
 
         predict.result_all_mitoz = all_mitoz

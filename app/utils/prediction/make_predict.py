@@ -101,7 +101,7 @@ def make_predict(image, predict, medit, job=None):
 
                 outputs = predictor(im)
 
-                outputs = outputs["instances"].to(cfg.MODEL.DEVICE)
+                outputs = outputs["instances"].to('cpu')
 
                 classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 

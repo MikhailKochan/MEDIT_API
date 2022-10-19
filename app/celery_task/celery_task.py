@@ -10,10 +10,10 @@ from app import db
 
 @shared_task(bind=True)
 def cutting_task(self):
-    print(self)
+    # print(self)
     from app.utils.create_zip.create_zip import create_zip
     task = Task.query.get(self.request.id)
-    print('task', task)
+    # print('task', task)
     if task:
         img = task.images
         # print('img', img)

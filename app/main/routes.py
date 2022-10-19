@@ -155,8 +155,8 @@ def predict_rout():
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
 
-        # predict = Predict(images=img,
-        #                   timestamp=datetime.utcnow())
+        predict = Predict(images=img,
+                          timestamp=datetime.utcnow())
 
         path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
                                              f"{current_app.config['DRAW']}/{img.filename}")
@@ -168,8 +168,8 @@ def predict_rout():
                                         description=f'{img.filename} prediction',
                                         job_timeout=10800,
                                         img=img,
-                                        # predict=predict,
-                                        # medit=current_app.medit,
+                                        predict=predict,
+                                        medit=current_app.medit,
                                         )
         db.session.commit()
 

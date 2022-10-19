@@ -164,7 +164,7 @@ def predict_rout():
         if not os.path.exists(path_to_save_draw_img):
             os.mkdir(path_to_save_draw_img)
 
-        task = current_user.launch_task(name='img_test',
+        task = current_user.launch_task(name='mk_pred',
                                         description=f'{img.filename} prediction',
                                         job_timeout=10800,
                                         img=img,

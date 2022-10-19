@@ -21,6 +21,57 @@ from detectron2.data.datasets import register_coco_instances, register_pascal_vo
 from detectron2.engine import DefaultPredictor, DefaultTrainer
 from detectron2.utils.visualizer import ColorMode, Visualizer
 
+from app import db
+
+
+def file_name_maker(filename):
+    """
+    функция для предотвращения повторения имен при сохранении
+    Args:
+        filename:
+            str
+    Returns:
+        filename + (n)
+        n - count filename repeated
+    """
+    g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
+    l = len(g)
+    if l > 0:
+        point = '.'
+        spl = g[-1].split(point)
+        end_str = spl.pop(-1)
+        name = point.join(spl)
+        new_filename = name + f"({l})." + end_str
+        return os.path.basename(new_filename)
+    else:
+        return filename
+
+
+def file_save_and_add_to_db(request, do_predict=False):
+    files = request.files.getlist("file")
+    if files:
+        for file in files:
+            filename = file_name_maker(file.filename)
+            path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            current_app.logger.info(f'получил файл {file.filename}')
+            file.save(path)
+            current_app.logger.info(f"сохранил файл {filename}")
+            img = Images(path)
+            # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
+            db.session.add(img)
+            db.session.commit()
+            current_app.logger.info(f"{filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+            # else:
+            #     current_app.logger.info(f"{filename} already in bd")
+            # img = Images.query.filter_by(analysis_number=img.analysis_number).first()
+
+            if do_predict:
+                path_to_save_draw = os.path.join(Config.BASEDIR, Config.DRAW, filename)
+                if not os.path.exists(path_to_save_draw):
+                    os.mkdir(path_to_save_draw)
+
+            return img
+
 
 def show_all_table(db='app.db'):
     connect = sqlite3.connect(db)

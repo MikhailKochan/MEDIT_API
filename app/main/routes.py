@@ -10,6 +10,7 @@ from sqlalchemy.dialects.sqlite import insert
 import json
 from rq import get_current_job
 from rq import Retry
+from app.view import file_save_and_add_to_db
 
 
 @bp.route('/redis-delete/<key>')
@@ -47,43 +48,14 @@ def get_zip(filename):
         return abort(404)
 
 
-@bp.route('/get/<string:key>')
-@login_required
-def get(key):
-    """
-    Args:
-        key:
-            key its filename
-    Returns:
-            Task.id
-    """
-    user_task = Task.query.filter(Task.user == current_user, Task.images, Images.filename == key).first()
-
-    if user_task:
-        data = {'task_id': user_task.id}
-    else:
-        return abort(404)
-
-    return jsonify(data)
-
-
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
     print('task_id', task_id)
     try:
         send = current_app.redis.get(task_id)
-
-        print('send in progress route: ', send)
-
+        # print('send in progress route: ', send)
         if send:
-            # current_app.redis.delete(task.id)
             return jsonify(json.loads(send.decode("utf-8")))
-                           # {'name': 'task',
-                           #  'data': json.loads(send.decode("utf-8"))})
-            # return jsonify({
-            #     'name': 'task',
-            #     'data': json.loads(send.decode("utf-8"))
-            # })
         else:
             return jsonify({'state': 'PENDING'})
     except Exception as e:
@@ -111,9 +83,7 @@ def new_analysis(image_id):
     pred = Predict(image_id=image_id)
     db.session.add(pred)
     db.session.commit()
-    # if current_user.get_task_in_progress('img_prediction'):
-    #     flash('An predict task is currently in progress')
-    # else:
+
     current_app.logger.info("start pred.lounch_task")
     pred.launch_task('img_prediction', 'make predict...')
     db.session.commit()
@@ -169,58 +139,8 @@ def index(filename):
         img = Images.query.filter_by(filename=filename).first()
         predict = img.predict.filter(Predict.tasks, Task.complete is False)
         data = predict.order_by(Predict.timestamp.desc()).all()
-    # for i in data:
-    #     print(i)
 
     return render_template('index.html', title='Analysis', body='', data=data)
-
-
-@bp.route('/upload', methods=['POST', 'GET'])
-@login_required
-def upload():
-    if request.method == 'POST':
-        img = file_save_and_add_to_db(request)
-
-        predict = Predict(images=img,
-                          timestamp=datetime.utcnow())
-
-        path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
-                                             f"{current_app.config['DRAW']}/{img.filename}")
-
-        if not os.path.exists(path_to_save_draw_img):
-            os.mkdir(path_to_save_draw_img)
-
-        current_user.launch_task(name='mk_pred',
-                                 description=f'{img.filename} prediction',
-                                 job_timeout=10800,
-                                 img=img,
-                                 predict=predict,
-                                 medit=current_app.medit,
-                                 )
-        db.session.commit()
-
-        return render_template('upload.html', title='Загрузка', body='')
-    else:
-        return render_template('upload.html', title='Загрузка', body='Выберите файл')
-
-
-def file_save_and_add_to_db(request):
-    files = request.files.getlist("file")
-    if files:
-        for file in files:
-            path = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
-            current_app.logger.info(f'получил файл {file.filename}')
-            file.save(path)
-            current_app.logger.info(f"сохранил файл {file.filename}")
-            img = Images(path)
-            if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-                db.session.add(img)
-                db.session.commit()
-                current_app.logger.info(f"{file.filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-            else:
-                current_app.logger.info(f"{file.filename} already in bd")
-            img = Images.query.filter_by(analysis_number=img.analysis_number).first()
-            return img
 
 
 @bp.route('/predict', methods=['POST', 'GET'])
@@ -229,20 +149,20 @@ def predict_rout():
     data = None
     if current_user.get_task_in_progress('img_test'):
         data = current_user.get_task_in_progress('img_test')
-        flash('now images is cutting')
+        flash(f'now {len(data)} images in predict')
     if request.method == 'GET':
-        return render_template('predict_rout.html', title='Порезка SVS', body=data)
+        return render_template('get_analysis.html', title='Анализ SVS', body=data)
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
 
         # predict = Predict(images=img,
         #                   timestamp=datetime.utcnow())
-        #
-        # path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
-        #                                      f"{current_app.config['DRAW']}/{img.filename}")
-        #
-        # if not os.path.exists(path_to_save_draw_img):
-        #     os.mkdir(path_to_save_draw_img)
+
+        path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
+                                             f"{current_app.config['DRAW']}/{img.filename}")
+
+        if not os.path.exists(path_to_save_draw_img):
+            os.mkdir(path_to_save_draw_img)
 
         task = current_user.launch_task(name='img_test',
                                         description=f'{img.filename} prediction',
@@ -252,47 +172,10 @@ def predict_rout():
                                         # medit=current_app.medit,
                                         )
         db.session.commit()
-        print(task)
+
         return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.progress', task_id=task.id)}
     # else:
     #     return render_template('predict_rout.html', title='Анализ', body=data)
-
-
-@bp.route('/cutting', methods=['POST', 'GET'])
-@login_required
-def cut_rout():
-    """
-        Что мне надо?
-        - отображать все задычи по порезке изображения пользователя
-        - добавлять новую задачу в очередь
-        - отображать статус задачи (выполняется или задача в очереди)
-    Returns:
-
-    """
-    data = None
-    try:
-        if current_user.get_task_in_progress('img_cutt'):
-            # data = current_user.get_task_in_progress('img_cutt')
-            flash('now images is cutting')
-
-        if request.method == 'POST':
-            img = file_save_and_add_to_db(request)
-
-            # Start new task
-            current_user.launch_task(name='img_cutt',
-                                     description=f'{img.filename} cutting',
-                                     img=img,
-                                     job_timeout=1800,
-                                     path=img.file_path,
-                                     CUTTING_FOLDER=current_app.config['CUTTING_FOLDER'],
-                                     _CUT_IMAGE_SIZE=current_app.config['_CUT_IMAGE_SIZE'],
-                                     )
-
-            db.session.commit()
-        return render_template('cut_rout_test.html', title='Порезка SVS', body=data)
-
-    except Exception as e:
-        current_app.logger.error(e)
 
 
 @bp.route('/cutting_celery', methods=['POST', 'GET'])
@@ -302,26 +185,29 @@ def cutting_rout_celery():
         data = None
         if current_user.get_task_in_progress('img_cutt'):
             data = current_user.get_task_in_progress('img_cutt')
-            flash('now images is cutting')
+            flash(f'now {len(data)} images in cutting')
         if request.method == 'GET':
             return render_template('cut_rout.html', title='Порезка SVS', body=data)
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
             from app.celery_task.celery_task import cutting_task
             celery_job = cutting_task.apply_async()
-
+            print(celery_job.id)
             task = Task(id=celery_job.id,
                         name='img_cutt',
                         description=f'Cutting {img.filename}',
                         user=current_user,
                         images=img)
+            print(task)
             db.session.add(task)
+
             db.session.commit()
             return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
         return render_template('cut_rout.html', title='Порезка SVS', body=data)
 
     except Exception as e:
         current_app.logger.error(e)
+        return render_template('cut_rout.html', title='Порезка SVS')
 
 
 @bp.route('/status/<task_id>')
@@ -369,10 +255,14 @@ def predict_rout_celery():
         if request.method == 'GET':
             return render_template('make_predict.html', title='analysis', body=data)
         if request.method == 'POST':
+            img = file_save_and_add_to_db(request, do_predict=True)
 
-            img = file_save_and_add_to_db(request)
             predict = Predict(images=img,
-                              timestamp=datetime.utcnow())
+                              timestamp=datetime.utcnow(),
+                              path_to_save=os.path.join(current_app.config.BASEDIR,
+                                                        current_app.config.DRAW,
+                                                        img.filename,
+                                                        datetime.utcnow().strftime('%d_%m_%Y__%H_%M')))
 
             from app.celery_task.celery_task import make_predict_task
             celery_job = make_predict_task.apply_async()

@@ -22,7 +22,8 @@ def img_test(**kwargs):
                        analysis_number=img.analysis_number)
     time.sleep(10)
     for i in range(101):
-        _set_task_progress(job, state='PROGRESS', progress=i)
+        # print('progress:', i)
+        _set_task_progress(job, state='PROGRESS', progress=i, all_mitoz=i*2)
         time.sleep(1)
     _set_task_progress(job, state='FINISHED', result='Predict finished')
 

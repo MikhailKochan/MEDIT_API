@@ -8,7 +8,7 @@
 }
 </style>
 
-<div class="container-table">
+<div class="container-table" style="width:100%;justify-content: center">
     <div class="box" style="background: #eff1f4;">
         Выберите файл
     </div>
@@ -26,37 +26,20 @@
     </div>
 </div>
 
-<div class="container-table">
-    <div class="box" id="datetime" style="justify-content: center;flex-wrap: wrap">
-        <form action="{{url_for('main.cut_rout')}}" style="margin-top:0%" enctype="multiple / form-data">
-            <input type="file" name="file" class="input-file" hidden>
-        </form>
-        <button class="button" type="button" style="margin-top:0%">Выбрать файл</button>
-        <section class="uploaded-area"></section>
-    </div>
+<form action="{{url_for('main.predict_rout')}}" style="margin-top:0%" enctype="form-data" method="post">
+    <input type="file" name="file" class="input-file" accept=".svs" hidden>
+    <input id="submit" type="submit" value="Загрузить" hidden/>
+</form>
 
-    <div class="box" id="name" style="justify-content: center">
-        <img id="img_file" src="/static/logo/load.gif" style="border-radius:0;display:none;">
-        <section class="progress-area"></section>
-    </div>
+<section class="progress-area"></section>
+<section class="uploaded-area"></section>
 
 
-    <div class="box" id="status" style="justify-content: center">
+<button id="inputSVS" class="button" type="button" style="margin-top:1%;background:#389ce4;width:160px">Выбрать файл</button>
 
-    </div>
-
-
-    <div class="box" id="result" style="justify-content: center">
-
-    </div>
-
-    <div class="box">
-        <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
-    </div>
-</div>
-
-
-<script src="/static/js/get_analysis.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://malsup.github.io/jquery.form.js"></script>
+<script src="/static/js/get_analysis_jquery.js"></script>
 
 {{ super() }}
 {% endblock %}

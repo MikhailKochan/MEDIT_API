@@ -95,7 +95,7 @@ class User(UserMixin, db.Model):
 
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    analysis_number = db.Column(db.Integer, unique=True)
+    analysis_number = db.Column(db.Integer, unique=False)
     name = db.Column(db.String(64), index=True, unique=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     img_creation_time = db.Column(db.String(64), index=True)
@@ -333,6 +333,8 @@ class Predict(db.Model):
     result_max_mitoz_in_one_img = db.Column(db.String(128))
     count_img = db.Column(db.Integer)
     name_img_have_max_mitoz = db.Column(db.Integer)
+
+    path_to_save = db.Column(db.String(512))
 
     tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 

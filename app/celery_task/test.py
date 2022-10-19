@@ -1,13 +1,18 @@
+from typing import Any
+
 import os
 import shutil
 import random
 import time
 import json
 
+import numpy as np
+import cv2
+
 from celery import shared_task
 from flask import current_app
 # from app import celery
-from app.models import Task, Images, User
+from app.models import Task, Images, User, Predict
 from app import db
 
 
@@ -28,7 +33,25 @@ def _set_task_progress(job, **kwargs):
         rd.set(job_id, json.dumps(send))
 
 
-def test_test(image: Images, *args, **kwargs):
+def test_cutting(self):
+    #  ОТКРЫВАЕМ КАРТИНКУ
+    file = images_opener(self)
+    assert file, 'Нет возможности открыть файл'
+    cut_space_generator = space_selector(self, file)
+
+    save_folder = os.path.join(CUTTING_FOLDER, self.filename)
+    if not os.path.exists(save_folder):
+        os.mkdir(save_folder)
+
+    for filename, img in cut_space_generator:  # перебираем области для обработки
+        if cut_file:
+            if image.format.lower() == '.svs':
+                img.save(os.path.join(save_folder, f"{filename}.jpg"))
+
+    create_zip(save_folder)
+
+
+def test_general_process(image: Images, make_analysis: Predict = None, **kwargs):
     """
         -открываем картинуку
         -находим область
@@ -37,58 +60,68 @@ def test_test(image: Images, *args, **kwargs):
         -при необходимости сохраняем эту область
     Args:
         medit:
-
     Returns:
-
     """
+    #  ОТКРЫВАЕМ КАРТИНКУ
     file = images_opener(image)
+    assert file, 'Нет возможности открыть файл'
+
+    #  СОЗДАЕМ ГЕНЕРАТОР ОБЛАСТЕЙ КАРТИНКИ(координаты)
     cut_space_generator = space_selector(image, file)
 
-    if 'medit' in kwargs and 'predict' in kwargs:
-        medit = kwargs.get('medit')
+    if make_analysis:
+        if not os.path.exists(make_analysis.path_to_save):
+            os.mkdir(make_analysis.path_to_save)
+            current_app.logger.info(f"Directory {make_analysis.path_to_save} for draw created")
 
-        max_mitoz_in_one_img = 0
-        all_mitoz = 0
+    if cut_file:
+        save_folder = os.path.join(CUTTING_FOLDER, image.filename)
+        if not os.path.exists(save_folder):
+            os.mkdir(save_folder)
 
-        Visualizer = medit.Visualizer
+    for filename, img in cut_space_generator:  # перебираем области для обработки
 
-        mitoz_metadata = medit.mitoz_metadata
+        if make_analysis and current_app.medit:
+            make_predict(img_name_draw=filename,
+                         img=img,
+                         predict=make_analysis)
 
-        ColorMode = medit.ColorMode
+        if cut_file:
+            if image.format.lower() == '.svs':
+                img.save(os.path.join(save_folder, f"{filename}.jpg"))
 
-        predictor = medit.predictor
-        pred = kwargs.get('predict')
-        date_now = pred.timestamp.strftime('%d_%m_%Y__%H_%M')
-        path_to_save_draw = os.path.join(Config.BASEDIR, f"{Config.DRAW}/{image.filename}/{date_now}")
-
-    for filename, img in cut_space_generator:  # находим области для обработки
-        if predictor:
-            output = pridict(predictor)
+    file_path: str = save_folder if cut_file else make_analysis.path_to_save
+    create_zip(file_path)
 
 
-def predict(predictor, im):
-    outputs = predictor(im)
+def make_predict(img_name_draw, img, predict: Predict):
 
-    outputs = outputs["instances"].to("cpu")
+    path_to_save_draw = predict.path_to_save
+
+    assert current_app.medit, 'Object medit not added in app'
+
+    im = np.asarray(img)
+    outputs = current_app.medit.predictor(im)
+    outputs = outputs["instances"].to(current_app.medit.cfg.MODEL.DEVICE)
 
     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
     if mitoz in classes:
-        v = Visualizer(im[:, :, ::-1],
-                       metadata=mitoz_metadata,
-                       scale=1,
-                       instance_mode=ColorMode.SEGMENTATION)
+        v = current_app.meditVisualizer(im[:, :, ::-1],
+                                        metadata=current_app.medit.mitoz_metadata,
+                                        scale=1,
+                                        instance_mode=current_app.medit.ColorMode.SEGMENTATION)
 
         v = v.draw_instance_predictions(outputs)
 
         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                     v.get_image()[:, :, ::-1])
 
-        all_mitoz += classes.count(mitoz)
-        if classes.count(mitoz) > max_mitoz_in_one_img:
-            max_mitoz_in_one_img = classes.count(mitoz)
+        predict.result_all_mitoz += classes.count(mitoz)
+        if classes.count(mitoz) > predict.result_max_mitoz_in_one_img:
+            predict.result_max_mitoz_in_one_img = classes.count(mitoz)
 
-        return all_mitoz, max_mitoz_in_one_img
+        return predict
 
 
 def space_selector(image: Images, file):
@@ -103,8 +136,6 @@ def space_selector(image: Images, file):
     s_col = int(h_rest / 2)
     s_row = int(w_rest / 2)
 
-    # total = h_sum * w_sum
-
     for i in range(0, w_sum):
         for j in range(0, h_sum):
 
@@ -118,6 +149,7 @@ def space_selector(image: Images, file):
                 img = file.read_region((start_row, start_col), 0, current_app.configCUT_IMAGE_SIZE)
             else:
                 img = None
+            assert img, f'images: {img}, {image.filename}, {image.format}'
             img = img.convert('RGB')
 
             yield filename, img
@@ -132,16 +164,21 @@ def images_opener(image: Images):
     Returns:
         obj images
     """
-    if image.format.lower() == '.svs':
-        import os
-        # import sys
-        from sys import platform
+    try:
+        if image.format.lower() == '.svs':
+            import os
+            from sys import platform
+            import openslide
+            if platform == 'win32':
+                os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
+            file = openslide.OpenSlide(image.file_path)
 
-        if platform == 'win32':
-            os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
+        else:
+            current_app.logger.info(f'{image.format} not add')
+            file = None
 
-        import openslide
-        file = openslide.OpenSlide(image.file_path)
-    else:
-        return f'{image.format} not add'
-    return file
+        return file
+
+    except Exception as e:
+        current_app.logger.info(f'ERROR IN images_opener: {e}')
+        return None

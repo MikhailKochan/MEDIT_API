@@ -10,9 +10,10 @@ from app import db
 
 @shared_task(bind=True)
 def cutting_task(self):
+    print(self)
     from app.utils.create_zip.create_zip import create_zip
     task = Task.query.get(self.request.id)
-    # print('task', task)
+    print('task', task)
     if task:
         img = task.images
         # print('img', img)
@@ -30,6 +31,10 @@ def cutting_task(self):
                     'filename': img.filename,
                     }
     else:
+        # time.sleep(1)
+        # if count < 3:
+        #     count += 1
+        #     cutting_task(self, count=count)
         self.update_state(state='FAILURE')
         return {'progress': 0, 'status': 'FAILED', 'result': 'EXCEPTION IN CUTTING TASK', }
 

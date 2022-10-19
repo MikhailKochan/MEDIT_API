@@ -17,3 +17,5 @@ app/kwargs.py
 __pycache__
 .venv
 .idea
+институт/*
+app/trash.py

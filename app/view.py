@@ -41,7 +41,7 @@ def file_name_maker(filename):
         spl = g[-1].split(point)
         end_str = spl.pop(-1)
         name = point.join(spl)
-        new_filename = name + f"({l})." + end_str
+        new_filename = name + f"_{l}." + end_str
         return os.path.basename(new_filename)
     else:
         return filename

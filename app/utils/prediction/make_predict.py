@@ -34,7 +34,7 @@ def make_predict(image, predict, medit, job=None):
                            state='PROGRESS',
                            progress=progress,
                            all_mitoz=0,
-                           func='Predict',
+                           function='Predict',
                            analysis_number=image.analysis_number)
 
         Visualizer = medit.Visualizer

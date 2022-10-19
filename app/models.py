@@ -406,52 +406,6 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
 
-def _set_task_progress(job, progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
-    if job:
-        job_id = job.get_id()
-        job.meta['progress'] = progress
-        job.meta['function'] = func
-        job.meta['filename'] = filename
-        job.save_meta()
-
-        if current_app:
-            rd = current_app.redis
-        else:
-            from redis import Redis
-            rd = Redis.from_url(Config.__dict__['REDIS_URL'])
-
-        rd.set(job_id, json.dumps({'task_id': job_id,
-                                   'state': 'PROGRESS',
-                                   'mitoz': all_mitoz,
-                                   'filename': filename,
-                                   'func': func,
-                                   'function': func,
-                                   'analysis_number': analysis_number,
-                                   'progress': progress}))
-        try:
-            if progress >= 100:
-                if current_app:
-                    task = Task.query.get(job_id)
-                    task.complete = True
-                    db.session.commit()
-                else:
-                    from sqlalchemy import select, create_engine
-                    from sqlalchemy.orm import Session
-
-                    engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
-                    with Session(engine) as session:
-                        task = session.query(Task).get(job_id)
-                        task.complete = True
-                        session.commit()
-                # current_app.redis.delete(job_id)
-
-        except Exception as e:
-            print(f'ERROR in set_task_progress: {e}')
-            if current_app:
-                current_app.logger.error(e)
-                db.session.rollback()
-
-
 class Task(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)

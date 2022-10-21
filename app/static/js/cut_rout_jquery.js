@@ -1,3 +1,4 @@
+var container = document.querySelectorAll('.container-table');
 function getExtension(filename) {
   var parts = filename.split('.');
   return parts[parts.length - 1];
@@ -125,4 +126,10 @@ function update_progress(status_url, element_id) {
             }, 2000);
         }
     });
-}
+};
+for (var i = 1; i < container.length; ++i) {
+    let element_id = container[i].id;
+    let status_url = `/progress/${container[i].id}`;
+    console.log(status_url);
+    update_progress(status_url, element_id);
+};

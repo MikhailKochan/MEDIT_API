@@ -3,7 +3,8 @@
 {% block content %}
 <style>
     #menu_analysis{
-        background: white;
+        background: gray;
+
 
 }
 </style>
@@ -32,7 +33,38 @@
 </form>
 
 <section class="progress-area"></section>
-<section class="uploaded-area"></section>
+<section class="uploaded-area">
+    {% if tasks %}
+    {% for task in tasks %}
+        <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
+            <div class="box" id="datetime" style="justify-content: center;flex-wrap: wrap">
+                <img src="./static/logo/file.png">
+                <span class="name"></span>
+            </div>
+            <div class="box" id="status" style="justify-content: center">
+                <div class="content" style="justify-content: center; align-items: center">
+                    <div class="details" style="justify-content: center">
+                        <span class="name"></span>
+                        <span class="percent"></span>
+                    </div>
+                    <div class="progress-bar" style="width: 90%">
+                        <div class="progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="box" id="analysis_number" style="justify-content: center">
+
+            </div>
+            <div class="box" id="result" style="justify-content: center">
+
+            </div>
+            <div class="box">
+                <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+            </div>
+        </div>
+    {% endfor %}
+    {% endif %}
+</section>
 
 
 <button id="inputSVS" class="button" type="button" style="margin-top:1%;background:#389ce4;width:160px">Выбрать файл</button>

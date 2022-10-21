@@ -146,12 +146,12 @@ def index(filename):
 @bp.route('/predict', methods=['POST', 'GET'])
 @login_required
 def predict_rout():
-    data = None
-    if current_user.get_task_in_progress('img_test'):
-        data = current_user.get_task_in_progress('img_test')
+    tasks = None
+    if current_user.get_task_in_progress('mk_pred'):
+        tasks = current_user.get_task_in_progress('mk_pred')
         flash(f'now {len(data)} images in predict')
     if request.method == 'GET':
-        return render_template('get_analysis.html', title='Анализ SVS', body=data)
+        return render_template('get_analysis.html', title='Анализ SVS', tasks=tasks)
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
 
@@ -182,12 +182,12 @@ def predict_rout():
 @login_required
 def cutting_rout_celery():
     try:
-        data = None
+        tasks = None
         if current_user.get_task_in_progress('img_cutt'):
-            data = current_user.get_task_in_progress('img_cutt')
-            flash(f'now {len(data)} images in cutting')
+            tasks = current_user.get_task_in_progress('img_cutt')
+            flash(f'now {len(tasks)} images in cutting')
         if request.method == 'GET':
-            return render_template('cut_rout.html', title='Порезка SVS', body=data)
+            return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
             from app.celery_task.celery_task import cutting_task
@@ -203,7 +203,7 @@ def cutting_rout_celery():
 
             db.session.commit()
             return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
-        return render_template('cut_rout.html', title='Порезка SVS', body=data)
+        # return render_template('cut_rout.html', title='Порезка SVS', body=tasks)
 
     except Exception as e:
         current_app.logger.error(e)

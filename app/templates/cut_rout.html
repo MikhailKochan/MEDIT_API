@@ -3,7 +3,8 @@
 {% block content %}
 <style>
 #menu_cutting{
-    background: white;
+    background: gray;
+
 }
 </style>
 
@@ -21,17 +22,31 @@
 
 <div class="wrapper" style="align-items: center">
     <section class="progress-area"></section>
-    <section class="uploaded-area"></section>
+    <section class="uploaded-area">
+        {% if tasks %}
+            {% for task in tasks %}
+                <li class="row" id="{{task.id}}">
+                        <img src="./static/logo/file.png">
+                        <span class="name">{task.images.filename}</span>
+                        <div class="content">
+                            <div class="details">
+                                <span class="name"></span>
+                                <span class="percent"></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="box" style="display:none;width:40%;align-items:center;justify-content:center;height: 100%">
+                            <a class="button_download" href="" style="justify-content:center">Скачать</a>
+                        </div>
+                    </li>
+            {% endfor %}
+        {% endif %}
+    </section>
 </div>
 
-{% if body %}
-    {% for task in body %}
-        <div class="data_enable" hidden>
-            <span>{{task.id}}</span>
-            <span>{{task.images.filename}}</span>
-        </div>
-    {% endfor %}
-{% endif %}
+
 
 <!--<script src="/static/js/jquery-3.6.3.min.js"></script>-->
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>

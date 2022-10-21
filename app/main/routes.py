@@ -149,7 +149,7 @@ def predict_rout():
     tasks = None
     if current_user.get_task_in_progress('mk_pred'):
         tasks = current_user.get_task_in_progress('mk_pred')
-        flash(f'now {len(data)} images in predict')
+        flash(f'now {len(tasks)} images in predict')
     if request.method == 'GET':
         return render_template('get_analysis.html', title='Анализ SVS', tasks=tasks)
     if request.method == 'POST':
@@ -191,14 +191,15 @@ def cutting_rout_celery():
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
             from app.celery_task.celery_task import cutting_task
-            celery_job = cutting_task.apply_async()
-            print(celery_job.id)
+            celery_job = cutting_task.apply_async(link_error=error_handler.s(),
+                                                  kwargs={'img': img})
+            # print(celery_job.id)
             task = Task(id=celery_job.id,
                         name='img_cutt',
                         description=f'Cutting {img.filename}',
                         user=current_user,
                         images=img)
-            print(task)
+            # print(task)
             db.session.add(task)
 
             db.session.commit()
@@ -265,7 +266,8 @@ def predict_rout_celery():
                                                         datetime.utcnow().strftime('%d_%m_%Y__%H_%M')))
 
             from app.celery_task.celery_task import make_predict_task
-            celery_job = make_predict_task.apply_async()
+            celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
+                                                       kwargs={'img': img, 'predict': predict})
 
             task = Task(id=celery_job.id,
                         name='img_predict',

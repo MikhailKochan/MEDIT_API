@@ -95,7 +95,7 @@ function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
-        console.log(data['state']);
+//        console.log(data['state']);
         percent = parseInt(data['progress']);
 
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
@@ -103,9 +103,9 @@ function update_progress(status_url, element_id) {
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
 
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-            console.log('1');
+//            console.log('1');
             if ('result' in data) {
-                console.log('2');
+//                console.log('2');
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['state']} • `);
                 $(`#${element_id} > div.content > div.progress-bar`).hide()
                 $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
@@ -114,13 +114,13 @@ function update_progress(status_url, element_id) {
             }
             else {
                 // something unexpected happened
-                console.log('3');
+//                console.log('3');
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
             }
         }
         else {
             // rerun in 2 seconds
-            console.log('4');
+//            console.log('4');
             setTimeout(function() {
                 update_progress(status_url, element_id);
             }, 2000);
@@ -130,6 +130,6 @@ function update_progress(status_url, element_id) {
 for (var i = 1; i < container.length; ++i) {
     let element_id = container[i].id;
     let status_url = `/progress/${container[i].id}`;
-    console.log(status_url);
+//    console.log(status_url);
     update_progress(status_url, element_id);
 };

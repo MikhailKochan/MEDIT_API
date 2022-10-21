@@ -8,14 +8,20 @@ from app.models import Task, Images, User
 from app import db
 
 
+@shared_task
+def error_handler(request, exc, traceback):
+    print('Task {0} raised exception: {1!r}\n{2!r}'.format(
+          request.id, exc, traceback))
+
+
 @shared_task(bind=True)
-def cutting_task(self):
+def cutting_task(self, **kwargs):
     # print(self)
     from app.utils.create_zip.create_zip import create_zip
     task = Task.query.get(self.request.id)
     # print('task', task)
     if task:
-        img = task.images
+        img = kwargs.get('img')
         # print('img', img)
         if img and os.path.isfile(img.file_path):
             path_cutting_img = img.cutting(celery_job=self)
@@ -40,7 +46,7 @@ def cutting_task(self):
 
 
 @shared_task(bind=True)
-def make_predict_task(self):
+def make_predict_task(self, **kwargs):
     import torch
     torch.multiprocessing.set_start_method('spawn')
     # torch.cuda.empty_cache()
@@ -49,8 +55,8 @@ def make_predict_task(self):
     task = Task.query.get(self.request.id)
     # print('task', task)
     if task:
-        img = task.images
-        predict = task.predict
+        img = kwargs.get('img')
+        predict = kwargs.get('predict')
         if img and os.path.isfile(img.file_path):
 
             predict, path_predict_img = img.make_predict(predict, celery_job=self)

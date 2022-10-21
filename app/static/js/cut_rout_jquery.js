@@ -79,6 +79,7 @@ $('document').ready(function(){
                                 $(`#${data.task_id} > div.content > div.details`).after(detailsElement);
 
                                 let status_url = request.getResponseHeader('Location');
+                                console.log(status_url);
                                 update_progress(status_url, data.task_id);
                             },
                             resetForm: true,
@@ -95,7 +96,7 @@ function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
-//        console.log(data['state']);
+        console.log(data['state']);
         percent = parseInt(data['progress']);
 
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');

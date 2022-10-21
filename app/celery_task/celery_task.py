@@ -11,7 +11,7 @@ from app import db
 
 @shared_task
 def error_handler(request, exc, traceback):
-    print('Task {0} raised exception: {1!r}\n{2!r}'.format(
+    app.logger.error('Task {0} raised exception: {1!r}\n{2!r}'.format(
           request.id, exc, traceback))
 
 

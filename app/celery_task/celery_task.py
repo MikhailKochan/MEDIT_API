@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 import time
+import json
 from celery import shared_task
 from flask import current_app
 from app.models import Task, Images, User
@@ -21,7 +22,7 @@ def cutting_task(self, **kwargs):
     task = Task.query.get(self.request.id)
     # print('task', task)
     if task:
-        img = kwargs.get('img')
+        img = json.loads(kwargs.get('img'))
         # print('img', img)
         if img and os.path.isfile(img.file_path):
             path_cutting_img = img.cutting(celery_job=self)

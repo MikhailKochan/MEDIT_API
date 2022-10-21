@@ -11,6 +11,7 @@ import json
 from rq import get_current_job
 from rq import Retry
 from app.view import file_save_and_add_to_db
+from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
 
 @bp.route('/redis-delete/<key>')
@@ -190,7 +191,7 @@ def cutting_rout_celery():
             return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
-            from app.celery_task.celery_task import cutting_task
+
             celery_job = cutting_task.apply_async(link_error=error_handler.s(),
                                                   kwargs={'img': img})
             # print(celery_job.id)
@@ -265,7 +266,7 @@ def predict_rout_celery():
                                                         img.filename,
                                                         datetime.utcnow().strftime('%d_%m_%Y__%H_%M')))
 
-            from app.celery_task.celery_task import make_predict_task
+
             celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
                                                        kwargs={'img': img, 'predict': predict})
 

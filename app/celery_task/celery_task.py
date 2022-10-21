@@ -19,24 +19,21 @@ def error_handler(request, exc, traceback):
 def cutting_task(self, **kwargs):
     # print(self)
     from app.utils.create_zip.create_zip import create_zip
-    task = Task.query.get(self.request.id)
-    # print('task', task)
-    if task:
-        img = Images.query.get(kwargs.get('img_id'))
-        # print('img', img)
-        if img and os.path.isfile(img.file_path):
-            path_cutting_img = img.cutting(celery_job=self)
-            if path_cutting_img:
-                create_zip(path_to_save=path_cutting_img, job=self)
-                shutil.rmtree(path_cutting_img)  # Delete cutting folder
-            os.remove(img.file_path)  # Delete download svs
-            task.complete = True
-            db.session.commit()
-            return {'progress': 100,
-                    'status': 'Task completed!',
-                    'result': 'ready to download',
-                    'filename': img.filename,
-                    }
+    img = Images.query.get(kwargs.get('img_id'))
+    if img and os.path.isfile(img.file_path):
+        path_cutting_img = img.cutting(celery_job=self)
+        if path_cutting_img:
+            create_zip(path_to_save=path_cutting_img, job=self)
+            shutil.rmtree(path_cutting_img)  # Delete cutting folder
+        os.remove(img.file_path)  # Delete download svs
+        task = Task.query.get(self.request.id)
+        task.complete = True
+        db.session.commit()
+        return {'progress': 100,
+                'status': 'Task completed!',
+                'result': 'ready to download',
+                'filename': img.filename,
+                }
     else:
         # time.sleep(1)
         # if count < 3:

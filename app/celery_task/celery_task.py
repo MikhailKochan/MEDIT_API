@@ -22,7 +22,7 @@ def cutting_task(self, **kwargs):
     task = Task.query.get(self.request.id)
     # print('task', task)
     if task:
-        img = Imges.query.get(kwargs.get('img_id'))
+        img = Images.query.get(kwargs.get('img_id'))
         # print('img', img)
         if img and os.path.isfile(img.file_path):
             path_cutting_img = img.cutting(celery_job=self)

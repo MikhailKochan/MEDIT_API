@@ -193,7 +193,7 @@ def cutting_rout_celery():
             img = file_save_and_add_to_db(request)
 
             celery_job = cutting_task.apply_async(link_error=error_handler.s(),
-                                                  kwargs={'img': json.dumps(img)})
+                                                  kwargs={'img_id': img.id})
             # print(celery_job.id)
             task = Task(id=celery_job.id,
                         name='img_cutt',

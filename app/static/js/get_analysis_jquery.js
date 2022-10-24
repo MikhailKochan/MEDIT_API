@@ -1,4 +1,4 @@
-var container = document.querySelectorAll('.container-table');
+
 
 function getExtension(filename) {
   var parts = filename.split('.');
@@ -8,7 +8,7 @@ function getExtension(filename) {
 function makeProgressHTML(id, name){
     let progressHTML = `
         <div class="container-table" id="${id}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: center;flex-wrap: wrap">
+            <div class="box" id="datetime" style="justify-content: flex-start;">
                 <img src="./static/logo/file.png">
                 <span class="name">${name}</span>
             </div>
@@ -40,7 +40,13 @@ var detailsElement = `
             <span class="percent"></span>
         </div>
 `
-
+function cutName(name) {
+    if(name.length >= 12){
+        let splitName = name.split('.');
+        name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+    };
+    return name
+}
 $('document').ready(function(){
         $('#inputSVS').on('click', function(){
             console.log('click');
@@ -60,10 +66,11 @@ $('document').ready(function(){
                     fileOriginalName = file.name,
                     name = file.name;
 
-                    if(name.length >= 8){
-                        let splitName = name.split('.');
-                        name = splitName[0].substring(0, 8) + "... ." + splitName[splitName.length - 1];
-                    };
+//                    if(name.length >= 8){
+//                        let splitName = name.split('.');
+//                        name = splitName[0].substring(0, 8) + "... ." + splitName[splitName.length - 1];
+//                    };
+                    name = cutName(name);
                     let element_id = fileOriginalName.replaceAll('.', '\\.');
                     let progressHTML = makeProgressHTML(fileOriginalName, name);
 
@@ -155,9 +162,13 @@ function update_progress(status_url, element_id) {
     });
 }
 
-for (var i = 1; i < container.length; ++i) {
+var container = document.querySelectorAll('.uploaded-area > .container-table');
+
+for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
     let status_url = `/progress/${container[i].id}`;
-    console.log(status_url);
+    let name = $(`#${element_id} > #datetime > span`).text()
+    name = cutName(name);
+    $(`#${element_id} > #datetime > span`).html(name)
     update_progress(status_url, element_id);
 }

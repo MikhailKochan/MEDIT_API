@@ -1,4 +1,10 @@
-
+function cutName(name) {
+    if(name.length >= 12){
+        let splitName = name.split('.');
+        name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+    };
+    return name
+}
 function getExtension(filename) {
   var parts = filename.split('.');
   return parts[parts.length - 1];
@@ -49,10 +55,11 @@ $('document').ready(function(){
                     fileOriginalName = file.name,
                     name = file.name;
 
-                    if(name.length >= 12){
-                        let splitName = name.split('.');
-                        name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
-                    };
+//                    if(name.length >= 12){
+//                        let splitName = name.split('.');
+//                        name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
+//                    };
+                    name = cutName(name);
                     let progressHTML = makeProgressHTML(fileOriginalName, name);
 
                     event.preventDefault();
@@ -79,7 +86,7 @@ $('document').ready(function(){
                                 $(`#${data.task_id} > div.content > div.details`).after(detailsElement);
 
                                 let status_url = request.getResponseHeader('Location');
-                                console.log(status_url);
+//                                console.log(status_url);
                                 update_progress(status_url, data.task_id);
                             },
                             resetForm: true,
@@ -96,9 +103,9 @@ function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
-        console.log(data['state']);
+//        console.log(data['state']);
         percent = parseInt(data['progress']);
-        console.log(percent);
+//        console.log(percent);
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
@@ -129,10 +136,12 @@ function update_progress(status_url, element_id) {
     });
 };
 var container = document.querySelectorAll('.row');
-console.log(container);
+//console.log(container);
 for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
     let status_url = `/status/${container[i].id}`;
-    console.log(container[i].id);
+    let name = document.querySelector(`#${element_id} > span`).textContent
+    name = cutName(name);
+    document.querySelector(`#${element_id} > span`).innerHTML = name
     update_progress(status_url, element_id);
 };

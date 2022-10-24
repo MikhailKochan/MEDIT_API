@@ -1,4 +1,4 @@
-var container = document.querySelectorAll('.container-table');
+
 function getExtension(filename) {
   var parts = filename.split('.');
   return parts[parts.length - 1];
@@ -23,13 +23,13 @@ function makeProgressHTML(id, name){
             </li>
     `;
     return progressHTML
-}
+};
 var detailsElement = `
           <div class="details"style="flex-direction:row">
             <span class="func_name">Cutting • </span>
             <span class="percent"></span>
         </div>
-`
+`;
 
 $('document').ready(function(){
         $('#inputSVS').on('click', function(){
@@ -98,7 +98,7 @@ function update_progress(status_url, element_id) {
         // update UI
         console.log(data['state']);
         percent = parseInt(data['progress']);
-
+        console.log(percent);
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
@@ -128,9 +128,11 @@ function update_progress(status_url, element_id) {
         }
     });
 };
-for (var i = 1; i < container.length; ++i) {
+var container = document.querySelectorAll('.row');
+console.log(container);
+for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
-    let status_url = `/progress/${container[i].id}`;
-//    console.log(status_url);
+    let status_url = `/status/${container[i].id}`;
+    console.log(container[i].id);
     update_progress(status_url, element_id);
 };

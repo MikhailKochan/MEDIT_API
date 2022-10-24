@@ -27,10 +27,14 @@
             {% for task in tasks %}
                 <li class="row" id="{{task.id}}">
                         <img src="./static/logo/file.png">
-                        <span class="name"></span>
+                        <span class="name">{{ task.images.filename }}</span>
                         <div class="content">
                             <div class="details">
-                                <span class="name"></span>
+                                <span class="name">Загрузка • </span>
+                                <span class="percent"><img class='fa-check' src="./static/logo/green_check.png"></span>
+                            </div>
+                            <div class="details"style="flex-direction:row">
+                                <span class="func_name">Cutting • </span>
                                 <span class="percent"></span>
                             </div>
                             <div class="progress-bar">

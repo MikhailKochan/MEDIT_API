@@ -27,6 +27,7 @@ def cutting_task(self, **kwargs):
             shutil.rmtree(path_cutting_img)  # Delete cutting folder
         os.remove(img.file_path)  # Delete download svs
         task = Task.query.get(self.request.id)
+        current_app.logger.info(f'{task} task in 30 line in celery_task.py')
         if task:
             task.complete = True
         else:

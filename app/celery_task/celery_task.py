@@ -11,7 +11,7 @@ from app import db
 
 @shared_task
 def error_handler(request, exc, traceback):
-    app.logger.error('Task {0} raised exception: {1!r}\n{2!r}'.format(
+    current_app.logger.error('Task {0} raised exception: {1!r}\n{2!r}'.format(
           request.id, exc, traceback))
 
 
@@ -27,7 +27,10 @@ def cutting_task(self, **kwargs):
             shutil.rmtree(path_cutting_img)  # Delete cutting folder
         os.remove(img.file_path)  # Delete download svs
         task = Task.query.get(self.request.id)
-        task.complete = True
+        if task:
+            task.complete = True
+        else:
+            current_app.logger.error(f'{self.request.id} task not found')
         db.session.commit()
         return {'progress': 100,
                 'status': 'Task completed!',

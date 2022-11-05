@@ -42,9 +42,8 @@ def _set_celery_task_progress(job, progress, all_mitoz=None, func=None, filename
 
         except Exception as e:
             print(f'ERROR in set_celery_task_progress: {e}')
-            # if current_app:
-            #     current_app.logger.error(e)
-            # db.session.rollback()
+            if current_app:
+                current_app.logger.error(e)
 
 
 class DatabaseTask(Task):

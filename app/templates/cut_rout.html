@@ -27,7 +27,7 @@
             {% for task in tasks %}
                 <li class="row" id="{{task.id}}">
                         <img src="./static/logo/file.png">
-                        <span class="name">{{ task.images.filename }}</span>
+                        <span class="name">{{ task.images.filename[:9] }}</span>
                         <div class="content">
                             <div class="details">
                                 <span class="name">Загрузка • </span>

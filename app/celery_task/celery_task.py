@@ -15,6 +15,14 @@ def error_handler(request, exc, traceback):
           request.id, exc, traceback))
 
 
+def task_getter(task_id: str):
+    for _ in range(10):
+        task = Task.query.get(task_id)
+        if task:
+            return task
+        time.sleep(0.1)
+
+
 @shared_task(bind=True)
 def cutting_task(self, **kwargs):
     # print(self)
@@ -26,7 +34,7 @@ def cutting_task(self, **kwargs):
             create_zip(path_to_save=path_cutting_img, job=self)
             shutil.rmtree(path_cutting_img)  # Delete cutting folder
         os.remove(img.file_path)  # Delete download svs
-        task = Task.query.get(self.request.id)
+        task = task_getter(self.request.id)
         current_app.logger.info(f'{task} task in 30 line in celery_task.py')
         if task:
             task.complete = True
@@ -44,6 +52,7 @@ def cutting_task(self, **kwargs):
         #     count += 1
         #     cutting_task(self, count=count)
         self.update_state(state='FAILURE')
+        current_app.logger.error(f'{self.request.id} task failed')
         return {'progress': 0, 'status': 'FAILED', 'result': 'EXCEPTION IN CUTTING TASK', }
 
 

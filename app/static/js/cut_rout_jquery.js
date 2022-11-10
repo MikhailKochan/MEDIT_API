@@ -140,8 +140,8 @@ var container = document.querySelectorAll('.row');
 for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
     let status_url = `/status/${container[i].id}`;
-    if (document.querySelector(`#\\30 ${element_id} > span`)) {
-        let name = document.querySelector(`#\\30 ${element_id} > span`).textContent;
+    if (document.querySelector(`#${element_id} > span`)) {
+        let name = document.querySelector(`#${element_id} > span`).textContent;
         name = cutName(name);
         document.querySelector(`#${element_id} > span`).innerHTML = name
     };

@@ -244,7 +244,7 @@ class Medit:
         cfg.INPUT.MAX_SIZE_TRAIN = 4080
         cfg.INPUT.MAX_SIZE_TEST = 4080
         cfg.INPUT.MIN_SIZE_TEST = 3072
-        cfg.SOLVER.STEPS = (30000,)
+        cfg.SOLVER.STEPS = (1000,)
         cfg.SOLVER.MAX_ITER = Config.__dict__['_ITER']
         cfg.MODEL.DEVICE = Config.__dict__['_CUDA_SET']
         cfg.DATASETS.TRAIN = ("mitoze_train",)
@@ -258,6 +258,8 @@ class Medit:
 
         cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # 3 classes (mitoz, GMCC, ostiocit)
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+
+        cfg.SOLVER.GAMMA = 0.05
 
         cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.98  # set the testing threshold for this model

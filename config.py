@@ -16,7 +16,7 @@ class Config(object):
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
     MODEL_NAME = ''
-    _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model')
+    _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
 
     REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
 
@@ -70,7 +70,7 @@ class Config(object):
     if torch.cuda.is_available():
         _CUDA_SET = "cuda"
     _COLORS = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
-    _ITER = 40000
+    _ITER = 5000
 
     POSTS_PER_PAGE = 8
 

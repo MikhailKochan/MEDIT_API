@@ -5,7 +5,7 @@ import json
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import Session
 
-from app.models import Config
+from config import Config
 from flask import current_app
 
 

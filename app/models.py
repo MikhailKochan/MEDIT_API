@@ -27,6 +27,9 @@ import sqlite3
 from app import login, db
 
 
+# from app.view import create_zip
+
+
 def generator_id(cls):
     try:
         connect = sqlite3.connect('app.db')

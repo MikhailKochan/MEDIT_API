@@ -4,8 +4,8 @@ import rq
 # from raven.contrib.flask import Sentry
 from config import Config
 from redis import Redis
-
-from celery import Celery
+#
+# from celery import Celery
 
 from flask import Flask, request, current_app
 from flask_sqlalchemy import SQLAlchemy

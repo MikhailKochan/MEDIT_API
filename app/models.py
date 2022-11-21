@@ -3,18 +3,15 @@ from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import pathlib
-from config import Config
+
 import os
 from decimal import Decimal as D
 import redis
 import rq
 import numpy as np
 
-from rq import get_current_job
-from rq import Retry
 import json
 from time import time
-import zipfile
 
 from sys import platform
 
@@ -23,14 +20,11 @@ if platform == 'win32':
 import openslide
 
 from tqdm import tqdm
-import glob
+
 import cv2
-from pascal_voc_writer import Writer
+
 import sqlite3
 from app import login, db
-
-
-# from app.view import create_zip
 
 
 def generator_id(cls):

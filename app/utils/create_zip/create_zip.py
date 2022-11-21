@@ -12,7 +12,7 @@ def create_zip(path_to_save: str, job=None):
         from app.utils.celery import _set_celery_task_progress as _set_task_progress
     else:
         from rq import get_current_job
-        from app.models import _set_task_progress
+        from app.new_tasks import _set_task_progress
         job = get_current_job()
     try:
         progress = 0

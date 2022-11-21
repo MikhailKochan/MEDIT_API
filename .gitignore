@@ -19,3 +19,4 @@ __pycache__
 .idea
 институт/*
 app/trash.py
+task1.py

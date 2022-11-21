@@ -13,7 +13,7 @@ import openslide
 from decimal import Decimal as D
 # from tqdm import tqdm
 
-from app.models import Config
+from config import Config
 
 
 def make_predict(image, predict, medit, job=None):

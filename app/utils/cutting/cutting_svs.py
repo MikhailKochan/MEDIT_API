@@ -10,8 +10,6 @@ import openslide
 from decimal import Decimal as D
 # from tqdm import tqdm
 
-from app.models import Config
-
 
 def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
     if job:

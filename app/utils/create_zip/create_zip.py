@@ -4,7 +4,7 @@ import glob
 from tqdm import tqdm
 from decimal import Decimal as D
 
-from app.models import Config
+from config import Config
 
 
 def create_zip(path_to_save: str, job=None):
@@ -22,7 +22,7 @@ def create_zip(path_to_save: str, job=None):
         _set_task_progress(
             job=job,
             progress=progress,
-            func='Create zip',
+            function='Create zip',
             filename=folder_name)
 
         zip_folder = Config.__dict__['SAVE_ZIP']

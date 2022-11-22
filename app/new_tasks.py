@@ -57,11 +57,14 @@ def mk_pred(**kwargs):
         with Session(engine) as session:
             if predict:
                 session.add(predict)
-                session.commit()
             create_zip(path_to_save=path)
             _set_task_progress(job, state='FINISHED', result='Predict finished')
             shutil.rmtree(path)
             os.remove(img.file_path)
+            task = predict.tasks
+            if task:
+                task.complete = True
+            session.commit()
     except Exception as e:
         print('ERROR in mk_pred new_tasks', e)
 

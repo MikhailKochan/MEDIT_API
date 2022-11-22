@@ -51,7 +51,7 @@ def get_zip(filename):
 
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
-    print('task_id', task_id)
+    # print('task_id', task_id)
     try:
         send = current_app.redis.get(task_id)
         # print('send in progress route: ', send)

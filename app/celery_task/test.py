@@ -12,6 +12,7 @@ import cv2
 from celery import shared_task
 from flask import current_app
 # from app import celery
+from config import Config
 from app.models import Task, Images, User, Predict
 from app import db
 
@@ -95,22 +96,21 @@ def test_general_process(image: Images, make_analysis: Predict = None, **kwargs)
 
 
 def make_predict(img_name_draw, img, predict: Predict):
-
     path_to_save_draw = predict.path_to_save
 
     assert current_app.medit, 'Object medit not added in app'
 
     im = np.asarray(img)
     outputs = current_app.medit.predictor(im)
-    outputs = outputs["instances"].to(current_app.medit.cfg.MODEL.DEVICE)
+    outputs = outputs["instances"].to("cpu")
 
     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
     if mitoz in classes:
-        v = current_app.meditVisualizer(im[:, :, ::-1],
-                                        metadata=current_app.medit.mitoz_metadata,
-                                        scale=1,
-                                        instance_mode=current_app.medit.ColorMode.SEGMENTATION)
+        v = current_app.medit.Visualizer(im[:, :, ::-1],
+                                         metadata=current_app.medit.mitoz_metadata,
+                                         scale=1,
+                                         instance_mode=current_app.medit.ColorMode.SEGMENTATION)
 
         v = v.draw_instance_predictions(outputs)
 
@@ -182,3 +182,6 @@ def images_opener(image: Images):
     except Exception as e:
         current_app.logger.info(f'ERROR IN images_opener: {e}')
         return None
+
+
+

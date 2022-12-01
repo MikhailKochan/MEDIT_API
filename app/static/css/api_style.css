@@ -7,6 +7,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Marck+Script&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 html,body{
     /*font-family: "Cormorant SC";*/
     /*font-family: "Marck Script";*/
@@ -14,9 +15,9 @@ html,body{
     /*font-family: Raleway;*/
     /*font-family: Comfortaa;*/
     /*font-family: "Poiret One";*/
-    /*font-family: "Open Sans";
-    font-family: Merriweather;*/
-    font-family: Ramabhadra;
+    font-family: 'Open Sans', sans-serif;
+    /*font-family: Merriweather;
+    font-family: Ramabhadra;*/
     display: flex;
     align-items: center;
     /*background: #389ce4;*/

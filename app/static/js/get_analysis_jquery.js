@@ -28,7 +28,7 @@ function makeProgressHTML(id, name){
             <div class="box" id="result" style="justify-content: center">
             </div>
             <div class="box">
-                <a class="button_download" href="" style="display:none;justify-content:flex-start"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+                <a class="button_download" href="" style="display:none"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
             </div>
         </div>
     `;

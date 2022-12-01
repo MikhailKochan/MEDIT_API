@@ -27,14 +27,14 @@
             {% for task in tasks %}
                 <li class="row" id="{{task.id}}">
                         <img src="./static/logo/file.png">
-                    <span class="name"><p>{{ task.images.filename[:9] }}</p></span>
+                        <span class="name">{{ task.images.filename[:9] }}</span>
                         <div class="content">
                             <div class="details">
-                                <span class="name"><p>Загрузка • </p></span>
+                                <span class="name">Загрузка • </span>
                                 <span class="percent"><img class='fa-check' src="./static/logo/green_check.png"></span>
                             </div>
                             <div class="details"style="flex-direction:row">
-                                <span class="func_name"><p>Cutting • </p></span>
+                                <span class="func_name">Cutting • </span>
                                 <span class="percent"></span>
                             </div>
                             <div class="progress-bar">
@@ -42,7 +42,7 @@
                             </div>
                         </div>
                         <div class="box" style="display:none;width:40%;align-items:center;justify-content:center;height: 100%">
-                            <a class="button_download" href="" style="justify-content:center"><p>Скачать</p></a>
+                            <a class="button_download" href="" style="justify-content:center">Скачать</a>
                         </div>
                     </li>
             {% endfor %}

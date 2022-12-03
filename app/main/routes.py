@@ -16,8 +16,18 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 
 @bp.route('/history', methods=['GET', 'POST'])
 def history():
+    page = request.args.get('page', 1, type=int)
+    data = Predict.query.order_by(Predict.timestamp.desc()).paginate(page,
+                                                                     current_app.config['POSTS_PER_PAGE'],
+                                                                     False)
+    if not data.items:
+        flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':
-    return render_template('history.html', title='История исследований')
+    next_url = url_for('main.index', page=data.next_num) if data.has_next else None
+    prev_url = url_for('main.index', page=data.prev_num) if data.has_prev else None
+    return render_template('history.html', title='История исследований', data=data.items,
+                           next_url=next_url, prev_url=prev_url)
+
 
 
 @bp.route('/info', methods=['GET', 'POST'])

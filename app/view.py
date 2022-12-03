@@ -69,8 +69,9 @@ def file_save_and_add_to_db(request, do_predict=False):
                 path_to_save_draw = os.path.join(Config.BASEDIR, Config.DRAW, filename)
                 if not os.path.exists(path_to_save_draw):
                     os.mkdir(path_to_save_draw)
-
             return img
+    else:
+        return None
 
 
 def show_all_table(db='app.db'):

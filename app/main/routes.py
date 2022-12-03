@@ -14,6 +14,12 @@ from app.view import file_save_and_add_to_db
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
 
+@bp.route('/history', methods=['GET', 'POST'])
+def history():
+    # if request.method == 'GET':
+    return render_template('history.html', title='История исследований')
+
+
 @bp.route('/get-zip/<string:filename>')
 @login_required
 def get_zip(filename):
@@ -25,10 +31,8 @@ def get_zip(filename):
 
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
-    # print('task_id', task_id)
     try:
         send = current_app.redis.get(task_id)
-        # print('send in progress route: ', send)
         if send:
             return jsonify(json.loads(send.decode("utf-8")))
         else:
@@ -38,85 +42,7 @@ def progress(task_id):
         return abort(404)
 
 
-@bp.route('/del/<prediction_id>')
-@login_required
-def delete(task_id):
-    current_app.logger.info(f"user {current_user} delete predict id = {task_id}")
-    # TODO
-    # подумать нужно ли удалять задачи, если да добавить их в алгоритм удаления
-    task = Task.query.filter_by(id=task_id).first()
-    Predict.query.filter(Task, Task.id == task.id).delete()
-    db.session.commit()
-    data = True
-    return jsonify(data)
-
-
-@bp.route('/new_analysis/<image_id>')
-@login_required
-def new_analysis(image_id):
-    current_app.logger.info(f'start new analysis, img_id: {image_id}')
-    pred = Predict(image_id=image_id)
-    db.session.add(pred)
-    db.session.commit()
-
-    current_app.logger.info("start pred.lounch_task")
-    pred.launch_task('img_prediction', 'make predict...')
-    db.session.commit()
-    return redirect(url_for('main.index', filename=f'{pred.id}'))
-
-
 @bp.route('/')
-@bp.route('/analysis')
-@login_required
-def analysis():
-    # data = Images.query.order_by(Images.timestamp.desc()).all()
-    # return render_template('get_analysis.html', title='analysis', body='')
-    return redirect(url_for('main.cutting_rout_celery'))
-
-
-@bp.route('/index/', defaults={'filename': None})
-@bp.route('/index/<filename>', methods=['GET'])
-@login_required
-def index(filename):
-    page = request.args.get('page', 1, type=int)
-
-    if filename is None:
-        id = request.args.get('select')
-
-        if request.args.get('new_analysis'):
-            return redirect(url_for('main.new_analysis', image_id=id))
-
-        if id is None:
-            data = Predict.query.order_by(Predict.timestamp.desc()).paginate(page,
-                                                                             current_app.config['POSTS_PER_PAGE'],
-                                                                             False)
-        elif id == 'history':
-            data = Predict.query.order_by(Predict.timestamp.desc()).paginate(page,
-                                                                             current_app.config['POSTS_PER_PAGE'],
-                                                                             False)
-        else:
-            data = Predict.query.filter(Predict.images, Images.id == id) \
-                .paginate(page,
-                          current_app.config['POSTS_PER_PAGE'],
-                          False)
-        # print(data.items)
-        if not data.items:
-            flash(f'Нет выполненых исследованний')
-        next_url = url_for('main.index', page=data.next_num) if data.has_next else None
-        prev_url = url_for('main.index', page=data.prev_num) if data.has_prev else None
-        return render_template('index.html', title='Analysis', body='', data=data.items,
-                               next_url=next_url, prev_url=prev_url)
-
-    elif filename.isdigit():
-        data = Predict.query.filter_by(id=filename)
-    else:
-        img = Images.query.filter_by(filename=filename).first()
-        predict = img.predict.filter(Predict.tasks, Task.complete is False)
-        data = predict.order_by(Predict.timestamp.desc()).all()
-
-    return render_template('index.html', title='Analysis', body='', data=data)
-
-
 @bp.route('/predict', methods=['POST', 'GET'])
 @login_required
 def predict_rout():
@@ -128,9 +54,9 @@ def predict_rout():
         return render_template('get_analysis.html', title='Исследование', tasks=tasks)
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
-
-        predict = Predict(images=img,
-                          timestamp=datetime.utcnow())
+        if img is None:
+            return render_template('get_analysis.html', title='Исследование', tasks=tasks)
+        predict = Predict(images=img, timestamp=datetime.utcnow())
 
         path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
                                              f"{current_app.config['DRAW']}/{img.filename}")
@@ -153,34 +79,30 @@ def predict_rout():
 @bp.route('/cutting_celery', methods=['POST', 'GET'])
 @login_required
 def cutting_rout_celery():
+    tasks = None
     try:
-        tasks = None
         if current_user.get_task_in_progress('img_cutt'):
             tasks = current_user.get_task_in_progress('img_cutt')
             flash(f'now {len(tasks)} images in cutting')
-        if request.method == 'GET':
-            return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
         if request.method == 'POST':
             img = file_save_and_add_to_db(request)
+            if img:
+                celery_job = cutting_task.apply_async(link_error=error_handler.s(),
+                                                      kwargs={'img_id': img.id})
 
-            celery_job = cutting_task.apply_async(link_error=error_handler.s(),
-                                                  kwargs={'img_id': img.id})
-            # print(celery_job.id)
-            task = Task(id=celery_job.id,
-                        name='img_cutt',
-                        description=f'Cutting {img.filename}',
-                        user=current_user,
-                        images=img)
-            # print(task)
-            db.session.add(task)
+                task = Task(id=celery_job.id,
+                            name='img_cutt',
+                            description=f'Cutting {img.filename}',
+                            user=current_user,
+                            images=img)
 
-            db.session.commit()
-            return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
-        # return render_template('cut_rout.html', title='Порезка SVS', body=tasks)
+                db.session.add(task)
 
+                db.session.commit()
+                return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
     except Exception as e:
         current_app.logger.error(e)
-        return render_template('cut_rout.html', title='Порезка SVS')
+    return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
 
 
 @bp.route('/status/<task_id>')

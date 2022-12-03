@@ -414,6 +414,7 @@ class Task(db.Model):
     image_id = db.Column(db.Integer, db.ForeignKey('images.id', ondelete="CASCADE"))
 
     complete = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def get_rq_job(self):
         try:

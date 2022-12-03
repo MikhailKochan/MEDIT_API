@@ -110,7 +110,6 @@ def index(filename):
         id = request.args.get('select')
 
         if request.args.get('new_analysis'):
-            print("redirect to new analysis")
             return redirect(url_for('main.new_analysis', image_id=id))
 
         if id is None:
@@ -150,7 +149,7 @@ def predict_rout():
     tasks = None
     if current_user.get_task_in_progress('mk_pred'):
         tasks = current_user.get_task_in_progress('mk_pred')
-        flash(f'now {len(tasks)} images in predict')
+        flash(f'Количество исследований в работе: {len(tasks)}')
     if request.method == 'GET':
         return render_template('get_analysis.html', title='Анализ SVS', tasks=tasks)
     if request.method == 'POST':
@@ -265,7 +264,6 @@ def predict_rout_celery():
                                                         current_app.config.DRAW,
                                                         img.filename,
                                                         datetime.utcnow().strftime('%d_%m_%Y__%H_%M')))
-
 
             celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
                                                        kwargs={'img': img, 'predict': predict})

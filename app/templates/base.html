@@ -19,19 +19,19 @@
     <div class="content">
         <div class="nav-bar" style="">
             <div class="company-name">MEDIT</div>
-            {% if current_user.is_anonymous %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            {% else %}
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
+            {% if current_user.is_authenticated %}
+<!--            <a href="{{ url_for('auth.login') }}">Вход</a>-->
+<!--            {% else %}-->
+            <a href="{{ url_for('auth.logout') }}">Выход</a>
             {% endif %}
         </div>
         <div class="my_content">
             <div class="menu">
                 <div class="menu_a">
-                    <a id="menu_analysis" href="{{ url_for('main.predict_rout') }}"><img src="/static/logo/analysis.png" alt="#">Анализ</a>
+                    <a id="menu_analysis" href="{{ url_for('main.predict_rout') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
 <!--                    <a id="menu_upload" href=""><img src="/static/logo/download.png" alt="#">Загрузить</a>-->
                     <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>
-                    <a id="menu_history" href="/index?select=history"><img src="/static/logo/history.png" alt="#">История</a>
+                    <a id="menu_history" href="/index?select=history"><img src="/static/logo/history.png" alt="#">История исследований</a>
                     <a id="menu_info" href="#"><img src="/static/logo/info.png" alt="#">О программе</a>
                 </div>
                 <div class="menu_logo">

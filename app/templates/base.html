@@ -20,7 +20,7 @@
         <div class="nav-bar" style="">
             <div class="company-name">MEDIT</div>
             {% if current_user.is_anonymous %}
-            <a href="{{ url_for('auth.login') }}">Вход</a>
+            <a href="{{ url_for('auth.login') }}" style="display:none">Вход</a>
             {% else %}
             <a href="{{ url_for('auth.logout') }}">Выход</a>
             {% endif %}

@@ -140,7 +140,7 @@ html,body{
     font-size: 18px;
     margin: 15px;
     border-radius: 5px;
-    text-align: center;
+    /*text-align: center;*/
 }
 .menu a:hover {
     background: gray;

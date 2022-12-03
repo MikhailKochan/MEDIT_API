@@ -21,12 +21,12 @@
         <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
         <p hidden>{{ form.submit() }}</p>
 <!--        <input id="submit" name="submit" type="submit" value="Sign In" hidden>-->
-        <button class="button" type="button" style="height:60px;max-width:600px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
+        <button class="button" type="button" style="height:60px;max-width:250px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
             <p>Вход</p>
         </button>
     </form>
     <script>
-        const fileInput = form.querySelector(".input"),
+        const fileInput = form.querySelector(".button"),
         bottomInputFile = document.querySelector("button");
         bottomInputFile.addEventListener("click", ()=>{fileInput.click();});
     </script>

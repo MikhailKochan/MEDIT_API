@@ -24,8 +24,8 @@ def history():
     if not data:
         flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':
-    next_url = url_for('main.index', page=data.next_num) if data.has_next else None
-    prev_url = url_for('main.index', page=data.prev_num) if data.has_prev else None
+    next_url = url_for('main.history', page=data.next_num) if data.has_next else None
+    prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None
     return render_template('history.html', title='История исследований', tasks=data.items,
                            next_url=next_url, prev_url=prev_url)
 

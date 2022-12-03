@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
 <!--    <link href="/static/css/bootstrap.min.css" rel="stylesheet ">-->
@@ -9,10 +9,10 @@
     {% if title %}
         <title>MEDIT - {{ title }}</title>
     {% else %}
-        <title>Analysis Data</title>
+        <title>MEDIT</title>
     {% endif %}
     {% endblock %}
-
+    <link rel="icon" href="mitoz2.gif" type="image/gif" sizes="32x32">
 <!--    <script src="https://kit.fontawesome.com/1710e4743f.js" crossorigin="anonymous"></script>-->
 </head>
 <body>
@@ -31,10 +31,13 @@
                     <a id="menu_analysis" href="{{ url_for('main.predict_rout') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
                     <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>
                     <a id="menu_history" href="{{ url_for('main.history') }}"><img src="/static/logo/history.png" alt="#">История исследований</a>
-                    <a id="menu_info" href="#"><img src="/static/logo/info.png" alt="#">О программе</a>
+                    <a id="menu_info" href="{{ url_for('main.info') }}"><img src="/static/logo/info.png" alt="#">О программе</a>
                 </div>
                 <div class="menu_logo">
-                <img id="logo" src="/static/logo/mitoz.gif" alt=""><p>Mitoze</p><img src="/static/logo/mitoz_ai.png" alt="#"></div>
+                    <img id="logo" src="/static/logo/mitoz.gif" alt="">
+                    <p>Mitoze</p>
+                    <img src="/static/logo/mitoz_ai.png" alt="#">
+                </div>
             </div>
             <div class="container-wrapper" style="align-items: center">
                 {% block content %}

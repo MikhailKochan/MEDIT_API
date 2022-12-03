@@ -20,6 +20,12 @@ def history():
     return render_template('history.html', title='История исследований')
 
 
+@bp.route('/info', methods=['GET', 'POST'])
+def info():
+    # if request.method == 'GET':
+    return render_template('info.html', title='О программе')
+
+
 @bp.route('/get-zip/<string:filename>')
 @login_required
 def get_zip(filename):

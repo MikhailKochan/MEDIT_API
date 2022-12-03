@@ -11,10 +11,10 @@
 
 <div class="container-table" style="width:100%;justify-content: center">
     <div class="box" style="background: #eff1f4;">
-        Выберите файл
+        Файл
     </div>
     <div class="box" style="background: #eff1f4;">
-        Обработка
+        Статус
     </div>
     <div class="box" style="background: #eff1f4;">
         Номер исследования
@@ -23,7 +23,7 @@
         Найдено митозов
     </div>
     <div class="box" style="background: #eff1f4;">
-        Скачать
+        Скачать результат
     </div>
 </div>
 
@@ -59,7 +59,12 @@
 
             </div>
             <div class="box">
-                <a class="button_download" href="" style="display:none"><img src="/static/logo/download.png" alt="#">Скачать</a><br>
+                <a class="button_download" href="" style="display:none">
+                    <img src="/static/logo/down-arrow.png" alt="#">
+                </a>
+                <a class="button_download" href="" style="display:none">
+                    <img src="/static/logo/remove.png" alt="#">
+                </a>
             </div>
         </div>
     {% endfor %}
@@ -67,7 +72,7 @@
 </section>
 
 
-<button id="inputSVS" class="button" type="button" style="height:60px;max-width:250px;margin-top:0%;display:flex;justify-content:center;align-items:center;">
+<button id="inputSVS" class="button" type="button" style="height:60px;max-width:200px;margin-top:1%;display:flex;justify-content:center;align-items:center;">
     <img src="/static/logo/upload.png" alt="#">
     <p>Выбрать файл</p>
 </button>

@@ -14,32 +14,6 @@ from app.view import file_save_and_add_to_db
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
 
-@bp.route('/redis-delete/<key>')
-@login_required
-def redis_del_key(key):
-    try:
-        current_app.redis.delete(key)
-        Task.query.filter_by(id=key).delete()
-        db.session.commit()
-        data = jsonify('true')
-    except Exception as e:
-        current_app.logger.error(f'ERROR in redis_del_key route: {e}')
-        data = abort(404)
-    return data
-
-
-@bp.route('/zip-delete/<key>')
-@login_required
-def del_zip(key):
-    print(key)
-    try:
-        path = os.path.join(current_app.config["SAVE_ZIP"], key)
-        os.remove(path)
-        return jsonify('')
-    except FileNotFoundError:
-        return abort(404)
-
-
 @bp.route('/get-zip/<string:filename>')
 @login_required
 def get_zip(filename):
@@ -151,7 +125,7 @@ def predict_rout():
         tasks = current_user.get_task_in_progress('mk_pred')
         flash(f'Количество исследований в работе: {len(tasks)}')
     if request.method == 'GET':
-        return render_template('get_analysis.html', title='Анализ SVS', tasks=tasks)
+        return render_template('get_analysis.html', title='Исследование', tasks=tasks)
     if request.method == 'POST':
         img = file_save_and_add_to_db(request)
 
@@ -174,8 +148,6 @@ def predict_rout():
         db.session.commit()
 
         return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.progress', task_id=task.id)}
-    # else:
-    #     return render_template('predict_rout.html', title='Анализ', body=data)
 
 
 @bp.route('/cutting_celery', methods=['POST', 'GET'])

@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from config import Config
 from flask import current_app
 
+from models import Task, Predict
+
 
 def img_test(**kwargs):
     import time
@@ -57,7 +59,7 @@ def mk_pred(**kwargs):
         with Session(engine) as session:
             if predict:
                 session.add(predict)
-                task = predict.tasks
+                task = Task.query.filter(Task.predict, Predict.id == predict.id).first()
             create_zip(path_to_save=path)
             _set_task_progress(job, state='FINISHED', result='Predict finished')
             shutil.rmtree(path)

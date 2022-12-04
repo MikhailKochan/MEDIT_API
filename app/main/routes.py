@@ -42,6 +42,7 @@ def history():
                                     name='mk_pred').paginate(page,
                                                              current_app.config['POSTS_PER_PAGE'],
                                                              False)
+    print(data)
     if not data:
         flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':

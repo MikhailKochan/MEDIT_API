@@ -43,7 +43,7 @@ def history():
                                                              current_app.config['POSTS_PER_PAGE'],
                                                              False)
 
-    if len(data) == 0:
+    if len(data.items) == 0:
         if analysis_number:
             flash(f'У Вас нет исследованний с номером {analysis_number}')
         else:

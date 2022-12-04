@@ -8,5 +8,5 @@ class SearchPredictForm(FlaskForm):
     submit = SubmitField('Поиск')
 
     def validate_search(form, field):
-        if not field.data.isdigit():
+        if not field.dataget('analysis_number').isdigit():
             raise ValidationError('Номер исследования это целое число')

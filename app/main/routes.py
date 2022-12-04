@@ -25,7 +25,7 @@ def history():
     data = {}
 
     if form.validate_on_submit():
-        analysis_number = form.data.analysis_number
+        analysis_number = form.data.get('analysis_number')
         if analysis_number:
             data = Task.query.filter(Task.user_id == current_user.id,
                                      Task.predict,

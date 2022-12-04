@@ -18,9 +18,11 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 @login_required
 def history():
     page = request.args.get('page', 1, type=int)
-    data = Task.query.filter_by(user=current_user, complete=True).paginate(page,
-                                                                           current_app.config['POSTS_PER_PAGE'],
-                                                                           False)
+    data = Task.query.filter_by(user=current_user,
+                                complete=True,
+                                name='mk_pred').paginate(page,
+                                                         current_app.config['POSTS_PER_PAGE'],
+                                                         False)
     if not data:
         flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':

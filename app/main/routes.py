@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 from app import db
 import os
 from app.models import Images, Predict, Status, Task
+from app.main.forms import SearchPredictForm
 from app.main import bp
 from sqlalchemy.dialects.sqlite import insert
 import json
@@ -17,19 +18,32 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 @bp.route('/history', methods=['GET', 'POST'])
 @login_required
 def history():
+    form = SearchPredictForm()
+    if form.validate_on_submit():
+        analysis_number = form.data
     page = request.args.get('page', 1, type=int)
+
     data = Task.query.filter_by(user=current_user,
                                 complete=True,
                                 name='mk_pred').paginate(page,
                                                          current_app.config['POSTS_PER_PAGE'],
                                                          False)
+    if analysis_number:
+        data = Task.query.filter(Task.user_id == current_user.id,
+                                 Task.predict,
+                                 Task.images,
+                                 Images.analysis_number == analysis_number)\
+            .order_by(Task.timestamp.desc()).all() \
+            .paginate(page,
+                      current_app.config['POSTS_PER_PAGE'],
+                      False)
     if not data:
         flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':
     next_url = url_for('main.history', page=data.next_num) if data.has_next else None
     prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None
     return render_template('history.html', title='История исследований', tasks=data.items,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url, form=form)
 
 
 @bp.route('/info', methods=['GET', 'POST'])

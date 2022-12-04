@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% import 'bootstrap/wtf.html' as wtf %}
+
 {% block content %}
 <style>
     #menu_history{
@@ -9,9 +11,12 @@
 }
 </style>
 
-<form action="{{url_for('main.history')}}" style="margin-top:0%" enctype="form-data" method="post">
 
-</form>
+<div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
 
 <div class="container-table" style="width:100%;justify-content: center">
     <div class="box" style="background: #eff1f4;">
@@ -59,7 +64,7 @@
             </div>
             <div class="box">
                 <a class="button_download" href="" style="display:none">
-                    <img src="/static/logo/download_blue.png" alt="#">
+                    <img src="/static/logo/download_green.png" alt="#">
                 </a>
                 <a class="button_cancel" href="" style="display:none">
                     <img src="/static/logo/remove.png" alt="#">

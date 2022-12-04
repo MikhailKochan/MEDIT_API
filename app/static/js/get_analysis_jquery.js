@@ -143,7 +143,7 @@ function update_progress(status_url, element_id) {
                 $(`#${element_id} > #status > div > div.details > span.name`).text(`${data['state']}`);
                 $(`#${element_id} > #status > div > div.progress-bar`).hide()
                 $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
-                $(`#${element_id} > div.box > a`).attr("href", `/get-zip/${data['filename']}.zip`)
+                $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}.zip`)
                 $(`#${element_id} > div:nth-child(5) > a`).css("display", "flex");
             }
             else {

@@ -23,7 +23,7 @@ def history():
     page = request.args.get('page', 1, type=int)
 
     data = {}
-
+    analysis_number = None
     if form.validate_on_submit():
         analysis_number = form.data.get('analysis_number')
         if analysis_number:
@@ -42,9 +42,12 @@ def history():
                                     name='mk_pred').paginate(page,
                                                              current_app.config['POSTS_PER_PAGE'],
                                                              False)
-    print(data.items())
-    if not data:
-        flash(f'Нет выполненых исследованний')
+
+    if len(data) == 0:
+        if analysis_number:
+            flash(f'У Вас нет исследованний с номером {analysis_number}')
+        else:
+            flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':
     next_url = url_for('main.history', page=data.next_num) if data.has_next else None
     prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None

@@ -93,7 +93,7 @@ $('document').ready(function(){
                                 }
                             },
                             success:function(data, status, request){
-                                console.log('success');
+//                                console.log('success');
                                 $(`.progress-area > #${element_id}`).remove();
                                 progressHTML = makeProgressHTML(data.task_id, name);
 //                                console.log(progressHTML);
@@ -137,9 +137,9 @@ function update_progress(status_url, element_id) {
             $(`#${element_id} > #analysis_number`).text(`${data['analysis_number']}`);
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-            console.log('1');
+//            console.log('1');
             if ('result' in data) {
-                console.log('2');
+//                console.log('2');
                 $(`#${element_id} > #status > div > div.details > span.name`).text(`${data['state']}`);
                 $(`#${element_id} > #status > div > div.progress-bar`).hide()
                 $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
@@ -148,7 +148,7 @@ function update_progress(status_url, element_id) {
             }
             else {
                 // something unexpected happened
-                console.log('3');
+//                console.log('3');
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
             }
         }

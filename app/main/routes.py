@@ -21,6 +21,8 @@ def history():
     form = SearchPredictForm()
 
     page = request.args.get('page', 1, type=int)
+    
+    data = {}
 
     if form.validate_on_submit():
         analysis_number = form.data

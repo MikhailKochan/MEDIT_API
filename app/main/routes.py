@@ -19,24 +19,27 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 @login_required
 def history():
     form = SearchPredictForm()
-    if form.validate_on_submit():
-        analysis_number = form.data
+
     page = request.args.get('page', 1, type=int)
 
-    data = Task.query.filter_by(user=current_user,
-                                complete=True,
-                                name='mk_pred').paginate(page,
-                                                         current_app.config['POSTS_PER_PAGE'],
-                                                         False)
-    if analysis_number:
-        data = Task.query.filter(Task.user_id == current_user.id,
-                                 Task.predict,
-                                 Task.images,
-                                 Images.analysis_number == analysis_number)\
-            .order_by(Task.timestamp.desc()).all() \
-            .paginate(page,
-                      current_app.config['POSTS_PER_PAGE'],
-                      False)
+    if form.validate_on_submit():
+        analysis_number = form.data
+        if analysis_number:
+            data = Task.query.filter(Task.user_id == current_user.id,
+                                     Task.predict,
+                                     Task.images,
+                                     Images.analysis_number == analysis_number) \
+                .order_by(Task.timestamp.desc()).all() \
+                .paginate(page,
+                          current_app.config['POSTS_PER_PAGE'],
+                          False)
+
+    else:
+        data = Task.query.filter_by(user=current_user,
+                                    complete=True,
+                                    name='mk_pred').paginate(page,
+                                                             current_app.config['POSTS_PER_PAGE'],
+                                                             False)
     if not data:
         flash(f'Нет выполненых исследованний')
     # if request.method == 'GET':

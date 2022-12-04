@@ -202,10 +202,10 @@ img {
 .box a {
     margin: 5px;
     color: #070c13;
-    background: #389ce4;
+    background: #ffffff;
     display: flex;
     height: 70%;
-    width: 80%;
+    width: 30%;
     border: none;
     align-items: center;
     justify-content: space-evenly;
@@ -216,7 +216,10 @@ img {
 
 }
 .box a:hover {
-    background: #0f78c3;
+    background: #1162b2;
+}
+.box a.button_cancel:hover {
+    background: #f44336;
 }
 form {
     width: 90%;

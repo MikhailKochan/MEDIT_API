@@ -127,7 +127,7 @@ function update_progress(status_url, element_id) {
         if (data['state'] == 'PENDING') {
             infoFunc = 'В очереди'
         };
-        $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc} • `);
+        $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
 
         if ('all_mitoz' in data){
 //            console.log(data['all_mitoz'])
@@ -140,7 +140,7 @@ function update_progress(status_url, element_id) {
             console.log('1');
             if ('result' in data) {
                 console.log('2');
-                $(`#${element_id} > #status > div > div.details > span.name`).text(`${data['state']} • `);
+                $(`#${element_id} > #status > div > div.details > span.name`).text(`${data['state']}`);
                 $(`#${element_id} > #status > div > div.progress-bar`).hide()
                 $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
                 $(`#${element_id} > div.box > a`).attr("href", `/get-zip/${data['filename']}.zip`)

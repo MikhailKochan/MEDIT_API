@@ -72,7 +72,7 @@ class Config(object):
     _COLORS = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
     _ITER = 5000
 
-    POSTS_PER_PAGE = 8
+    POSTS_PER_PAGE = 6
 
     LANGUAGES = ['en', 'ru']
 

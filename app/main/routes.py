@@ -31,7 +31,7 @@ def history():
                                      Task.predict,
                                      Task.images,
                                      Images.analysis_number == analysis_number) \
-                .order_by(Task.timestamp.desc()).all() \
+                .order_by(Task.timestamp.desc()) \
                 .paginate(page,
                           current_app.config['POSTS_PER_PAGE'],
                           False)

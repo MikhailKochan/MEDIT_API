@@ -50,7 +50,7 @@ class User(UserMixin, db.Model):
 
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
-    predict = db.relationship('Predict', backref='images', lazy='dynamic')
+    predict = db.relationship('Predict', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return f'<User {self.username}>'

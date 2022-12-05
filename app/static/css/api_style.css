@@ -198,6 +198,7 @@ img {
     border: 1px solid #6b666e;
     align-content: center;
     min-width: 120px;
+    font-size: inherit;
 }
 .box a {
     margin: 5px;
@@ -213,7 +214,7 @@ img {
     font-size: 18px;
     text-align: center;
     border-radius: 5px;
-
+    font-size: inherit;
 }
 .box a:hover {
     background: #4abc96;

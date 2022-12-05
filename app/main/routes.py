@@ -24,17 +24,14 @@ def history():
 
     analysis_number = form.data.get('analysis_number')
 
-    current_app.logger.info(f'analysis number: {analysis_number}')
-
     data = Predict.query.filter(Predict.tasks,
                                 Task.complete == True,
                                 Task.user_id == current_user.id)
 
     if form.validate_on_submit():
-        current_app.logger.info(f'validate success')
-        # analysis_number = form.data.get('analysis_number')
+
         if analysis_number:
-            current_app.logger.info(f'data.join')
+
             data = data.join(Images).filter_by(analysis_number=analysis_number)
 
     data = data.order_by(Predict.timestamp.desc()).paginate(page, current_app.config['POSTS_PER_PAGE'], False)

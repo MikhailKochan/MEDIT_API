@@ -51,7 +51,7 @@
 <section class="uploaded-area">
     {% if data %}
     {% for predict in data %}
-        <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
+        <div class="container-table" id="{{ predict.id }}" style="width:100%;justify-content:center">
             <div class="box" id="filename" style="justify-content: flex-start;">
                 <img src="./static/logo/file.png">
                 <span class="name">{{ predict.images.filename }}</span>

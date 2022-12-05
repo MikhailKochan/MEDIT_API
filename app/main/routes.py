@@ -31,15 +31,15 @@ def history():
             data = data.join(Images).filter_by(analysis_number=analysis_number)
     if sort:
         if sort == 'name':
-            data = data.order_by(Predict.images.filename.desc())
+            data = data.join(Images).order_by(Images.filename.desc())
         elif sort == 'date':
             data = data.order_by(Predict.timestamp.desc())
         elif sort == 'analysis_number':
-            data = data.order_by(Predict.images.analysis_number.desc())
+            data = data.join(Images).order_by(Images.analysis_number.desc())
         elif sort == 'mitoses':
             data = data.order_by(Predict.result_all_mitoz.desc())
-        else:
-            data = data.order_by(Predict.timestamp.desc())
+    else:
+        data = data.order_by(Predict.timestamp.desc())
     data = data.paginate(page, current_app.config['POSTS_PER_PAGE'], False)
 
     if len(data.items) == 0:

@@ -331,7 +331,7 @@ class Predict(db.Model):
     result_all_mitoz = db.Column(db.Integer)
     result_max_mitoz_in_one_img = db.Column(db.String(128))
     count_img = db.Column(db.Integer)
-    name_img_have_max_mitoz = db.Column(db.Integer)
+    name_img_have_max_mitoz = db.Column(db.String(512))
 
     path_to_save = db.Column(db.String(512))
 

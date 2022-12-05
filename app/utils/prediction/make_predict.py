@@ -88,7 +88,7 @@ def make_predict(image, predict, medit, job=None):
         mitoz = CLASS_NAMES.index('mitoz')
 
         all_mitoz = 0
-
+        img_name = None
         # with tqdm(total=total, position=0, leave=False) as pbar:
         for i in range(0, w_sum):
             for j in range(0, h_sum):
@@ -124,7 +124,7 @@ def make_predict(image, predict, medit, job=None):
                     all_mitoz += classes.count(mitoz)
                     if classes.count(mitoz) > max_mitoz_in_one_img:
                         max_mitoz_in_one_img = classes.count(mitoz)
-                        # img_name = f"{filename}.jpg"
+                        img_name = f"{img_name_draw}.jpg"
 
                 progress += 1 / total * 100.0
 
@@ -142,7 +142,7 @@ def make_predict(image, predict, medit, job=None):
 
         predict.count_img = total
 
-        # predict.name_img_have_max_mitoz = img_name
+        predict.name_img_have_max_mitoz = img_name if img_name else None
 
         predict.model = cfg.MODEL.WEIGHTS
 

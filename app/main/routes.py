@@ -24,7 +24,7 @@ def history():
 
     analysis_number = form.data.get('analysis_number')
 
-    print('analysis number:', analysis_number)
+    current_app.logger.info('analysis number:', analysis_number)
 
     data = Predict.query.filter(Predict.tasks,
                                 Task.complete == True,

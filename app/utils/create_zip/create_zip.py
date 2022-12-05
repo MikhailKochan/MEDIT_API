@@ -25,11 +25,9 @@ def create_zip(path_to_save: str, job=None):
             function='Create zip',
             filename=folder_name)
 
-        zip_folder = Config.__dict__['SAVE_ZIP']
-
         list_img = glob.glob(f"{path_to_save}/*")
 
-        zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{folder_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+        zipFile = zipfile.ZipFile(os.path.join(Config.__dict__['SAVE_ZIP'], f'{folder_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
 
         total = len(list_img)
 

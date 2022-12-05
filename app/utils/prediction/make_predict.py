@@ -72,7 +72,12 @@ def make_predict(image, predict, medit, job=None):
         s_row = int(w_rest / 2)
         total = h_sum * w_sum
 
-        path_to_save_draw = os.path.join(Config.BASEDIR, Config.DRAW, image.filename, f"{image.filename[:6]}_{date_now}")
+        path_to_save_draw = os.path.join(Config.BASEDIR,
+                                         Config.DRAW,
+                                         image.filename,
+                                         f"{image.filename[:6]}_{date_now}")
+
+        predict.path_to_save = f"{os.path.basename(path_to_save_draw)}.zip"
 
         if not os.path.exists(path_to_save_draw):
 

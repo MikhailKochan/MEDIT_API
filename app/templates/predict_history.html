@@ -29,19 +29,21 @@
 
 <div class="container-table" style="width:100%;justify-content: center">
     <div class="box"  style="background: #eff1f4;width:100%">
+        <a href="/history/?sort=name">
         Файл
+        </a>
     </div>
     <div class="box" style="background: #eff1f4;">
-        Дата исследования
+        <a href="/history/?sort=date">Дата исследования</a>
     </div>
     <div class="box" style="background: #eff1f4;">
         Статус
     </div>
     <div class="box" style="background: #eff1f4;">
-        Номер исследования
+        <a href="/history/?sort=analysis_number">Номер исследования</a>
     </div>
     <div class="box" style="background: #eff1f4;">
-        Найдено митозов
+        <a href="/history/?sort=mitoses">Найдено митозов</a>
     </div>
     <div class="box" style="background: #eff1f4;">
         Скачать результат
@@ -69,11 +71,16 @@
                 {{ predict.result_all_mitoz }}
             </div>
             <div class="box">
-                <a class="button_download" href="" style="display:none">
-                    <img src="/static/logo/download_green.png" alt="#">
-                </a>
-                <a class="button_cancel" href="" style="display:none">
-                    <img src="/static/logo/remove.png" alt="#">
+                {% if predict.path_to_save %}
+                    <a class="button_download" href="/get-zip/{{ predict.path_to_save }}" style="">
+                        <img src="/static/logo/download_green.png" alt="#">
+                    </a>
+                    <a class="button_cancel" href="" style="">
+                        <img src="/static/logo/remove.png" alt="#">
+                    </a>
+                {% endif %}
+                <a class="button_csv" href="" style="">
+                    <img src="/static/logo/csv.png" alt="#">
                 </a>
             </div>
         </div>

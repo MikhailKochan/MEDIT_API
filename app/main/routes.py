@@ -19,22 +19,28 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 @login_required
 def history():
     form = SearchPredictForm()
-
+    sort = request.args.get('sort', '', type=str)
     page = request.args.get('page', 1, type=int)
-
     analysis_number = form.data.get('analysis_number')
-
     data = Predict.query.filter(Predict.tasks,
                                 Task.complete == True,
                                 Task.user_id == current_user.id)
 
     if form.validate_on_submit():
-
         if analysis_number:
-
             data = data.join(Images).filter_by(analysis_number=analysis_number)
-
-    data = data.order_by(Predict.timestamp.desc()).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
+    if sort:
+        if sort == 'name':
+            data = data.order_by(Predict.images.filename.desc())
+        elif sort == 'date':
+            data = data.order_by(Predict.timestamp.desc())
+        elif sort == 'analysis_number':
+            data = data.order_by(Predict.images.analysis_number.desc())
+        elif sort == 'mitoses':
+            data = data.order_by(Predict.result_all_mitoz.desc())
+        else:
+            data = data.order_by(Predict.timestamp.desc())
+    data = data.paginate(page, current_app.config['POSTS_PER_PAGE'], False)
 
     if len(data.items) == 0:
         if analysis_number:

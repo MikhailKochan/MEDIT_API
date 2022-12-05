@@ -39,7 +39,7 @@ def history():
         elif sort == 'mitoses':
             data = data.order_by(Predict.result_all_mitoz.desc())
     else:
-        data = data.order_by(Predict.timestamp.desc())
+        data = data.join(Predict).order_by(Predict.timestamp.desc())
     data = data.paginate(page, current_app.config['POSTS_PER_PAGE'], False)
 
     if len(data.items) == 0:

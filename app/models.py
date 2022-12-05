@@ -441,7 +441,7 @@ class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
 
-    predict = db.relationship('predict', backref='status', lazy='dynamic')
+    predict = db.relationship('Predict', backref='status', lazy='dynamic')
 
     timestamp = db.Column(db.Float, index=True, default=time)
     payload_json = db.Column(db.Text)

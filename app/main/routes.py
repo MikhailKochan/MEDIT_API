@@ -35,7 +35,7 @@ def history():
         if analysis_number:
             data.join(Images).filter_by(analysis_number=analysis_number)
 
-    data.order_by(Predict.timestamp.desc()).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
+    data = data.order_by(Predict.timestamp.desc()).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
 
     if len(data.items) == 0:
         if analysis_number:

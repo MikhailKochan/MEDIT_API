@@ -100,7 +100,7 @@ class Images(db.Model):
     img_creation_time = db.Column(db.String(64), index=True)
     img_creation_date = db.Column(db.String(64), index=True)
 
-    predict = db.relationship('predict', backref='images', lazy='dynamic')
+    predict = db.relationship('Predict', backref='images', lazy='dynamic')
 
     tasks = db.relationship('Task', backref='images', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 

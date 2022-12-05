@@ -22,26 +22,20 @@ def history():
 
     page = request.args.get('page', 1, type=int)
 
-    data = {}
-    analysis_number = None
+    analysis_number = form.data.get('analysis_number')
+
+    print('analysis number:', analysis_number)
+
+    data = Predict.query.filter(Predict.tasks,
+                                Task.complete == True,
+                                Task.user_id == current_user.id)
+
     if form.validate_on_submit():
         analysis_number = form.data.get('analysis_number')
         if analysis_number:
-            data = Task.query.filter(Task.user_id == current_user.id,
-                                     Task.predict,
-                                     Task.images,
-                                     Images.analysis_number == analysis_number) \
-                .order_by(Task.timestamp.desc()) \
-                .paginate(page,
-                          current_app.config['POSTS_PER_PAGE'],
-                          False)
+            data.join(Images).filter_by(analysis_number=analysis_number)
 
-    else:
-        data = Task.query.filter_by(user=current_user,
-                                    complete=True,
-                                    name='mk_pred').paginate(page,
-                                                             current_app.config['POSTS_PER_PAGE'],
-                                                             False)
+    data.order_by(Predict.timestamp.desc()).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
 
     if len(data.items) == 0:
         if analysis_number:
@@ -51,7 +45,7 @@ def history():
     # if request.method == 'GET':
     next_url = url_for('main.history', page=data.next_num) if data.has_next else None
     prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None
-    return render_template('history.html', title='История исследований', tasks=data.items,
+    return render_template('predict_history.html', title='История исследований', data=data.items,
                            next_url=next_url, prev_url=prev_url, form=form)
 
 

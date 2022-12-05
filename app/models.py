@@ -50,6 +50,8 @@ class User(UserMixin, db.Model):
 
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
+    predict = db.relationship('Predict', backref='images', lazy='dynamic')
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -335,9 +337,11 @@ class Predict(db.Model):
 
     tasks = db.relationship('Task', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
 
-    status = db.relationship('Status', backref='predict', lazy='dynamic', cascade="all, delete", passive_deletes=True)
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
 
     image_id = db.Column(db.Integer, db.ForeignKey('images.id'))
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     model = db.Column(db.String(128))
 
@@ -436,7 +440,9 @@ class Task(db.Model):
 class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
-    predict_id = db.Column(db.Integer, db.ForeignKey('predict.id', ondelete="CASCADE"))
+
+    predict = db.relationship('Predict', backref='status')
+
     timestamp = db.Column(db.Float, index=True, default=time)
     payload_json = db.Column(db.Text)
 

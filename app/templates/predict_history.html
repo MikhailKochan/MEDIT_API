@@ -48,31 +48,25 @@
     </div>
 </div>
 
-<section class="progress-area"></section>
 <section class="uploaded-area">
-    {% if tasks %}
-    {% for task in tasks %}
+    {% if data %}
+    {% for predict in data %}
         <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: flex-start;">
+            <div class="box" id="filename" style="justify-content: flex-start;">
                 <img src="./static/logo/file.png">
-                <span class="name">{{ task.images.filename }}</span>
+                <span class="name">{{ predict.images.filename }}</span>
+            </div>
+            <div class="box" id="datetime" style="justify-content: flex-start;">
+                {{ predict.timestamp.strftime('%d.%m.%Y:%H/%M') }}
             </div>
             <div class="box" id="status" style="justify-content: center">
-                <div class="content" style="justify-content: center; align-items: center">
-                    <div class="details" style="justify-content: center">
-                        <span class="name"></span>
-                        <span class="percent"></span>
-                    </div>
-                    <div class="progress-bar" style="width: 90%">
-                        <div class="progress" style="width: 0%"></div>
-                    </div>
-                </div>
+                Завершено
             </div>
             <div class="box" id="analysis_number" style="justify-content: center">
-
+                {{ predict.images.analysis_number }}
             </div>
             <div class="box" id="result" style="justify-content: center">
-
+                {{ predict.result_all_mitoz }}
             </div>
             <div class="box">
                 <a class="button_download" href="" style="display:none">
@@ -98,9 +92,9 @@
     </li>
 </ul>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="https://malsup.github.io/jquery.form.js"></script>
-<script src="/static/js/get_analysis_jquery.js"></script>
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>-->
+<!--<script src="https://malsup.github.io/jquery.form.js"></script>-->
+<!--<script src="/static/js/get_analysis_jquery.js"></script>-->
 <script>
     const fileInput = document.querySelector("#submit"),
     bottomInputFile = document.querySelector("button");
@@ -108,4 +102,3 @@
 </script>
 {{ super() }}
 {% endblock %}
-

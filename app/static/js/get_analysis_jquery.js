@@ -132,6 +132,7 @@ function update_progress(status_url, element_id) {
         if (data['state'] == 'PENDING') {
             infoFunc = 'В очереди'
         };
+
         $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
 
         if ('all_mitoz' in data){
@@ -145,7 +146,9 @@ function update_progress(status_url, element_id) {
 //            console.log('1');
             if ('result' in data) {
 //                console.log('2');
-                $(`#${element_id} > #status > div > div.details > span.name`).text(`${data['state']}`);
+                if (data['state'] == 'FINISHED') {
+                            $(`#${element_id} > #status > div > div.details > span.name`).text('Исследование завершено')
+                        };
                 $(`#${element_id} > #status > div > div.progress-bar`).hide()
                 $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
                 $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}.zip`)

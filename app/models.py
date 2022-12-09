@@ -3,12 +3,9 @@ from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import pathlib
-from config import Config
 import os
-from decimal import Decimal as D
 import redis
 import rq
-import numpy as np
 
 import json
 from time import time
@@ -19,15 +16,8 @@ if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 import openslide
 
-from tqdm import tqdm
-
-import cv2
-
 import sqlite3
 from app import login, db
-
-
-# from app.view import create_zip
 
 
 def generator_id(cls):
@@ -200,122 +190,6 @@ class Images(db.Model):
             if current_app:
                 current_app.logger.error(e)
 
-    # def alternative_predict(self, predict):
-    #     try:
-    #         progress = 0
-    #
-    #         max_mitoz_in_one_img = 0
-    #
-    #         _set_task_progress(progress, 0, func='alternative_predict')
-    #
-    #         Visualizer = current_app.medit.Visualizer
-    #
-    #         cfg = current_app.medit.cfg
-    #
-    #         mitoz_metadata = current_app.medit.mitoz_metadata
-    #
-    #         ColorMode = current_app.medit.ColorMode
-    #
-    #         predictor = current_app.medit.predictor
-    #
-    #         date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
-    #
-    #         CLASS_NAMES = current_app.config['CLASS_NAMES']
-    #         _CUT_IMAGE_SIZE = current_app.config['_CUT_IMAGE_SIZE']
-    #
-    #         h_sum = int(self.height / _CUT_IMAGE_SIZE[1])
-    #         w_sum = int(self.width / _CUT_IMAGE_SIZE[0])
-    #
-    #         if self.format.lower() == '.svs':
-    #             f_path = os.path.join(current_app.config['BASEDIR'],
-    #                                   current_app.config['UPLOAD_FOLDER'],
-    #                                   self.filename)
-    #             current_app.logger.info(f"Directory {f_path} for open in openslide")
-    #             file = openslide.OpenSlide(f_path)
-    #
-    #         else:
-    #             return f'{self.format} not added'
-    #
-    #         h_rest = self.height % _CUT_IMAGE_SIZE[1]
-    #         w_rest = self.width % _CUT_IMAGE_SIZE[0]
-    #         s_col = int(h_rest / 2)
-    #         s_row = int(w_rest / 2)
-    #         total = h_sum * w_sum
-    #
-    #         path_to_save_draw = os.path.join(current_app.config['BASEDIR'],
-    #                                          f"{current_app.config['DRAW']}/{self.filename}/{date_now}")
-    #
-    #         if not os.path.exists(path_to_save_draw):
-    #             os.mkdir(path_to_save_draw)
-    #
-    #             current_app.logger.info(f"Directory {self.filename} for draw created")
-    #
-    #         mitoz = CLASS_NAMES.index('mitoz')
-    #         all_mitoz = 0
-    #
-    #         with tqdm(total=total, position=0, leave=False) as pbar:
-    #             for i in range(0, w_sum):
-    #                 for j in range(0, h_sum):
-    #                     pbar.set_description(f"Total img: {total}. Start cutting")
-    #
-    #                     start_row = j * _CUT_IMAGE_SIZE[0] + s_row
-    #                     start_col = i * _CUT_IMAGE_SIZE[1] + s_col
-    #
-    #                     filename = "0_im" + "_" + str(i) + "_" + str(j)
-    #
-    #                     if self.format.lower() == '.svs':
-    #
-    #                         img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
-    #                         img = img.convert('RGB')
-    #
-    #                         im = np.asarray(img)
-    #
-    #                         outputs = predictor(im)
-    #
-    #                         outputs = outputs["instances"].to("cpu")
-    #
-    #                         classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
-    #
-    #                         if mitoz in classes:
-    #                             v = Visualizer(im[:, :, ::-1],
-    #                                            metadata=mitoz_metadata,
-    #                                            scale=1,
-    #                                            instance_mode=ColorMode.SEGMENTATION)
-    #
-    #                             v = v.draw_instance_predictions(outputs)
-    #                             cv2.imwrite(os.path.join(path_to_save_draw, f"{filename}.jpg"),
-    #                                         v.get_image()[:, :, ::-1])
-    #
-    #                             all_mitoz += classes.count(mitoz)
-    #                             if classes.count(mitoz) > max_mitoz_in_one_img:
-    #                                 max_mitoz_in_one_img = classes.count(mitoz)
-    #                                 # img_name = f"{filename}.jpg"
-    #
-    #                     progress += 1 / total * 100.0
-    #
-    #                     _set_task_progress(float(D(str(progress)).quantize(D("1.00"))),
-    #                                        all_mitoz=all_mitoz,
-    #                                        func='alternative_predict')
-    #
-    #                     pbar.update(1)
-    #
-    #         predict.result_all_mitoz = all_mitoz
-    #
-    #         predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
-    #
-    #         predict.count_img = total
-    #
-    #         # predict.name_img_have_max_mitoz = img_name
-    #
-    #         predict.model = cfg.MODEL.WEIGHTS
-    #
-    #         predict.image_id = self.id
-    #
-    #         return predict
-    #
-    #     except Exception as e:
-    #         current_app.logger.error(e)
-
     def __repr__(self):
         if self.timestamp:
             text = f'<Image {self.name} load on server {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}' \
@@ -387,8 +261,7 @@ class Predict(db.Model):
         except Exception as e:
             result = e
 
-        else:
-            return result
+        return result
 
 
 @login.user_loader

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from config import Config
 from flask import current_app
 
-from models import Task, Predict
+from app.models import Task, Predict
 
 
 def img_test(**kwargs):

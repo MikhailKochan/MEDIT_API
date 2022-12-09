@@ -59,7 +59,8 @@ def mk_pred(**kwargs):
         with Session(engine) as session:
             if predict:
                 session.add(predict)
-                task = Task.query.filter(Task.predict, Predict.id == predict.id).first()
+                task = session.query(Task).filter(Task.predict, Predict.id == predict.id).first()
+                # task = Task.query.filter(Task.predict, Predict.id == predict.id).first()
             create_zip(path_to_save=path)
             _set_task_progress(job, state='FINISHED', result='Predict finished')
             shutil.rmtree(path)

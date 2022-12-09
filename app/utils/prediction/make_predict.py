@@ -138,6 +138,7 @@ def make_predict(image, predict, medit, job=None):
 
         predict.result_all_mitoz = all_mitoz
 
+        # TODO решить проблему с добавлением инфы в бд, проверить тип вносимых данных
         # predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
 
         predict.count_img = total

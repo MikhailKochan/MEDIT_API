@@ -19,9 +19,9 @@ html,body{
     /*font-family: Merriweather;
     font-family: Ramabhadra;*/
     display: flex;
-    align-items: center;
     /*background: #389ce4;*/
     height: 100%;
+    margin: 0px;
 }
 .pager {
     display:flex;

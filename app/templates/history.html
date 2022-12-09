@@ -53,9 +53,9 @@
     {% if tasks %}
     {% for task in tasks %}
         <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: flex-start;min-width: 192px;">
+            <div class="box" id="datetime" style="justify-content:flex-start;min-width:192px;word-break:break-all;">
                 <img src="./static/logo/file.png">
-                <span class="name" style="word-break: break-all">{{ task.images.filename }}</span>
+                <span class="name">{{ task.images.filename }}</span>
             </div>
             <div class="box" id="status" style="justify-content: center">
                 <div class="content" style="justify-content: center; align-items: center">

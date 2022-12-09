@@ -138,12 +138,12 @@ def make_predict(image, predict, medit, job=None):
 
         predict.result_all_mitoz = all_mitoz
 
-        # TODO решить проблему с добавлением инфы в бд, проверить тип вносимых данных
-        # predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
+        predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
 
         predict.count_img = total
 
-        predict.name_img_have_max_mitoz = img_name if img_name else None
+        # TODO решить проблему с добавлением инфы в бд, проверить тип вносимых данных
+        # predict.name_img_have_max_mitoz = img_name if img_name else None
 
         predict.model = cfg.MODEL.WEIGHTS
 

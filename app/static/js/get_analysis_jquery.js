@@ -124,6 +124,11 @@ function update_progress(status_url, element_id) {
             $(`#${element_id} > #status > div > div.details > span.percent`).text(percent + '%');
         };
         let infoFunc = data['function'];
+        if (infoFunc == 'predict'){
+            infoFunc = 'Исследование'
+        }else if (infoFunc == ''){
+
+            }
         if (data['state'] == 'PENDING') {
             infoFunc = 'В очереди'
         };

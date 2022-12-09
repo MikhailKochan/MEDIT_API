@@ -138,7 +138,7 @@ def make_predict(image, predict, medit, job=None):
 
         predict.result_all_mitoz = all_mitoz
 
-        predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
+        # predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
 
         predict.count_img = total
 

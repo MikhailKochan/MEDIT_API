@@ -22,9 +22,6 @@ html,body{
     align-items: center;
     /*background: #389ce4;*/
     height: 100%;
-    width: 100%;
-    min-width: 100%;
-    justify-content: center;
 }
 .pager {
     display:flex;
@@ -237,6 +234,7 @@ form {
     align-items: stretch;
     justify-content: flex-start;
     overflow-y: scroll;
+    min-width: 850px;
 }
 .container-wrapper::-webkit-scrollbar{
     width: 5px;

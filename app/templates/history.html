@@ -28,7 +28,7 @@
 </form>
 
 <div class="container-table" style="width:100%;justify-content: center">
-    <div class="box" style="background: #eff1f4;">
+    <div class="box" style="background: #eff1f4;min-width: 192px;">
         Файл
     </div>
     <div class="box" style="background: #eff1f4;">
@@ -40,7 +40,7 @@
     <div class="box" style="background: #eff1f4;">
         Номер исследования
     </div>
-    <div class="box" style="background: #eff1f4;">
+    <div class="box" style="background: #eff1f4;min-width: 80px">
         Найдено митозов
     </div>
     <div class="box" style="background: #eff1f4;">
@@ -53,9 +53,9 @@
     {% if tasks %}
     {% for task in tasks %}
         <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: flex-start;">
+            <div class="box" id="datetime" style="justify-content: flex-start;min-width: 192px;">
                 <img src="./static/logo/file.png">
-                <span class="name">{{ task.images.filename }}</span>
+                <span class="name" style="word-break: break-all">{{ task.images.filename }}</span>
             </div>
             <div class="box" id="status" style="justify-content: center">
                 <div class="content" style="justify-content: center; align-items: center">
@@ -71,7 +71,7 @@
             <div class="box" id="analysis_number" style="justify-content: center">
 
             </div>
-            <div class="box" id="result" style="justify-content: center">
+            <div class="box" id="result" style="justify-content: center;min-width: 80px">
 
             </div>
             <div class="box">

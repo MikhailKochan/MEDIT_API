@@ -74,8 +74,8 @@ def make_predict(image, predict, medit, job=None):
 
         path_to_save_draw = os.path.join(Config.BASEDIR,
                                          Config.DRAW,
-                                         image.filename,
-                                         f"{image.filename[:6]}_{date_now}")
+                                         # image.filename,
+                                         f"{image.filename}_{date_now}")
 
         predict.path_to_save = f"{os.path.basename(path_to_save_draw)}.zip"
 

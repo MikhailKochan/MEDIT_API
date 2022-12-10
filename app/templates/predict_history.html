@@ -28,7 +28,7 @@
 </form>
 
 <div class="container-table" style="width:100%;justify-content: center">
-    <div class="box"  style="background: #eff1f4;width:100%">
+    <div class="box"  style="background: #eff1f4;width:100%;min-width: 192px;">
         <a href="/history?sort=name" style="height:100%;width:100%;background:none;">
         Файл
         </a>
@@ -46,7 +46,7 @@
             Номер исследования
         </a>
     </div>
-    <div class="box" style="background: #eff1f4;">
+    <div class="box" style="background: #eff1f4;min-width: 80px">
         <a href="/history?sort=mitoses"style="height:100%;width:100%;background:none;">
             Найдено митозов
         </a>
@@ -60,7 +60,7 @@
     {% if data %}
     {% for predict in data %}
         <div class="container-table" id="{{ predict.id }}" style="width:100%;justify-content:center">
-            <div class="box" id="filename" style="justify-content: flex-start;width:100%">
+            <div class="box" id="filename" style="justify-content:flex-start;width:100%;min-width:192px;word-break:break-all;">
                 <img src="./static/logo/file.png">
                 <span class="name">{{ predict.images.filename }}</span>
             </div>
@@ -73,16 +73,16 @@
             <div class="box" id="analysis_number" style="justify-content: center">
                 {{ predict.images.analysis_number }}
             </div>
-            <div class="box" id="result" style="justify-content: center">
+            <div class="box" id="result" style="justify-content: center;min-width: 80px">
                 {{ predict.result_all_mitoz }}
             </div>
             <div class="box">
                 {% if predict.path_to_save %}
                     <a class="button_download" href="/get-zip/{{ predict.path_to_save }}" style="">
-                        <img src="/static/logo/download_green.png" alt="#">
+                        <img src="/static/logo/download_green.png" alt="#" title="Скачать изображения">
                     </a>
                     <a class="button_cancel" href="" style="">
-                        <img src="/static/logo/remove.png" alt="#">
+                        <img src="/static/logo/remove.png" alt="#" title="Удалить Изображения">
                     </a>
                 {% endif %}
 <!--                <a class="button_csv" href="" style="">-->

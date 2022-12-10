@@ -48,8 +48,6 @@ function cutName(name) {
     return name
 }
 
-$('document').tooltip({show: null});
-
 $('document').ready(function(){
         $('#inputSVS').on('click', function(){
             console.log('click');

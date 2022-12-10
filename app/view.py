@@ -34,9 +34,10 @@ def file_name_maker(filename):
         filename + (n)
         n - count filename repeated
     """
-    g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*").sort()
+    g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
     l = len(g)
     if l > 0:
+        g = g.sort()
         point = '.'
         spl = g[0].split(point)
         end_str = spl.pop(-1)

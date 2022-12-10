@@ -13,7 +13,7 @@ function makeProgressHTML(id, name){
                 <span class="name">${name}</span>
             </div>
             <div class="box" id="status" style="justify-content: center">
-                <div class="content" style="justify-content: center; align-items: center">
+                <div class="content" style="justify-content: center; align-items: center;min-width:0px;">
                     <div class="details" style="justify-content: center">
                         <span class="name">Загрузка • </span>
                         <span class="percent"></span>

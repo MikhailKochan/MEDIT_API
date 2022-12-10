@@ -88,9 +88,9 @@ def save_image(image: Image, filename, f_path):
 
 
 def convert_to_np(image: Image) -> np:
-    start = time.time()
+    # start = time.time()
     arr = np.asarray(image)
-    print(f'arr time: {time.time() - start} s')
+    # print(f'arr time: {time.time() - start} s')
     return arr
 
 
@@ -114,31 +114,38 @@ async def async_open_image(f_path, loop):
         return await loop.run_in_executor(thread_pool, partial(openslide.OpenSlide, f_path))
 
 
-async def async_main(session, start_row, start_col, file, loop, filename, f_path):
-    url = 'http://localhost:8001/uploadfile'
+async def async_main(session, start_row, start_col, file, loop, filename, f_path, number):
+    url = 'http://localhost:8001/path/'
     # data = FormData()
     try:
-        start = time.time()
+        # start = time.time()
         image = await async_image_process(file, start_row, start_col, loop)
-        print(f'main after read region time: {time.time() - start} s')
+        # print(f'main after read region time: {time.time() - start} s')
 
-        start = time.time()
+        # start = time.time()
         path_save = await async_image_save_process(image, loop, filename, f_path)
-        print(f'main after image_save time: {time.time() - start} s')
-        async with aiofiles.open(path_save, 'rb') as f:
-            start = time.time()
-            fl = await f.read()
-            # print(len(fl))
-            data = {'file': fl, 'filename': f"{filename}"}
-            resp = await session.post(url, data=data)
+        # print(f'main after image_save time: {time.time() - start} s')
+        start = time.time()
+        # params = {path_save}
+        # resp = await session.get(url, params=params)
+        # async with aiofiles.open(path_save, 'rb') as f:
+        #
+        #     fl = await f.read()
+        #     # print(len(fl))
+        #     data = {'file': fl, 'filename': f"{filename}"}
+        resp = await session.post(url, data={'path': path_save})
 
         print(f'main after post time: {time.time() - start} s')
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
         return
     if resp.status == 200:
+        print(number, "----------")
         print(resp)
         os.remove(path_save)
+    else:
+        print(number, "----------")
+        print(resp)
 
 
 async def bulk_request():
@@ -151,16 +158,20 @@ async def bulk_request():
     print(f'openslide image open time: {time.time() - start} s')
     tasks = []
     # file_list = glob.glob("/home/nina_admin/fast_api/fastapi/save/ger_test/*.jpg")
+    number = 0
     async with ClientSession() as session:
         for start_row, start_col, file_name in space_selector(height, width):
-            tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path))
-            if len(tasks) >= 1:
+
+            tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
+            number += 1
+            if number >= 20:
                 await asyncio.gather(*tasks)
-                time.sleep(1)
+                # time.sleep(3)
                 tasks = []
-                break
+                # break
         # time.sleep(1)
         # await asyncio.gather(*tasks)
+        print(number)
 
 
 if __name__ == "__main__":

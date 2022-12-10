@@ -144,10 +144,7 @@ html,body{
     background: gray;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-a:hover {
-    background: gray;
-    /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
-}
+
 img {
     width: 35px;
     height: 35px;
@@ -218,8 +215,14 @@ img {
     border-radius: 5px;
     font-size: inherit;
 }
-.box a:button_download {
+
+.box a:button_download:hover {
     background: #4abc96;
+}
+
+.box a:hover {
+    background: gray;
+    /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
 }
 .box a.button_cancel:hover {
     background: #f44336;

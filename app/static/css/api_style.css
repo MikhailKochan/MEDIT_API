@@ -20,6 +20,7 @@ html,body{
     font-family: Ramabhadra;*/
     display: flex;
     /*background: #389ce4;*/
+    flex-direction: column;
     height: 100%;
     margin: 0px;
 }
@@ -99,7 +100,7 @@ html,body{
     display: flex;
     min-height: 100%;
     width: 100%;
-
+    min-width: 1118px;
     justify-content: flex-start;
     /*box-shadow: rgb(0 0 0 / 40%) 0px 30px 90px;*/
 }

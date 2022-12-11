@@ -236,7 +236,7 @@ form {
     width: 96%;
     align-items: stretch;
     justify-content: flex-start;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
     min-width: 850px;
 }
 .container-wrapper::-webkit-scrollbar{

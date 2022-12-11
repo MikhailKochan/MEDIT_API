@@ -115,7 +115,7 @@ async def async_open_image(f_path, loop):
 
 
 async def async_main(session, start_row, start_col, file, loop, filename, f_path, number):
-    url = 'http://localhost:8001/path/'
+    url = 'http://localhost:8001/uploadfile/'
     # data = FormData()
     try:
         # start = time.time()
@@ -128,12 +128,12 @@ async def async_main(session, start_row, start_col, file, loop, filename, f_path
         start = time.time()
         # params = {path_save}
         # resp = await session.get(url, params=params)
-        # async with aiofiles.open(path_save, 'rb') as f:
-        #
-        #     fl = await f.read()
-        #     # print(len(fl))
-        #     data = {'file': fl, 'filename': f"{filename}"}
-        resp = await session.post(url, data={'path': path_save})
+        async with aiofiles.open(path_save, 'rb') as f:
+
+            fl = await f.read()
+            # print(len(fl))
+            data = {'file': fl, 'filename': f"{filename}"}
+            resp = await session.post(url, data=data)
 
         print(f'main after post time: {time.time() - start} s')
     except Exception as ex:
@@ -146,6 +146,7 @@ async def async_main(session, start_row, start_col, file, loop, filename, f_path
     else:
         print(number, "----------")
         print(resp)
+    lst = []
 
 
 async def bulk_request():
@@ -164,13 +165,13 @@ async def bulk_request():
 
             tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
             number += 1
-            if number >= 20:
-                await asyncio.gather(*tasks)
-                # time.sleep(3)
-                tasks = []
+            # if number >= 20:
+            #     await asyncio.gather(*tasks)
+            #     # time.sleep(3)
+            #     tasks = []
                 # break
         # time.sleep(1)
-        # await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
         print(number)
 
 

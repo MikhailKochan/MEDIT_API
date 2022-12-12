@@ -146,7 +146,7 @@ async def bulk_request():
     loop = asyncio.get_running_loop()
 
     f_path = glob.glob(f'{Config.UPLOAD_FOLDER}/*.svs')
-    if file[0]:
+    if f_path[0]:
         start = time.time()
         file = await async_open_image(f_path, loop)
         height, width = file.level_dimensions[0]

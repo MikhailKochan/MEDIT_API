@@ -1,5 +1,6 @@
 import asyncio
 import os
+import glob
 import numpy as np
 from sys import platform
 
@@ -43,37 +44,28 @@ def space_selector(height: int, width: int):
             yield start_row, start_col, filename
 
 
-def main():
-    # CUT_IMAGE_SIZE = Config.__dict__['_CUT_IMAGE_SIZE']
-    print(CUT_IMAGE_SIZE)
-    f_path = "D:/svs/Andreeva14.29Y_GCT_Mal.svs"
-    start = time.time()
-    file = openslide.OpenSlide(f_path)
-
-    print(f'openslide time: {time.time() - start} s')
-    height, width = file.level_dimensions[0]
-
-    print(f'openslide height width: {time.time() - start} s')
-    # gen = space_selector(height, width)
-    for start_row, start_col, _ in space_selector(height, width):
-        print(start_row, start_col)
-    # [print(img.convert('RGB')) for img in gen]
-
-    print(f'openslide after for1: {time.time() - start} s')
-    # img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
-    # print(f'openslide after for2: {time.time() - start} s')
-    # print(f'openslide after for3: {time.time() - start} s')
-    #
-    # print(f'openslide after for: {time.time() - start} s')
+def list_maker(gen):
+    lst = [i for i in gen]
+    return lst
 
 
-# loop = asyncio.get_running_loop()
-# thread_pool = concurrent.futures.ThreadPoolExecutor()
+def list_spliter(lst):
+    n = np.array_split(lst, len(lst) // 20)
+    return n
+
+
+def task_maker(height, width):
+    gen = space_selector(height, width)
+    n = list_spliter(list_maker(gen))
+    for i in n:
+        yield i
 
 
 def read_region(file: Image, start_row: int, start_col: int):
+    start = time.time()
     img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
     img = img.convert('RGB')
+    print(f'read region time: {time.time() - start} s')
     return img
 
 
@@ -94,6 +86,14 @@ def convert_to_np(image: Image) -> np:
     return arr
 
 
+def convert_to_bytes(image: Image) -> np:
+    image_content = BytesIO()
+    image.seek(0)
+    image.save(image_content, format='JPEG')
+    image_content.seek(0)
+    return image_content
+
+
 async def async_image_process(img: Image, start_row: int, start_col: int, loop):
     with ThreadPoolExecutor() as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(read_region, img, start_row, start_col))
@@ -106,7 +106,7 @@ async def async_image_save_process(img: Image, loop, filename, f_path):
 
 async def async_convert_process(img: Image, loop):
     with ThreadPoolExecutor() as thread_pool:
-        return await loop.run_in_executor(thread_pool, partial(convert_to_np, img))
+        return await loop.run_in_executor(thread_pool, partial(convert_to_bytes, img))
 
 
 async def async_open_image(f_path, loop):
@@ -116,63 +116,56 @@ async def async_open_image(f_path, loop):
 
 async def async_main(session, start_row, start_col, file, loop, filename, f_path, number):
     url = 'http://localhost:8001/uploadfile/'
-    # data = FormData()
     try:
-        # start = time.time()
         image = await async_image_process(file, start_row, start_col, loop)
-        # print(f'main after read region time: {time.time() - start} s')
+        data = {"file": await async_convert_process(image, loop)}
+        resp = await session.post(url, data=data)
 
-        # start = time.time()
-        path_save = await async_image_save_process(image, loop, filename, f_path)
-        # print(f'main after image_save time: {time.time() - start} s')
-        start = time.time()
-        # params = {path_save}
-        # resp = await session.get(url, params=params)
+        """path_save = await async_image_save_process(image, loop, filename, f_path)
         async with aiofiles.open(path_save, 'rb') as f:
-
             fl = await f.read()
-            # print(len(fl))
             data = {'file': fl, 'filename': f"{filename}"}
-            resp = await session.post(url, data=data)
+            print(f'read time: {time.time() - start} s')
+            resp = await session.post(url, data=data)"""
 
-        print(f'main after post time: {time.time() - start} s')
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
         return
-    if resp.status == 200:
+    if resp.status != 200:
         print(number, "----------")
         print(resp)
-        os.remove(path_save)
-    else:
-        print(number, "----------")
-        print(resp)
-    lst = []
+        # os.remove(path_save)
+    # else:
+    #     print(number, "----------")
+    #     print(resp)
+        # await number
 
 
 async def bulk_request():
     """Make requests concurrently"""
     loop = asyncio.get_running_loop()
-    f_path = "D:/svs/Andreeva14.29Y_GCT_Mal.svs"
-    start = time.time()
-    file = await async_open_image(f_path, loop)
-    height, width = file.level_dimensions[0]
-    print(f'openslide image open time: {time.time() - start} s')
-    tasks = []
-    # file_list = glob.glob("/home/nina_admin/fast_api/fastapi/save/ger_test/*.jpg")
-    number = 0
-    async with ClientSession() as session:
-        for start_row, start_col, file_name in space_selector(height, width):
 
-            tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
-            number += 1
-            # if number >= 20:
-            #     await asyncio.gather(*tasks)
-            #     # time.sleep(3)
-            #     tasks = []
-                # break
-        # time.sleep(1)
-        await asyncio.gather(*tasks)
-        print(number)
+    f_path = glob.glob(f'{Config.UPLOAD_FOLDER}/*.svs')
+    if file[0]:
+        start = time.time()
+        file = await async_open_image(f_path, loop)
+        height, width = file.level_dimensions[0]
+        print(f'openslide image open time: {time.time() - start} s')
+        tasks = []
+        number = 1
+        async with ClientSession() as session:
+            for start_row, start_col, file_name in space_selector(height, width):
+                tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
+                number += 1
+                if number % 1 == 0:
+                    await asyncio.gather(*tasks)
+                    print(f'task start time: {time.time() - start} s')
+                    tasks = []
+                    break
+            # await asyncio.gather(*tasks)
+            print(number)
+    else:
+        print("NOT FILE IN DIRECTORY")
 
 
 if __name__ == "__main__":

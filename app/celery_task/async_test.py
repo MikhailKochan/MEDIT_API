@@ -153,7 +153,7 @@ async def bulk_request():
         height, width = file.level_dimensions[0]
         print(f'openslide image open time: {time.time() - start} s')
         tasks = []
-        number = 1
+        number = 0
         async with ClientSession() as session:
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
@@ -163,7 +163,7 @@ async def bulk_request():
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
                     # break
-            # await asyncio.gather(*tasks)
+            await asyncio.gather(*tasks)
             print(number)
     else:
         print("NOT FILE IN DIRECTORY")

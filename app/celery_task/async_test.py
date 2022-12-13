@@ -158,11 +158,11 @@ async def bulk_request():
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
                 number += 1
-                if number % 60 == 0:
+                if number % 20 == 0:
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
-                    break
+                    # break
             # await asyncio.gather(*tasks)
             print(number)
     else:

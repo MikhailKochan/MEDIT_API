@@ -162,8 +162,8 @@ async def bulk_request():
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
-                    break
-            # await asyncio.gather(*tasks)
+                    # break
+            await asyncio.gather(*tasks)
             print(number)
     else:
         print("NOT FILE IN DIRECTORY")

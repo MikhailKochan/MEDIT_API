@@ -162,6 +162,7 @@ async def bulk_request():
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
+                    await asyncio.sleep(5)
                     # break
             await asyncio.gather(*tasks)
             print(number)

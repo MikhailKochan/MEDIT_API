@@ -120,15 +120,15 @@ async def async_main(session, start_row, start_col, file, loop, filename, f_path
     try:
 
         image = await async_image_process(file, start_row, start_col, loop)
-        """data = {"file": await async_convert_process(image, loop)}
-        resp = await session.post(url, data=data)"""
-        start = time.time()
+        data = {"file": await async_convert_process(image, loop)}
+        resp = await session.post(url, data=data)
+        """start = time.time()
         path_save = await async_image_save_process(image, loop, filename, f_path)
         async with aiofiles.open(path_save, 'rb') as f:
             fl = await f.read()
             data = {'file': fl, 'filename': f"{filename}"}
             print(f'read time: {time.time() - start} s')
-            resp = await session.post(url, data=data)
+            resp = await session.post(url, data=data)"""
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
@@ -136,7 +136,7 @@ async def async_main(session, start_row, start_col, file, loop, filename, f_path
     if resp.status != 200:
         print(number, "----------")
         print(resp)
-    os.remove(path_save)
+    # os.remove(path_save)
     # else:
     #     print(number, "----------")
     #     print(resp)

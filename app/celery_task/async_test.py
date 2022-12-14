@@ -14,8 +14,8 @@ from config import Config
 from PIL import Image
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
-from aiohttp import ClientSession, FormData
-import aiofiles
+from aiohttp import ClientSession, TCPConnector
+
 from io import BytesIO
 
 
@@ -154,7 +154,8 @@ async def bulk_request():
         print(f'openslide image open time: {time.time() - start} s')
         tasks = []
         number = 0
-        async with ClientSession() as session:
+        connector = TCPConnector(force_close=True)
+        async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
                 number += 1
@@ -162,7 +163,7 @@ async def bulk_request():
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
-                    await asyncio.sleep(5)
+                    # await asyncio.sleep(5)
                     # break
             await asyncio.gather(*tasks)
             print(number)

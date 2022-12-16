@@ -120,21 +120,25 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
     try:
         image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
+        data = FormData()
         """bytes block"""
-        # file = await async_convert_process(image, loop)
+        # data.add_field('file',
+        #                await async_convert_process(image, loop),
+        #                filename=filename,
+        #                content_type='application/image')
         # print(f'convert time: {time.time() - start} s')
         """write read block"""
         path_save = await async_image_save_process(image, loop, filename, f_path)
+
         async with aiofiles.open(path_save, 'rb') as f:
-            file = await f.read()
+            data.add_field('file',
+                           await f.read(),
+                           filename=filename,
+                           content_type='application/image')
         print(f'write and read file time: {time.time() - start} s')
 
-        data = FormData()
-        data.add_field('file',
-                       file,
-                       filename=filename,
-                       content_type='application/image')
         params = {"uploadType": "multipart/form-data"}
+
         with await session.post(url, data=data, params=params) as resp:
             if resp.status != 200:
                 print(number, "--ERROR--")

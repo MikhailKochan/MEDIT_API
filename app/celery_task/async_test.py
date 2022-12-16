@@ -15,7 +15,7 @@ from PIL import Image
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 import aiofiles
-from aiohttp import ClientSession, TCPConnector
+from aiohttp import ClientSession, TCPConnector, FormData
 
 from io import BytesIO
 
@@ -120,10 +120,23 @@ async def async_main(session, start_row, start_col, file, loop, filename, f_path
     try:
 
         image = await async_image_process(file, start_row, start_col, loop)
-        data = {"file": await async_convert_process(image, loop)}
-        resp = await session.post(url, data=data)
-        """start = time.time()
-        path_save = await async_image_save_process(image, loop, filename, f_path)
+        start = time.time()
+        # data = {"file": await async_convert_process(image, loop)}
+        data = FormData()
+        data.add_field('file',
+                       await async_convert_process(image, loop),
+                       filename=filename,
+                       content_type='application/image')
+        print(f'convert time: {time.time() - start} s')
+        params = {"uploadType": "multipart/form-data"}
+        with await session.post(url, data=data, params=params) as resp:
+            if resp.status != 200:
+                print(number, "--ERROR--")
+                print(resp)
+            else:
+                print(resp)
+        # start = time.time()
+        """path_save = await async_image_save_process(image, loop, filename, f_path)
         async with aiofiles.open(path_save, 'rb') as f:
             fl = await f.read()
             data = {'file': fl, 'filename': f"{filename}"}

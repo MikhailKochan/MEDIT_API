@@ -120,13 +120,14 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
     try:
         image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
+        """bytes block"""
         # file = await async_convert_process(image, loop)
         # print(f'convert time: {time.time() - start} s')
-
+        """write read block"""
         path_save = await async_image_save_process(image, loop, filename, f_path)
-        print(f'write file time: {time.time() - start} s')
         async with aiofiles.open(path_save, 'rb') as f:
             file = await f.read()
+        print(f'write and read file time: {time.time() - start} s')
 
         data = FormData()
         data.add_field('file',

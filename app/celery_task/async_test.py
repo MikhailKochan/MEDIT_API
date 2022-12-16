@@ -118,7 +118,6 @@ async def async_open_image(f_path, loop):
 
 async def async_main(session, start_row, start_col, image, loop, filename, f_path, number):
     url = 'http://localhost:8001/uploadfile/'
-    await sem.acquire()
     try:
         image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
@@ -154,8 +153,6 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         return
     else:
         os.remove(path_save)
-    finally:
-        sem.release()
 
 
 async def bulk_request():
@@ -174,9 +171,13 @@ async def bulk_request():
         connector = TCPConnector(force_close=True)
         async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
+                await sem.acquire()
                 tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
-            await asyncio.gather(*tasks)
-
+                if sem.locked():
+                    await asyncio.gather(*tasks)
+                    tasks = []
+            if len(tasks) > 0:
+                await asyncio.gather(*tasks)
         # async with ClientSession(connector=connector) as session:
         #     for start_row, start_col, file_name in space_selector(height, width):
         #         tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))

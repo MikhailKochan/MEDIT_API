@@ -39,7 +39,6 @@ def file_name_maker(filename):
     if g:
         g.sort()
         point = '.'
-        print(g)
         spl = g[0].split(point)
         end_str = spl.pop(-1)
         name = point.join(spl)

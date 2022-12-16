@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import time
 
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import Session
@@ -51,9 +52,9 @@ def mk_pred(**kwargs):
 
     job = get_current_job()
     img = kwargs.get('img')
-
+    start = time.time()
     predict, path = make_predict(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
-
+    print(f'PREDICT TIME: {time.time() - start}')
     try:
         engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
         with Session(engine) as session:

@@ -153,8 +153,8 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         return
     else:
         os.remove(path_save)
-    finally:
-        sem.release()
+    # finally:
+    #     sem.release()
 
 
 async def bulk_request():
@@ -171,27 +171,27 @@ async def bulk_request():
         tasks = []
         number = 0
         connector = TCPConnector(force_close=True)
-        async with ClientSession(connector=connector) as session:
-            for start_row, start_col, file_name in space_selector(height, width):
-                await sem.acquire()
-                tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
-                if sem.locked():
-                    await asyncio.gather(*tasks)
-                    tasks = []
-            if len(tasks) > 0:
-                await asyncio.gather(*tasks)
         # async with ClientSession(connector=connector) as session:
         #     for start_row, start_col, file_name in space_selector(height, width):
+        #         await sem.acquire()
         #         tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
-        #         number += 1
-        #         if number % 20 == 0:
+        #         if sem.locked():
         #             await asyncio.gather(*tasks)
-        #             print(f'task start time: {time.time() - start} s')
         #             tasks = []
-        #             # await asyncio.sleep(5)
-        #             # break
-        #     await asyncio.gather(*tasks)
-        #     print(number)
+        #     if len(tasks) > 0:
+        #         await asyncio.gather(*tasks)
+        async with ClientSession(connector=connector) as session:
+            for start_row, start_col, file_name in space_selector(height, width):
+                tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
+                number += 1
+                if number % 20 == 0:
+                    await asyncio.gather(*tasks)
+                    print(f'task start time: {time.time() - start} s')
+                    tasks = []
+                    # await asyncio.sleep(5)
+                    # break
+            await asyncio.gather(*tasks)
+            print(number)
     else:
         print("NOT FILE IN DIRECTORY")
 

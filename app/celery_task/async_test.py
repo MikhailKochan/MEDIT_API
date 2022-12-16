@@ -153,6 +153,8 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         return
     else:
         os.remove(path_save)
+    finally:
+        sem.release()
 
 
 async def bulk_request():

@@ -118,6 +118,7 @@ async def async_open_image(f_path, loop):
 
 async def async_main(session, start_row, start_col, image, loop, filename, f_path, number):
     url = 'http://localhost:8001/uploadfile/'
+    await sem.acquire()
     try:
         image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
@@ -153,6 +154,8 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         return
     else:
         os.remove(path_save)
+    finally:
+        sem.release()
 
 
 async def bulk_request():
@@ -172,15 +175,20 @@ async def bulk_request():
         async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
-                number += 1
-                if number % 20 == 0:
-                    await asyncio.gather(*tasks)
-                    print(f'task start time: {time.time() - start} s')
-                    tasks = []
-                    # await asyncio.sleep(5)
-                    # break
             await asyncio.gather(*tasks)
-            print(number)
+
+        # async with ClientSession(connector=connector) as session:
+        #     for start_row, start_col, file_name in space_selector(height, width):
+        #         tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
+        #         number += 1
+        #         if number % 20 == 0:
+        #             await asyncio.gather(*tasks)
+        #             print(f'task start time: {time.time() - start} s')
+        #             tasks = []
+        #             # await asyncio.sleep(5)
+        #             # break
+        #     await asyncio.gather(*tasks)
+        #     print(number)
     else:
         print("NOT FILE IN DIRECTORY")
 

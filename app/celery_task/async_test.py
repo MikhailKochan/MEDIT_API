@@ -139,12 +139,13 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
 
         params = {"uploadType": "multipart/form-data"}
 
-        with session.post(url, data=data, params=params) as resp:
+        async with session.post(url, data=data, params=params) as resp:
             if resp.status != 200:
                 print(number, "--ERROR--")
                 print(await resp.text())
             else:
-                print("RESPONSE:", await resp.text())
+                print("RESPONSE:")
+                print(await resp.text())
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)

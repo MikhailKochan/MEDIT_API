@@ -36,9 +36,11 @@ def file_name_maker(filename):
     """
     g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
     l = len(g)
+    print(g)
     if l > 0:
         g = g.sort()
         point = '.'
+        print(g[0])
         spl = g[0].split(point)
         end_str = spl.pop(-1)
         name = point.join(spl)

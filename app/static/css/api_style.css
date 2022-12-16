@@ -340,7 +340,7 @@ section .details span {
 }
 .progress-area .progress-bar{
     height: 6px;
-    width: 100%;
+    width: 90%;
     background: #fff;
     margin-bottom: 4px;
     border-radius: 30px;

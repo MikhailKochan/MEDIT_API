@@ -40,12 +40,12 @@ def file_name_maker(filename):
     if l > 0:
         g = g.sort()
         point = '.'
-        print(g[0])
-        spl = g[0].split(point)
-        end_str = spl.pop(-1)
-        name = point.join(spl)
-        new_filename = name + f"_{l}." + end_str
-        return os.path.basename(new_filename)
+        # print(g[0])
+        # spl = g[0].split(point)
+        # end_str = spl.pop(-1)
+        # name = point.join(spl)
+        # new_filename = name + f"_{l}." + end_str
+        # return os.path.basename(new_filename)
     else:
         return filename
 

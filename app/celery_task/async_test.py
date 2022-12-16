@@ -21,6 +21,7 @@ from io import BytesIO
 
 
 CUT_IMAGE_SIZE = Config.__dict__['_CUT_IMAGE_SIZE']
+sem = asyncio.Semaphore(10)
 
 
 def space_selector(height: int, width: int):
@@ -172,7 +173,7 @@ async def bulk_request():
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
                 number += 1
-                if number % 10 == 0:
+                if number % 20 == 0:
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []

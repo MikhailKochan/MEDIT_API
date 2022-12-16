@@ -65,7 +65,7 @@ def task_maker(height, width):
 def read_region(file: Image, start_row: int, start_col: int):
     start = time.time()
     img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
-    img = img.convert('BGR;24')
+    img = img.convert('RGB')
     print(f'read region time: {time.time() - start} s')
     return img
 
@@ -145,7 +145,7 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
         return
-    finally:
+    else:
         os.remove(path_save)
 
 

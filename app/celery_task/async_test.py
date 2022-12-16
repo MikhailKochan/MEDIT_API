@@ -65,7 +65,7 @@ def task_maker(height, width):
 def read_region(file: Image, start_row: int, start_col: int):
     start = time.time()
     img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
-    img = img.convert('RGB')
+    img = img.convert('BGR;24')
     print(f'read region time: {time.time() - start} s')
     return img
 
@@ -115,44 +115,37 @@ async def async_open_image(f_path, loop):
         return await loop.run_in_executor(thread_pool, partial(openslide.OpenSlide, f_path))
 
 
-async def async_main(session, start_row, start_col, file, loop, filename, f_path, number):
+async def async_main(session, start_row, start_col, image, loop, filename, f_path, number):
     url = 'http://localhost:8001/uploadfile/'
     try:
-
-        image = await async_image_process(file, start_row, start_col, loop)
+        image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
-        # data = {"file": await async_convert_process(image, loop)}
+        # file = await async_convert_process(image, loop)
+        # print(f'convert time: {time.time() - start} s')
+
+        path_save = await async_image_save_process(image, loop, filename, f_path)
+        print(f'write file time: {time.time() - start} s')
+        async with aiofiles.open(path_save, 'rb') as f:
+            file = await f.read()
+
         data = FormData()
         data.add_field('file',
-                       await async_convert_process(image, loop),
+                       file,
                        filename=filename,
                        content_type='application/image')
-        print(f'convert time: {time.time() - start} s')
         params = {"uploadType": "multipart/form-data"}
         with await session.post(url, data=data, params=params) as resp:
             if resp.status != 200:
                 print(number, "--ERROR--")
                 print(resp)
             else:
-                print(resp)
-        # start = time.time()
-        """path_save = await async_image_save_process(image, loop, filename, f_path)
-        async with aiofiles.open(path_save, 'rb') as f:
-            fl = await f.read()
-            data = {'file': fl, 'filename': f"{filename}"}
-            print(f'read time: {time.time() - start} s')
-            resp = await session.post(url, data=data)"""
+                print("RESPONSE:", resp)
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
         return
-    if resp.status != 200:
-        print(number, "----------")
-        print(resp)
-    # os.remove(path_save)
-    # else:
-    #     print(number, "----------")
-    #     print(resp)
+    finally:
+        os.remove(path_save)
 
 
 async def bulk_request():
@@ -163,15 +156,15 @@ async def bulk_request():
     if f_path:
         f_path = f_path[0]
         start = time.time()
-        file = await async_open_image(f_path, loop)
-        height, width = file.level_dimensions[0]
+        image = await async_open_image(f_path, loop)
+        height, width = image.level_dimensions[0]
         print(f'openslide image open time: {time.time() - start} s')
         tasks = []
         number = 0
         connector = TCPConnector(force_close=True)
         async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
-                tasks.append(async_main(session, start_row, start_col, file, loop, file_name, f_path, number))
+                tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
                 number += 1
                 if number % 10 == 0:
                     await asyncio.gather(*tasks)

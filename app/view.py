@@ -37,15 +37,14 @@ def file_name_maker(filename):
     g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
 
     if g:
-        g = g.sort()
+        g.sort()
         point = '.'
         print(g)
-        # spl = g[0].split(point)
-        # end_str = spl.pop(-1)
-        # name = point.join(spl)
-        # new_filename = name + f"_{len(g)}." + end_str
-        # return os.path.basename(new_filename)
-        return g
+        spl = g[0].split(point)
+        end_str = spl.pop(-1)
+        name = point.join(spl)
+        new_filename = name + f"_{len(g)}." + end_str
+        return os.path.basename(new_filename)
     else:
         return filename
 

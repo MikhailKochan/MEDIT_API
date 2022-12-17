@@ -14,7 +14,7 @@ function makeProgressHTML(id, name){
             <li class="row" id="${id}">
                 <img src="./static/logo/file.png">
                 <span class="name">${name}</span>
-                <div class="content">
+                <div class="content" style='display:flex;min-width: 0px;flex-direction: column;'>
                     <div class="details">
                         <span class="name">Загрузка • </span>
                         <span class="percent"></span>

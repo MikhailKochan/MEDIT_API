@@ -118,7 +118,7 @@ class Images(db.Model):
                 self.name = file.properties['aperio.Filename']
                 self.img_creation_time = file.properties['aperio.Time']
                 self.img_creation_date = file.properties['aperio.Date']
-                self.height, self.width = file.level_dimensions[0]
+                self.width, self.height = file.level_dimensions[0]
             # TODO add more format
             elif self.format.lower() == '.jpg':
                 pass

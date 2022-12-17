@@ -24,7 +24,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
 
         file = openslide.OpenSlide(path)
 
-        height, width = file.level_dimensions[0]
+        width, height = file.level_dimensions[0]
 
         h_sum = int(height / _CUT_IMAGE_SIZE[1])
         w_sum = int(width / _CUT_IMAGE_SIZE[0])
@@ -44,8 +44,8 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
             os.mkdir(save_folder)
 
         # with tqdm(total=total, position=0, leave=False) as pbar:
-        for i in range(0, w_sum):
-            for j in range(0, h_sum):
+        for i in range(0, h_sum):
+            for j in range(0, w_sum):
                 # pbar.set_description(f"Total img: {total}. Start cutting")
 
                 start_row = j * _CUT_IMAGE_SIZE[0] + s_row

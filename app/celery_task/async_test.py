@@ -37,8 +37,8 @@ def space_selector(height: int, width: int):
     s_col = int(h_rest / 2)
     s_row = int(w_rest / 2)
 
-    for i in range(0, w_sum):
-        for j in range(0, h_sum):
+    for i in range(0, h_sum):
+        for j in range(0, w_sum):
 
             start_row = j * CUT_IMAGE_SIZE[0] + s_row
             start_col = i * CUT_IMAGE_SIZE[1] + s_col
@@ -69,7 +69,7 @@ def read_region(file: Image, start_row: int, start_col: int):
     start = time.time()
     img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
     img = img.convert('RGB')
-    print(f'read region time: {time.time() - start} s')
+    # print(f'read region time: {time.time() - start} s')
     return img
 
 
@@ -138,17 +138,19 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
                            await f.read(),
                            filename=filename,
                            content_type='application/image')
-        print(f'write and read file time: {time.time() - start} s')
+        # print(f'write and read file time: {time.time() - start} s')
 
         params = {"uploadType": "multipart/form-data"}
 
         async with session.post(url, data=data, params=params) as resp:
             if resp.status != 200:
-                print(number, "--ERROR--")
-                print(await resp.text())
+                pass
+                # print(number, "--ERROR--")
+                # print(await resp.text())
             else:
-                print("RESPONSE:")
-                print(await resp.text())
+                pass
+                # print("RESPONSE:")
+                # print(await resp.text())
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
@@ -200,9 +202,9 @@ async def bulk_request():
         start = time.time()
         image = await async_open_image(f_path, loop)
         # await prereader(image)
-        height, width = image.level_dimensions[0]
-
-        print(f'openslide image open time: {time.time() - start} s')
+        width, height = image.level_dimensions[0]
+        print(f"height: {height} | width: {width}")
+        # print(f'openslide image open time: {time.time() - start} s')
         tasks = []
         number = 0
         connector = TCPConnector(force_close=True)
@@ -222,13 +224,13 @@ async def bulk_request():
                 number += 1
                 if number % 20 == 0:
                     await asyncio.gather(*tasks)
-                    print(f'task start time: {time.time() - start} s')
+                    # print(f'task start time: {time.time() - start} s')
                     tasks = []
                     # await asyncio.sleep(5)
                     # break
             if tasks:
                 await asyncio.gather(*tasks)
-            print(number)
+            # print(number)
     else:
         print("NOT FILE IN DIRECTORY")
 

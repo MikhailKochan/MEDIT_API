@@ -20,7 +20,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
         job = get_current_job()
     try:
         progress = 0
-        _set_task_progress(job=job, progress=progress, func='Cutting')
+        _set_task_progress(job=job, progress=progress, function='Cutting')
 
         file = openslide.OpenSlide(path)
 

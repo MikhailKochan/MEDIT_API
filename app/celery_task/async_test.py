@@ -1,6 +1,8 @@
 import asyncio
 import os
 import glob
+
+import cv2
 import numpy as np
 from sys import platform
 
@@ -157,6 +159,37 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
     #     sem.release()
 
 
+async def prereader(image: Image):
+    lvl = image.level_count - 1
+    height, width = image.level_dimensions[lvl]
+    img = image.read_region((0, 0), lvl, image.level_dimensions[lvl])
+    img = img.convert('RGB')
+    # img.save("1.jpg")
+    rectangles = []
+    lower_white = np.array([10, 25, 100], dtype=np.uint8)
+    upper_white = np.array([172, 255, 255], dtype=np.uint8)
+    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower_white,
+                       upper_white)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    min_target_size = (40, 40)
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        if w >= min_target_size[0] and h >= min_target_size[1]:
+            rectangles.append((int(x), int(y), int(w), int(h)))
+
+    if rectangles:
+        for rect in rectangles:
+            x, y, w, h = rect
+            cv2.rectangle(img, (x, y), (x + w, y + h), [255, 0, 0], 2)
+            img = cv2.putText(img, f"{(x, y)}-{(x + w, y + h)}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                              .5, (0, 255, 0), 1, cv2.LINE_AA)
+    cv2.imwrite('1.jpg', img)
+    # cv2.imshow("img", img)
+    # cv2.waitKey(0)
+
+
 async def bulk_request():
     """Make requests concurrently"""
     loop = asyncio.get_running_loop()
@@ -166,7 +199,9 @@ async def bulk_request():
         f_path = f_path[0]
         start = time.time()
         image = await async_open_image(f_path, loop)
+        # await prereader(image)
         height, width = image.level_dimensions[0]
+
         print(f'openslide image open time: {time.time() - start} s')
         tasks = []
         number = 0
@@ -180,17 +215,19 @@ async def bulk_request():
         #             tasks = []
         #     if len(tasks) > 0:
         #         await asyncio.gather(*tasks)
+
         async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
                 tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
                 number += 1
-                if number % 10 == 0:
+                if number % 20 == 0:
                     await asyncio.gather(*tasks)
                     print(f'task start time: {time.time() - start} s')
                     tasks = []
                     # await asyncio.sleep(5)
                     # break
-            await asyncio.gather(*tasks)
+            if tasks:
+                await asyncio.gather(*tasks)
             print(number)
     else:
         print("NOT FILE IN DIRECTORY")

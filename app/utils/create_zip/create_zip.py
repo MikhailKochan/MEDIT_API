@@ -41,9 +41,7 @@ def create_zip(path_to_save: str, job=None):
             progress += 1 / total * 100.0
 
             _set_task_progress(job=job,
-                               progress=float(D(str(progress)).quantize(D("1.00"))),
-                               func='Create zip',
-                               filename=folder_name)
+                               progress=float(D(str(progress)).quantize(D("1.00"))))
 
         zipFile.close()
 

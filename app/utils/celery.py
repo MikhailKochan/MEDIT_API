@@ -30,12 +30,12 @@ def make_celery(app):
     return celery
 
 
-def _set_celery_task_progress(job, progress, all_mitoz=None, func=None, filename=None, analysis_number=None):
+def _set_celery_task_progress(job, progress, all_mitoz=None, function=None, filename=None, analysis_number=None):
     if job:
         try:
             job.update_state(state='PROGRESS',
                              meta={'progress': progress,
-                                   'function': func,
+                                   'function': function,
                                    'filename': filename,
                                    'all_mitoz': all_mitoz,
                                    'analysis_number': analysis_number})

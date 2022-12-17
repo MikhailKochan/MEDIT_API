@@ -62,16 +62,13 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
                 progress += 1 / total * 100.0
 
                 _set_task_progress(job=job,
-                                   progress=float(D(str(progress)).quantize(D("1.00"))),
-                                   func='Cutting')
-
-                    # pbar.update(1)
+                                   progress=float(D(str(progress)).quantize(D("1.00"))))
 
         return save_folder
     except Exception as e:
         print(f"ERROR in cutting: {e}")
 
-        _set_task_progress(job=None, progress=100, func='Cutting')
+        _set_task_progress(job=None, progress=100, function='Cutting')
 
 
 def cutting_celery(job, path: str, CUTTING_FOLDER: str, _CUT_IMAGE_SIZE: tuple) -> str:
@@ -97,7 +94,7 @@ def cutting_celery(job, path: str, CUTTING_FOLDER: str, _CUT_IMAGE_SIZE: tuple) 
 
         save_folder = os.path.join(CUTTING_FOLDER, img_filename)
 
-        _set_celery_task_progress(job=job, progress=progress, func='Cutting', filename=img_filename)
+        _set_celery_task_progress(job=job, progress=progress, function='Cutting', filename=img_filename)
 
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
@@ -128,4 +125,4 @@ def cutting_celery(job, path: str, CUTTING_FOLDER: str, _CUT_IMAGE_SIZE: tuple) 
         return save_folder
     except Exception as e:
         print(f"ERROR in cutting: {e}")
-        _set_celery_task_progress(job=job, progress=100, func='Cutting')
+        _set_celery_task_progress(job=job, progress=100, function='Cutting')

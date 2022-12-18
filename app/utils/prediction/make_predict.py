@@ -14,6 +14,7 @@ from decimal import Decimal as D
 # from tqdm import tqdm
 
 from config import Config
+from app.celery_task.async_test import quality_checking_image
 
 
 def make_predict(image, predict, medit, job=None):
@@ -90,8 +91,8 @@ def make_predict(image, predict, medit, job=None):
         all_mitoz = 0
         img_name = None
         # with tqdm(total=total, position=0, leave=False) as pbar:
-        for i in range(0, w_sum):
-            for j in range(0, h_sum):
+        for i in range(0, h_sum):
+            for j in range(0, w_sum):
                 # pbar.set_description(f"Total img: {total}. Start predict")
 
                 start_row = j * _CUT_IMAGE_SIZE[0] + s_row
@@ -102,30 +103,32 @@ def make_predict(image, predict, medit, job=None):
                 img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                 img = img.convert('RGB')
 
-                im = np.asarray(img)
-                # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
-                outputs = predictor(im)
+                if quality_checking_image(img):
 
-                outputs = outputs["instances"].to('cpu')
+                    im = np.asarray(img)
+                    # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+                    outputs = predictor(im)
 
-                classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
+                    outputs = outputs["instances"].to('cpu')
 
-                if mitoz in classes:
-                    v = Visualizer(im[:, :, ::-1],
-                                   metadata=mitoz_metadata,
-                                   scale=1,
-                                   instance_mode=ColorMode.SEGMENTATION)
+                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
-                    v = v.draw_instance_predictions(outputs)
+                    if mitoz in classes:
+                        v = Visualizer(im[:, :, ::-1],
+                                       metadata=mitoz_metadata,
+                                       scale=1,
+                                       instance_mode=ColorMode.SEGMENTATION)
 
-                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
-                                v.get_image()[:, :, ::-1])
-                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_original.jpg"),
-                                im)
-                    all_mitoz += classes.count(mitoz)
-                    if classes.count(mitoz) > max_mitoz_in_one_img:
-                        max_mitoz_in_one_img = classes.count(mitoz)
-                        img_name = f"{img_name_draw}.jpg"
+                        v = v.draw_instance_predictions(outputs)
+
+                        cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
+                                    v.get_image()[:, :, ::-1])
+                        cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_original.jpg"),
+                                    im)
+                        all_mitoz += classes.count(mitoz)
+                        if classes.count(mitoz) > max_mitoz_in_one_img:
+                            max_mitoz_in_one_img = classes.count(mitoz)
+                            img_name = f"{img_name_draw}.jpg"
 
                 progress += 1 / total * 100.0
 

@@ -73,12 +73,56 @@ def read_region(file: Image, start_row: int, start_col: int):
     return img
 
 
-def save_image(image: Image, filename, f_path):
+def quality_checking_image(image: Image, image_name=None):
+
+    # lower_white = np.array([10, 25, 100], dtype=np.uint8)
+    # upper_white = np.array([172, 255, 255], dtype=np.uint8)
+
+    start = time.time()
+
+    lower_white = np.array([0, 0, 168], dtype=np.uint8)
+    upper_white = np.array([180, 30, 255], dtype=np.uint8)
+
+    img = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower_white, upper_white)
+
+    # print("filter time:", time.time() - start)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    summa_S = 0.0
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        summa_S += w * h
+
+    if summa_S > CUT_IMAGE_SIZE[0] * CUT_IMAGE_SIZE[1] / 100 * 30:
+        quality = False
+    else:
+        quality = True
+
+    # print(f"Quality time: {time.time() - start}")
+    #
+    # res = cv2.bitwise_and(img, img, mask=mask)
+    # base = 'D:/nina/ai_medit/app/static/cutting_file/Maslov19.8Y_LymphoAngiomatos_Bon_ST_b_383.svs/not_quality'
+    # os.makedirs(base, exist_ok=True)
+    # image_name_res = os.path.join(base, f'{image_name}_res.jpg')
+    # image_name_mask = os.path.join(base, f'{image_name}_mask.jpg')
+    # cv2.imwrite(f"{image_name_res}", res)
+    # cv2.imwrite(f"{image_name_mask}", mask)
+    return quality
+
+
+def save_image(image: Image, filename, f_path, quality=True):
+
     img_filename = os.path.basename(f_path)
     save_folder = os.path.join(Config.CUTTING_FOLDER, img_filename)
+
+    if not quality:
+        save_folder = os.path.join(save_folder, f"not_quality")
+
     path_to_save = os.path.join(save_folder, f"{filename}.jpg")
-    if not os.path.exists(save_folder):
-        os.mkdir(save_folder)
+
+    os.makedirs(save_folder, exist_ok=True)
+
     image.save(path_to_save)
     return path_to_save
 
@@ -103,14 +147,19 @@ async def async_image_process(img: Image, start_row: int, start_col: int, loop):
         return await loop.run_in_executor(thread_pool, partial(read_region, img, start_row, start_col))
 
 
-async def async_image_save_process(img: Image, loop, filename, f_path):
+async def async_image_save_process(img: Image, loop, filename, f_path, quality):
     with ThreadPoolExecutor() as thread_pool:
-        return await loop.run_in_executor(thread_pool, partial(save_image, img, filename, f_path))
+        return await loop.run_in_executor(thread_pool, partial(save_image, img, filename, f_path, quality))
 
 
 async def async_convert_process(img: Image, loop):
     with ThreadPoolExecutor() as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(convert_to_bytes, img))
+
+
+async def async_quality_process(img: Image, loop, image_name):
+    with ThreadPoolExecutor() as thread_pool:
+        return await loop.run_in_executor(thread_pool, partial(quality_checking_image, img, image_name))
 
 
 async def async_open_image(f_path, loop):
@@ -131,8 +180,12 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         #                content_type='application/image')
         # print(f'convert time: {time.time() - start} s')
         """write read block"""
-        path_save = await async_image_save_process(image, loop, filename, f_path)
+        quality = await async_quality_process(image, loop, filename)
+        path_save = await async_image_save_process(image, loop, filename, f_path, quality)
 
+        # print(f"Image number: {number} - quality: {quality}")
+
+        """ if quality:
         async with aiofiles.open(path_save, 'rb') as f:
             data.add_field('file',
                            await f.read(),
@@ -150,46 +203,16 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
             else:
                 pass
                 # print("RESPONSE:")
-                # print(await resp.text())
+                # print(await resp.text())"""
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
         return
     else:
-        os.remove(path_save)
+        pass
+        # os.remove(path_save)
     # finally:
     #     sem.release()
-
-
-async def prereader(image: Image):
-    lvl = image.level_count - 1
-    height, width = image.level_dimensions[lvl]
-    img = image.read_region((0, 0), lvl, image.level_dimensions[lvl])
-    img = img.convert('RGB')
-    # img.save("1.jpg")
-    rectangles = []
-    lower_white = np.array([10, 25, 100], dtype=np.uint8)
-    upper_white = np.array([172, 255, 255], dtype=np.uint8)
-    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower_white,
-                       upper_white)
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    min_target_size = (40, 40)
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        if w >= min_target_size[0] and h >= min_target_size[1]:
-            rectangles.append((int(x), int(y), int(w), int(h)))
-
-    if rectangles:
-        for rect in rectangles:
-            x, y, w, h = rect
-            cv2.rectangle(img, (x, y), (x + w, y + h), [255, 0, 0], 2)
-            img = cv2.putText(img, f"{(x, y)}-{(x + w, y + h)}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                              .5, (0, 255, 0), 1, cv2.LINE_AA)
-    cv2.imwrite('1.jpg', img)
-    # cv2.imshow("img", img)
-    # cv2.waitKey(0)
 
 
 async def bulk_request():
@@ -201,7 +224,6 @@ async def bulk_request():
         f_path = f_path[0]
         start = time.time()
         image = await async_open_image(f_path, loop)
-        # await prereader(image)
         width, height = image.level_dimensions[0]
         print(f"height: {height} | width: {width}")
         # print(f'openslide image open time: {time.time() - start} s')
@@ -224,13 +246,10 @@ async def bulk_request():
                 number += 1
                 if number % 20 == 0:
                     await asyncio.gather(*tasks)
-                    # print(f'task start time: {time.time() - start} s')
                     tasks = []
-                    # await asyncio.sleep(5)
                     # break
             if tasks:
                 await asyncio.gather(*tasks)
-            # print(number)
     else:
         print("NOT FILE IN DIRECTORY")
 

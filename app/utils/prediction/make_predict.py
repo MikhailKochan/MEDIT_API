@@ -80,20 +80,14 @@ def make_predict(image, predict, medit, job=None):
 
         predict.path_to_save = f"{os.path.basename(path_to_save_draw)}.zip"
 
-        if not os.path.exists(path_to_save_draw):
-
-            os.mkdir(path_to_save_draw)
-
-            print(f"Directory {path_to_save_draw} for draw created")
+        os.makedirs(path_to_save_draw, exist_ok=True)
 
         mitoz = CLASS_NAMES.index('mitoz')
 
         all_mitoz = 0
         img_name = None
-        # with tqdm(total=total, position=0, leave=False) as pbar:
         for i in range(0, h_sum):
             for j in range(0, w_sum):
-                # pbar.set_description(f"Total img: {total}. Start predict")
 
                 start_row = j * _CUT_IMAGE_SIZE[0] + s_row
                 start_col = i * _CUT_IMAGE_SIZE[1] + s_col
@@ -138,7 +132,6 @@ def make_predict(image, predict, medit, job=None):
                     job=job,
                     progress=float(D(str(progress)).quantize(D("1.00"))),
                     all_mitoz=all_mitoz)
-                # pbar.update(1)
 
         predict.result_all_mitoz = all_mitoz
 

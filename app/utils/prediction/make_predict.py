@@ -117,8 +117,8 @@ def make_predict(image, predict, medit, job=None):
 
                         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
-                        cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_original.jpg"),
-                                    im)
+                        # cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_original.jpg"),
+                        #             im)
                         all_mitoz += classes.count(mitoz)
                         if classes.count(mitoz) > max_mitoz_in_one_img:
                             max_mitoz_in_one_img = classes.count(mitoz)

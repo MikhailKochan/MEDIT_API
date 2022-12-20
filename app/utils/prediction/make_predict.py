@@ -97,9 +97,10 @@ def make_predict(image, predict, medit, job=None):
                 img = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
                 img = img.convert('RGB')
 
+                im = np.asarray(img)
+
                 if quality_checking_image(img):
 
-                    im = np.asarray(img)
                     # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
                     outputs = predictor(im)
 

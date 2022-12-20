@@ -99,7 +99,7 @@ def make_predict(image, predict, medit, job=None):
 
                 im = np.asarray(img)
 
-                if quality_checking_image(img):
+                if quality_checking_image(im):
 
                     # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
                     outputs = predictor(im)

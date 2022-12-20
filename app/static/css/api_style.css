@@ -335,20 +335,20 @@ section .details span {
 .progress-area .details{
     display: flex;
     align-items: center;
-    margin-bottom: 7px;
+    /*margin-bottom: 7px;*/
     justify-content: space-between;
 }
 .progress-area .progress-bar{
     height: 6px;
     width: 90%;
-    background: #fff;
+    background: #d0cfcf;
     margin-bottom: 4px;
     border-radius: 30px;
 }
 .progress-bar .progress{
     height: 100%;
     width: 1%;
-    background: #6990f2;
+    background: #51cb56;
     border-radius: inherit;
 }/*
 .uploaded-area{

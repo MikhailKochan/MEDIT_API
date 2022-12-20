@@ -73,7 +73,7 @@ def read_region(file: Image, start_row: int, start_col: int):
     return img
 
 
-def quality_checking_image(image: np.asarray, image_name=None, quality_black=False):
+def quality_checking_image(image: np.asarray, quality_black=False):
 
     # lower_white = np.array([10, 25, 100], dtype=np.uint8)
     # upper_white = np.array([172, 255, 255], dtype=np.uint8)
@@ -303,24 +303,28 @@ def _convert_boxes(boxes):
 
 def quality_predict_area(image: np.asarray, predictions, path_to_save_draw, img_name_draw):
     boxes = predictions.pred_boxes if predictions.has("pred_boxes") else None
+    print(f"BOXES: {boxes}")
     if boxes is not None:
         boxes = _convert_boxes(boxes)
+        print(f"BOXES after convert: {boxes}")
         num_instances = len(boxes)
-        # areas = None
-        # if boxes is not None:
-        #     areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
-        # if areas is not None:
-        #     sorted_idxs = np.argsort(-areas).tolist()
-        #     # Re-order overlapped instances in descending order.
-        #     boxes = boxes[sorted_idxs] if boxes is not None else None
-        for i in range(num_instances):
-            if boxes is not None:
-                box_coord = boxes[i]
-                x, y, x1, y1 = box_coord
-                width = x1 - x
-                height = y1 - y
-                img = image[y: y + height, x: x + width]
-                cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
+        areas = None
+        if boxes is not None:
+            areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
+        if areas is not None:
+            print(f"areas: {areas}")
+            sorted_idxs = np.argsort(-areas).tolist()
+            # Re-order overlapped instances in descending order.
+            boxes = boxes[sorted_idxs] if boxes is not None else None
+            for i in range(num_instances):
+                if boxes is not None:
+                    box_coord = boxes[i]
+                    print(f"BOX COORD: {box_coord}")
+                    x, y, x1, y1 = box_coord
+                    width = x1 - x
+                    height = y1 - y
+                    img = image[y: y + height, x: x + width]
+                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
 
 
 def alfa():

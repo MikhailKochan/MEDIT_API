@@ -302,7 +302,7 @@ def _convert_boxes(boxes):
 
 
 def quality_predict_area(image: np.asarray, predictions, path_to_save_draw, img_name_draw):
-    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     boxes = predictions.pred_boxes if predictions.has("pred_boxes") else None
     print(f"BOXES: {boxes}")
     if boxes is not None:
@@ -324,7 +324,7 @@ def quality_predict_area(image: np.asarray, predictions, path_to_save_draw, img_
                     x, y, x1, y1 = box_coord
                     width = x1 - x
                     height = y1 - y
-                    img = img[int(y): int(y + height), int(x): int(x + width)]
+                    img = image[int(y): int(y + height), int(x): int(x + width)]
                     cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
 
 

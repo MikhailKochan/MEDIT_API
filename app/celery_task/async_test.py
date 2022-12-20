@@ -306,21 +306,21 @@ def quality_predict_area(image: np.asarray, predictions, path_to_save_draw, img_
     if boxes is not None:
         boxes = _convert_boxes(boxes)
         num_instances = len(boxes)
-        areas = None
-        if boxes is not None:
-            areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
-        if areas is not None:
-            sorted_idxs = np.argsort(-areas).tolist()
-            # Re-order overlapped instances in descending order.
-            boxes = boxes[sorted_idxs] if boxes is not None else None
-            for i in range(num_instances):
-                if boxes is not None:
-                    box_coord = boxes[i]
-                    x, y, x1, y1 = box_coord
-                    width = x1 - x
-                    height = y1 - y
-                    img = image[y: y + height, x: x + width]
-                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
+        # areas = None
+        # if boxes is not None:
+        #     areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
+        # if areas is not None:
+        #     sorted_idxs = np.argsort(-areas).tolist()
+        #     # Re-order overlapped instances in descending order.
+        #     boxes = boxes[sorted_idxs] if boxes is not None else None
+        for i in range(num_instances):
+            if boxes is not None:
+                box_coord = boxes[i]
+                x, y, x1, y1 = box_coord
+                width = x1 - x
+                height = y1 - y
+                img = image[y: y + height, x: x + width]
+                cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
 
 
 def alfa():

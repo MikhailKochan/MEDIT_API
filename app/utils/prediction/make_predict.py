@@ -105,10 +105,12 @@ def make_predict(image, predict, medit, job=None):
 
                     outputs = outputs["instances"].to('cpu')
                     try:
+                        print('start inside Try:')
                         from app.celery_task.async_test import quality_predict_area
                         quality_predict_area(im, outputs, path_to_save_draw, img_name_draw)
+                        print('finish inside Try:')
                     except Exception as e:
-                        print(e)
+                        print("Experimental block error:", e)
 
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 

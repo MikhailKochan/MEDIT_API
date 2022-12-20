@@ -104,6 +104,11 @@ def make_predict(image, predict, medit, job=None):
                     outputs = predictor(im)
 
                     outputs = outputs["instances"].to('cpu')
+                    try:
+                        from app.celery_task.async_test import quality_predict_area
+                        quality_predict_area(im, outputs, path_to_save_draw, img_name_draw)
+                    except Exception as e:
+                        print(e)
 
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 

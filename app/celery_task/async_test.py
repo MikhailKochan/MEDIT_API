@@ -73,10 +73,7 @@ def read_region(file: Image, start_row: int, start_col: int):
     return img
 
 
-def quality_checking_image(image: np.asarray, quality_black=False):
-
-    # lower_white = np.array([10, 25, 100], dtype=np.uint8)
-    # upper_white = np.array([172, 255, 255], dtype=np.uint8)
+def quality_checking_image(img: np.asarray, quality_black=False):
 
     start = time.time()
 
@@ -86,7 +83,7 @@ def quality_checking_image(image: np.asarray, quality_black=False):
         lower = np.array([0, 0, 0], dtype=np.uint8)
         upper = np.array([180, 255, 68], dtype=np.uint8)
 
-    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    # img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
 
@@ -296,36 +293,107 @@ def _convert_boxes(boxes):
     Convert different format of boxes to an NxB array, where B = 4 or 5 is the box dimension.
     """
     if isinstance(boxes, Boxes) or isinstance(boxes, RotatedBoxes):
+        print('isinstance(boxes, Boxes)')
         return boxes.tensor.detach().numpy()
     else:
+        print('NOT isinstance(boxes, Boxes)')
         return np.asarray(boxes)
 
 
-def quality_predict_area(image: np.asarray, predictions, path_to_save_draw, img_name_draw):
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+def _create_text_labels(classes, scores, class_names, is_crowd=None):
+    """
+    Args:
+        classes (list[int] or None):
+        scores (list[float] or None):
+        class_names (list[str] or None):
+        is_crowd (list[bool] or None):
+
+    Returns:
+        list[str] or None
+    """
+    labels = None
+    if classes is not None:
+        if class_names is not None and len(class_names) > 0:
+            labels = [class_names[i] for i in classes]
+        else:
+            labels = [str(i) for i in classes]
+    if scores is not None:
+        if labels is None:
+            labels = ["{:.0f}%".format(s * 100) for s in scores]
+        else:
+            labels = ["{} {:.0f}%".format(l, s * 100) for l, s in zip(labels, scores)]
+    if labels is not None and is_crowd is not None:
+        labels = [l + ("|crowd" if crowd else "") for l, crowd in zip(labels, is_crowd)]
+    return labels
+
+
+def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int):
+    """
+
+    Args:
+        image: MUST BE IN BGR
+        predictions: outputs after predict
+        metadata:
+        mitoses: index
+
+    Returns:
+
+    """
+    request_coord = []
+    request_label = []
+
+    classes = predictions.pred_classes.tolist() if predictions.has("pred_classes") else None
     boxes = predictions.pred_boxes if predictions.has("pred_boxes") else None
+    scores = predictions.scores if predictions.has("scores") else None
+    labels = _create_text_labels(classes, scores, metadata.get("thing_classes", None))
+
     print(f"BOXES: {boxes}")
-    if boxes is not None:
-        boxes = _convert_boxes(boxes)
-        print(f"BOXES after convert: {boxes}")
-        num_instances = len(boxes)
-        areas = None
+    if mitoses in classes:
         if boxes is not None:
-            areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
-        if areas is not None:
-            print(f"areas: {areas}")
-            sorted_idxs = np.argsort(-areas).tolist()
-            # Re-order overlapped instances in descending order.
-            boxes = boxes[sorted_idxs] if boxes is not None else None
-            for i in range(num_instances):
-                if boxes is not None:
-                    box_coord = boxes[i]
-                    print(f"BOX COORD: {box_coord}")
-                    x, y, x1, y1 = box_coord
-                    width = x1 - x
-                    height = y1 - y
-                    img = image[int(y): int(y + height), int(x): int(x + width)]
-                    cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_mitoses_{i}.jpg"), img)
+            boxes = _convert_boxes(boxes)
+            print(f"BOXES after convert: {boxes}")
+            num_instances = len(boxes)
+            if labels is not None:
+                assert len(labels) == num_instances
+            areas = None
+            if boxes is not None:
+                areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
+            if areas is not None:
+                print(f"areas: {areas}")
+                sorted_idxs = np.argsort(-areas).tolist()
+                # Re-order overlapped instances in descending order.
+                boxes = boxes[sorted_idxs] if boxes is not None else None
+                labels = [labels[k] for k in sorted_idxs] if labels is not None else None
+                for i in range(num_instances):
+                    if boxes is not None:
+                        box_coord = boxes[i]
+                        print(f"BOX COORD: {box_coord}")
+                        x, y, x1, y1 = box_coord
+                        img = image[int(y): int(y1), int(x): int(x1)]
+                        if classes[i] == mitoses:
+                            if quality_checking_image(img) and quality_checking_image(img, quality_black=True):
+                                request_coord.append(box_coord)
+                                request_label.append(labels[i])
+    return request_coord, request_label
+
+
+def draw_predict(image: np.asarray, coord: list, labels: list):
+    """
+    draw Image
+    Args:
+        image: MUST be BGR
+        coord: [[x,y,x1,y1], n1, n2... nx]
+        labels: lest names
+
+    Returns:
+        draw Image: np.assarray
+    """
+    for i in range(len(coord)):
+        x, y, x1, y1 = coord[i]
+        cv2.rectangle(image, (x, y), (x1, y1), [0, 0, 0], 1)
+        image = cv2.putText(image, f"{labels[i]}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                            .5, (0, 0, 0), 1, cv2.LINE_AA)
+    return image
 
 
 def alfa():

@@ -162,7 +162,7 @@ class Images(db.Model):
     def make_predict(self, predict, celery_job=None):
         try:
             if self.format.lower() == '.svs':
-                from app.utils.prediction.make_predict import make_predict as start_predict
+                from app.utils.prediction.make_predict import make_predict_test as start_predict
 
             elif self.format.lower() == '.jpg':
                 return current_app.logger.info('JPG not added in APP')

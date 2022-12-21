@@ -14,7 +14,119 @@ from decimal import Decimal as D
 # from tqdm import tqdm
 
 from config import Config
-from app.celery_task.async_test import quality_checking_image
+from app.celery_task.async_test import quality_checking_image, quality_predict_area, draw_predict
+
+
+def make_predict_test(image, predict, medit, job):
+
+    from rq import get_current_job
+    from app.new_tasks import _set_task_progress
+    job = get_current_job()
+    try:
+
+        progress = 0
+
+        max_mitoz_in_one_img = 0
+
+        _set_task_progress(job=job,
+                           state='PROGRESS',
+                           progress=progress,
+                           all_mitoz=0,
+                           function='Predict',
+                           analysis_number=image.analysis_number)
+
+        cfg = medit.cfg
+        print("Config CUDA :", cfg.MODEL.DEVICE)
+        mitoz_metadata = medit.mitoz_metadata
+
+        predictor = medit.predictor
+
+        date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
+
+        CLASS_NAMES = Config.CLASS_NAMES
+        _CUT_IMAGE_SIZE = Config.CUT_IMAGE_SIZE
+
+        h_sum = int(image.height / _CUT_IMAGE_SIZE[1])
+        w_sum = int(image.width / _CUT_IMAGE_SIZE[0])
+
+        if image.format.lower() == '.svs':
+            f_path = os.path.join(Config.BASEDIR,
+                                  Config.UPLOAD_FOLDER,
+                                  image.filename)
+            file = openslide.OpenSlide(f_path)
+
+        else:
+            return f'{image.format} not added'
+
+        h_rest = image.height % _CUT_IMAGE_SIZE[1]
+        w_rest = image.width % _CUT_IMAGE_SIZE[0]
+        s_col = int(h_rest / 2)
+        s_row = int(w_rest / 2)
+        total = h_sum * w_sum
+
+        path_to_save_draw = os.path.join(Config.BASEDIR,
+                                         Config.DRAW,
+                                         f"{image.filename}_{date_now}")
+
+        predict.path_to_save = f"{os.path.basename(path_to_save_draw)}.zip"
+
+        os.makedirs(path_to_save_draw, exist_ok=True)
+
+        mitoz = CLASS_NAMES.index('mitoz')
+
+        all_mitoz = 0
+
+        for i in range(0, h_sum):
+            for j in range(0, w_sum):
+
+                start_row = j * _CUT_IMAGE_SIZE[0] + s_row
+                start_col = i * _CUT_IMAGE_SIZE[1] + s_col
+
+                img_name_draw = "0_im" + "_" + str(i) + "_" + str(j)
+
+                img_PILLOW = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
+                img_PILLOW = img_PILLOW.convert('RGB')
+
+                im_RGB = np.asarray(img_PILLOW)
+                image_BGR = cv2.cvtColor(im_RGB, cv2.COLOR_RGB2BGR)
+
+                if quality_checking_image(image_BGR):
+
+                    # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+                    outputs = predictor(im_RGB)
+
+                    outputs = outputs["instances"].to('cpu')
+                    print(outputs)
+
+                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
+
+                    request_coord, request_label = quality_predict_area(image_BGR, outputs, mitoz_metadata, mitoz)
+
+                    file_name = os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")
+
+                    image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
+                    cv2.imwrite(file_name, image_draw)
+
+                    all_mitoz += classes.count(mitoz)
+
+                progress += 1 / total * 100.0
+
+                _set_task_progress(
+                    job=job,
+                    progress=float(D(str(progress)).quantize(D("1.00"))),
+                    all_mitoz=all_mitoz)
+
+        predict.result_all_mitoz = all_mitoz
+        predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img
+        predict.count_img = total
+        predict.model = cfg.MODEL.WEIGHTS
+        predict.image_id = image.id
+
+        return predict, path_to_save_draw
+    except Exception as e:
+        print(f'ERROR in make_predict_test: {e}', sys.exc_info()[0])
+        return type(e), e
+        # current_app.logger.error(e)
 
 
 def make_predict(image, predict, medit, job=None):
@@ -105,13 +217,7 @@ def make_predict(image, predict, medit, job=None):
                     outputs = predictor(im)
 
                     outputs = outputs["instances"].to('cpu')
-                    try:
-                        print('start inside Try:')
-                        from app.celery_task.async_test import quality_predict_area
-                        quality_predict_area(im, outputs, path_to_save_draw, img_name_draw)
-                        print('finish inside Try:')
-                    except Exception as e:
-                        print("Experimental block error:", e)
+                    print(outputs)
 
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 

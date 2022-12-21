@@ -53,7 +53,12 @@ def mk_pred(**kwargs):
     job = get_current_job()
     img = kwargs.get('img')
     start = time.time()
-    predict, path = make_predict_test(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
+
+    image = kwargs.get('img')
+    prd = kwargs.get('predict')
+    mdt = kwargs.get('medit')
+    print(image, prd, mdt)
+    predict, path = make_predict_test(image=image, predict=prd, medit=mdt)
     print(f'PREDICT TIME: {time.time() - start}')
     try:
         engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)

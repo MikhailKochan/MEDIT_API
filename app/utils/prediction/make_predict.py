@@ -39,7 +39,7 @@ def make_predict_test(image, predict, medit):
         date_now = predict.timestamp.strftime('%d_%m_%Y__%H_%M')
 
         CLASS_NAMES = Config.CLASS_NAMES
-        _CUT_IMAGE_SIZE = Config.CUT_IMAGE_SIZE
+        _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
 
         h_sum = int(image.height / _CUT_IMAGE_SIZE[1])
         w_sum = int(image.width / _CUT_IMAGE_SIZE[0])

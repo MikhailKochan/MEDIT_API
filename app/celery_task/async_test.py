@@ -83,6 +83,7 @@ def quality_checking_image(img: np.asarray, quality_black=False):
     Returns:
 
     """
+    print('START QUALITY')
     start = time.time()
 
     lower = np.array([0, 0, 168], dtype=np.uint8)
@@ -335,7 +336,7 @@ def _create_text_labels(classes, scores, class_names, is_crowd=None):
     return labels
 
 
-def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int):
+def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int = 0):
     """
 
     Args:

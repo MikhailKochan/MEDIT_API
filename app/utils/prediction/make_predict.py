@@ -18,23 +18,18 @@ from app.celery_task.async_test import quality_checking_image, quality_predict_a
 
 
 def make_predict_test(image, predict, medit, job=None):
-
     from rq import get_current_job
     from app.new_tasks import _set_task_progress
     job = get_current_job()
     try:
-
         progress = 0
-
         max_mitoz_in_one_img = 0
-
         _set_task_progress(job=job,
                            state='PROGRESS',
                            progress=progress,
                            all_mitoz=0,
                            function='Predict',
                            analysis_number=image.analysis_number)
-
         cfg = medit.cfg
         print("Config CUDA :", cfg.MODEL.DEVICE)
         mitoz_metadata = medit.mitoz_metadata
@@ -75,7 +70,7 @@ def make_predict_test(image, predict, medit, job=None):
         mitoz = CLASS_NAMES.index('mitoz')
 
         all_mitoz = 0
-
+        print('START ITER')
         for i in range(0, h_sum):
             for j in range(0, w_sum):
 
@@ -122,7 +117,7 @@ def make_predict_test(image, predict, medit, job=None):
         return predict, path_to_save_draw
     except Exception as e:
         print(f'ERROR in make_predict_test: {e}', sys.exc_info()[0])
-        return type(e), e
+
         # current_app.logger.error(e)
 
 

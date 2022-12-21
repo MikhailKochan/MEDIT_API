@@ -74,7 +74,15 @@ def read_region(file: Image, start_row: int, start_col: int):
 
 
 def quality_checking_image(img: np.asarray, quality_black=False):
+    """
 
+    Args:
+        img: MUST be BGR
+        quality_black:
+
+    Returns:
+
+    """
     start = time.time()
 
     lower = np.array([0, 0, 168], dtype=np.uint8)

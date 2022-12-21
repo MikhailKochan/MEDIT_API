@@ -92,13 +92,10 @@ def make_predict_test(image, predict, medit, job):
 
                 if quality_checking_image(image_BGR):
 
-                    # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
                     outputs = predictor(im_RGB)
 
                     outputs = outputs["instances"].to('cpu')
                     print(outputs)
-
-                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
                     request_coord, request_label = quality_predict_area(image_BGR, outputs, mitoz_metadata, mitoz)
 
@@ -107,7 +104,7 @@ def make_predict_test(image, predict, medit, job):
                     image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
                     cv2.imwrite(file_name, image_draw)
 
-                    all_mitoz += classes.count(mitoz)
+                    all_mitoz += len(request_coord)
 
                 progress += 1 / total * 100.0
 
@@ -210,10 +207,9 @@ def make_predict(image, predict, medit, job=None):
                 img = img.convert('RGB')
 
                 im = np.asarray(img)
+                im_BGR = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+                if quality_checking_image(im_BGR):
 
-                if quality_checking_image(im):
-
-                    # im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
                     outputs = predictor(im)
 
                     outputs = outputs["instances"].to('cpu')
@@ -231,8 +227,7 @@ def make_predict(image, predict, medit, job=None):
 
                         cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}.jpg"),
                                     v.get_image()[:, :, ::-1])
-                        # cv2.imwrite(os.path.join(path_to_save_draw, f"{img_name_draw}_original.jpg"),
-                        #             im)
+
                         all_mitoz += classes.count(mitoz)
                         if classes.count(mitoz) > max_mitoz_in_one_img:
                             max_mitoz_in_one_img = classes.count(mitoz)

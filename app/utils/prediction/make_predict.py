@@ -17,7 +17,7 @@ from config import Config
 from app.celery_task.async_test import quality_checking_image, quality_predict_area, draw_predict
 
 
-def make_predict_test(image, predict, medit, job):
+def make_predict_test(image, predict, medit, job=None):
 
     from rq import get_current_job
     from app.new_tasks import _set_task_progress

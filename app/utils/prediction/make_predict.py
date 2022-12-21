@@ -100,7 +100,7 @@ def make_predict_test(image, predict, medit):
                         file_name = os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")
 
                         image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
-                        if image_draw:
+                        if request_label:
                             cv2.imwrite(file_name, image_draw)
 
                             all_mitoz += len(request_coord)

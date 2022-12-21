@@ -91,16 +91,19 @@ def make_predict_test(image, predict, medit):
                     outputs = predictor(im_RGB)
 
                     outputs = outputs["instances"].to('cpu')
-                    print(outputs)
+                    classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
-                    request_coord, request_label = quality_predict_area(image_BGR, outputs, mitoz_metadata, mitoz)
+                    if mitoz in classes:
+                        request_coord, request_label = quality_predict_area(image_BGR, outputs, mitoz_metadata, mitoz)
+                        print('COORD:', request_coord)
+                        print('LABEL:', request_label)
+                        file_name = os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")
 
-                    file_name = os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")
+                        image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
+                        if image_draw:
+                            cv2.imwrite(file_name, image_draw)
 
-                    image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
-                    cv2.imwrite(file_name, image_draw)
-
-                    all_mitoz += len(request_coord)
+                            all_mitoz += len(request_coord)
 
                 progress += 1 / total * 100.0
 

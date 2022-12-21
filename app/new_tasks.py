@@ -46,14 +46,14 @@ def img_cutt(**kwargs):
 
 
 def mk_pred(**kwargs):
-    from app.utils.prediction.make_predict import make_predict
+    from app.utils.prediction.make_predict import make_predict_test
     from app.utils.create_zip.create_zip import create_zip
     from rq import get_current_job
 
     job = get_current_job()
     img = kwargs.get('img')
     start = time.time()
-    predict, path = make_predict(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
+    predict, path = make_predict_test(image=kwargs.get('img'), predict=kwargs.get('predict'), medit=kwargs.get('medit'))
     print(f'PREDICT TIME: {time.time() - start}')
     try:
         engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)

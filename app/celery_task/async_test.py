@@ -399,7 +399,7 @@ def draw_predict(image: np.asarray, coord: list, labels: list):
     """
     for i in range(len(coord)):
         x, y, x1, y1 = coord[i]
-        cv2.rectangle(image, (x, y), (x1, y1), [0, 0, 0], 1)
+        cv2.rectangle(image, (int(x), int(y)), (int(x1), int(y1)), [0, 0, 0], 1)
         image = cv2.putText(image, f"{labels[i]}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
                             .5, (0, 0, 0), 1, cv2.LINE_AA)
     return image

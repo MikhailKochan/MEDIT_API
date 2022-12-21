@@ -59,25 +59,29 @@ def mk_pred(**kwargs):
     mdt = kwargs.get('medit')
     print(image, prd, mdt)
     predict, path = make_predict_test(image=image, predict=prd, medit=mdt)
-    print(f'PREDICT TIME: {time.time() - start}')
-    try:
-        engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
-        with Session(engine) as session:
-            if predict:
-                session.add(predict)
-                task = session.query(Task).filter(Task.predict, Predict.id == predict.id).first()
-                # task = Task.query.filter(Task.predict, Predict.id == predict.id).first()
-            create_zip(path_to_save=path)
-            _set_task_progress(job, state='FINISHED', result='Predict finished')
-            shutil.rmtree(path)
-            os.remove(img.file_path)
-            if task:
-                task.complete = True
-            else:
-                print('ERROR in mk_pred new_tasks: TASK NOT FOUND')
-            session.commit()
-    except Exception as e:
-        print('ERROR in mk_pred new_tasks', e)
+    if isinstance(predict, Predict):
+        print(f'PREDICT TIME: {time.time() - start}')
+        try:
+            engine = create_engine(Config.__dict__['SQLALCHEMY_DATABASE_URI'], echo=False, future=True)
+            with Session(engine) as session:
+                if predict:
+                    session.add(predict)
+                    task = session.query(Task).filter(Task.predict, Predict.id == predict.id).first()
+                    # task = Task.query.filter(Task.predict, Predict.id == predict.id).first()
+                create_zip(path_to_save=path)
+                _set_task_progress(job, state='FINISHED', result='Predict finished')
+                shutil.rmtree(path)
+                os.remove(img.file_path)
+                if task:
+                    task.complete = True
+                else:
+                    print('ERROR in mk_pred new_tasks: TASK NOT FOUND')
+                session.commit()
+        except Exception as e:
+            print('ERROR in mk_pred new_tasks', e)
+    else:
+        print(predict)
+        print(path)
 
 
 def _set_task_progress(job, **kwargs):

@@ -118,8 +118,7 @@ def make_predict_test(image, predict, medit):
         return predict, path_to_save_draw
     except Exception as e:
         print(f'ERROR in make_predict_test: {e}', sys.exc_info()[0])
-
-        # current_app.logger.error(e)
+        return type(e), e
 
 
 def make_predict(image, predict, medit, job=None):

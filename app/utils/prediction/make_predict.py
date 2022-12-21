@@ -17,7 +17,7 @@ from config import Config
 from app.celery_task.async_test import quality_checking_image, quality_predict_area, draw_predict
 
 
-def make_predict_test(image, predict, medit, job=None):
+def make_predict_test(image, predict, medit):
     from rq import get_current_job
     from app.new_tasks import _set_task_progress
     job = get_current_job()
@@ -51,7 +51,8 @@ def make_predict_test(image, predict, medit, job=None):
             file = openslide.OpenSlide(f_path)
 
         else:
-            return f'{image.format} not added'
+            print(f'{image.format} not added')
+            return
 
         h_rest = image.height % _CUT_IMAGE_SIZE[1]
         w_rest = image.width % _CUT_IMAGE_SIZE[0]

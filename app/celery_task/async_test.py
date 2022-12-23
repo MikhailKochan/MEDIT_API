@@ -83,12 +83,13 @@ def quality_checking_image(img: np.asarray, quality_black=False):
     Returns:
 
     """
-    print('START QUALITY')
-    start = time.time()
-
+    # print('START QUALITY')
+    # start = time.time()
+    precent = 30
     lower = np.array([0, 0, 168], dtype=np.uint8)
     upper = np.array([180, 30, 255], dtype=np.uint8)
     if quality_black:
+        precent = 10
         lower = np.array([0, 0, 0], dtype=np.uint8)
         upper = np.array([180, 255, 68], dtype=np.uint8)
 
@@ -104,12 +105,12 @@ def quality_checking_image(img: np.asarray, quality_black=False):
         x, y, w, h = cv2.boundingRect(cnt)
         summa_S += w * h
 
-    if summa_S > imgh * imgw / 100 * 30:
+    if summa_S > imgh * imgw / 100 * precent:
         quality = False
     else:
         quality = True
 
-    print(f"Quality time: {time.time() - start}")
+    # print(f"Quality time: {time.time() - start}")
 
     return quality
 
@@ -400,15 +401,16 @@ def draw_predict(image: np.asarray, coord: list, labels: list):
     for i in range(len(coord)):
         x, y, x1, y1 = coord[i]
         x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
-        cv2.rectangle(image, (x, y), (x1, y1), [0, 0, 0], 4)
-        image = cv2.putText(image, f"{labels[i]}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                            .5, (0, 0, 0), 1, cv2.LINE_AA)
+        cv2.rectangle(image, (x, y), (x1, y1), [0, 0, 0], 2)
+        cv2.rectangle(image, (x - 1, y - 15), (x + 85, y + 1), [0, 0, 0], -1)
+        image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
+                            .5, (80, 80, 255), 1, cv2.LINE_AA)
     return image
 
 
 def alfa():
-    x = 215
-    y = 196
+    x = 215 - 100
+    y = 196 - 100
     width = 65
     height = 75
     # x = 198
@@ -417,12 +419,19 @@ def alfa():
     # height = 75
     photo = 'photo_2022-12-19_22-35-59.jpg'
     photo1 = 'photo_2022-12-19_21-56-12.jpg'
-    img = cv2.imread(f"./PUT_YOUR_DATASET_HERE/{photo}")
-    imgh, imgw = img.shape[:2]
+
+    # image = cv2.imread(f"./PUT_YOUR_DATASET_HERE/{photo}")
+    # imgh, imgw = img.shape[:2]
+    photo2 = 'photo_2022-12-23_15-14-54.jpg'
+    image = cv2.imread(f"C:\\Users\\user\\Downloads\\{photo2}")
     # x = (imgh / 2 - height) / 2
     # y = (imgh / 2 - height) / 2 + height
-    img = img[y: y + height, x: x + width]
-    print(quality_checking_image(img))
+    cv2.rectangle(image, (x, y), (x+width, y+height), [0, 0, 0], 2)
+    cv2.rectangle(image, (x - 1, y - 15), (x + 85, y + 1), [0, 0, 0], -1)
+    img = cv2.putText(image, f"mitoz 97%", (x, y - 2), cv2.FONT_HERSHEY_SIMPLEX,
+                      .5, (80, 80, 255), 1, cv2.LINE_AA)
+    # img = img[y: y + height, x: x + width]
+    # print(quality_checking_image(img))
     # lower_white = np.array([0, 0, 168], dtype=np.uint8)
     # upper_white = np.array([180, 30, 255], dtype=np.uint8)
     #
@@ -444,8 +453,8 @@ def alfa():
 
 
 if __name__ == "__main__":
-    # alfa()
-    resize_image()
+    alfa()
+    # resize_image()
     # start_t = time.time()
     # asyncio.run(bulk_request())
     # print(f'Finish time: {time.time() - start_t} s')

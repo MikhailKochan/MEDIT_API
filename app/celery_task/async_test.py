@@ -85,11 +85,11 @@ def quality_checking_image(img: np.asarray, quality_black=False):
     """
     # print('START QUALITY')
     # start = time.time()
-    precent = 30
+    percentage = 30
     lower = np.array([0, 0, 168], dtype=np.uint8)
     upper = np.array([180, 30, 255], dtype=np.uint8)
     if quality_black:
-        precent = 10
+        percentage = 10
         lower = np.array([0, 0, 0], dtype=np.uint8)
         upper = np.array([180, 255, 68], dtype=np.uint8)
 
@@ -105,7 +105,7 @@ def quality_checking_image(img: np.asarray, quality_black=False):
         x, y, w, h = cv2.boundingRect(cnt)
         summa_S += w * h
 
-    if summa_S > imgh * imgw / 100 * precent:
+    if summa_S > imgh * imgw / 100 * percentage:
         quality = False
     else:
         quality = True
@@ -401,10 +401,10 @@ def draw_predict(image: np.asarray, coord: list, labels: list):
     for i in range(len(coord)):
         x, y, x1, y1 = coord[i]
         x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
-        cv2.rectangle(image, (x, y), (x1, y1), [0, 0, 0], 2)
-        cv2.rectangle(image, (x - 1, y - 15), (x + 85, y + 1), [0, 0, 0], -1)
+        cv2.rectangle(image, (x, y), (x1, y1), [2, 202, 244], 2)
+        cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), [2, 202, 244], -1)
         image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
-                            .5, (80, 80, 255), 1, cv2.LINE_AA)
+                            .8, (0, 0, 0), 2, cv2.LINE_AA)
     return image
 
 
@@ -426,10 +426,10 @@ def alfa():
     image = cv2.imread(f"C:\\Users\\user\\Downloads\\{photo2}")
     # x = (imgh / 2 - height) / 2
     # y = (imgh / 2 - height) / 2 + height
-    cv2.rectangle(image, (x, y), (x+width, y+height), [0, 0, 0], 2)
-    cv2.rectangle(image, (x - 1, y - 15), (x + 85, y + 1), [0, 0, 0], -1)
+    cv2.rectangle(image, (x, y), (x+width, y+height), [2, 202, 244], 2)
+    cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), [2, 202, 244], -1)
     img = cv2.putText(image, f"mitoz 97%", (x, y - 2), cv2.FONT_HERSHEY_SIMPLEX,
-                      .5, (80, 80, 255), 1, cv2.LINE_AA)
+                      .8, (0, 0, 0), 2, cv2.LINE_AA)
     # img = img[y: y + height, x: x + width]
     # print(quality_checking_image(img))
     # lower_white = np.array([0, 0, 168], dtype=np.uint8)

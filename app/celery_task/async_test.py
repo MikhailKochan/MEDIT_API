@@ -39,7 +39,6 @@ def space_selector(height: int, width: int):
 
     for i in range(0, h_sum):
         for j in range(0, w_sum):
-
             start_row = j * CUT_IMAGE_SIZE[0] + s_row
             start_col = i * CUT_IMAGE_SIZE[1] + s_col
 
@@ -75,7 +74,6 @@ def read_region(file: Image, start_row: int, start_col: int):
 
 def quality_checking_image(img: np.asarray,
                            quality_black=False,
-                           percentage=None,
                            lower=None,
                            upper=None,
                            settings=None):
@@ -85,8 +83,6 @@ def quality_checking_image(img: np.asarray,
         settings: user settings class Settings in models
         upper: upper range for HSV color
         lower: lower range for HSV color
-        percentage: percent S of all images for a quality (default for white mode = 30%,
-                                                                   for black mode = 10%)
         img: MUST be BGR
         quality_black: Black mode for images
 
@@ -155,7 +151,6 @@ def resize_image():
 
 
 def save_image(image: Image, filename, f_path, quality=True):
-
     img_filename = os.path.basename(f_path)
     save_folder = os.path.join(Config.CUTTING_FOLDER, img_filename)
 
@@ -304,6 +299,7 @@ class Rec_box:
     """
         Класс прямоугольников
     """
+
     def __init__(self, x, y, h, w):
         self.x = x
         self.y = y
@@ -402,9 +398,8 @@ def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int 
                         x, y, x1, y1 = box_coord
                         img = image[int(y): int(y1), int(x): int(x1)]
                         if classes[i] == mitoses:
-                            if quality_checking_image(img, settings) and quality_checking_image(img,
-                                                                                                quality_black=True,
-                                                                                                settings=settings):
+                            if quality_checking_image(img, settings=settings) \
+                                    and quality_checking_image(img, quality_black=True, settings=settings):
                                 request_coord.append(box_coord)
                                 request_label.append(labels[i])
     return request_coord, request_label
@@ -458,7 +453,7 @@ def alfa():
     image = cv2.imread(f"C:\\Users\\user\\Downloads\\{photo2}")
     # x = (imgh / 2 - height) / 2
     # y = (imgh / 2 - height) / 2 + height
-    cv2.rectangle(image, (x, y), (x+width, y+height), [2, 202, 244], 2)
+    cv2.rectangle(image, (x, y), (x + width, y + height), [2, 202, 244], 2)
     cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), [2, 202, 244], -1)
     img = cv2.putText(image, f"mitoz 97%", (x, y - 2), cv2.FONT_HERSHEY_SIMPLEX,
                       .8, (0, 0, 0), 2, cv2.LINE_AA)

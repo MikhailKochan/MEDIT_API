@@ -235,6 +235,10 @@
         document.querySelector('#percent_white').setAttribute('value', defaultSettings['percentage_white']);
         document.querySelector('#percent_black').setAttribute('value', defaultSettings['percentage_black']);
 
+        let percent_white = 100 - defaultSettings['percentage_white'];
+        let percent_black = defaultSettings['percentage_black'];
+        document.querySelector(`#test_white`).setAttribute('style',`width:${percent_white}%;`)
+        document.querySelector(`#test_black`).setAttribute('style',`width:${percent_black}%;height:${percent_black}%;`);
     }
 
     document.getElementById('reset').addEventListener('click', resetToDefault);

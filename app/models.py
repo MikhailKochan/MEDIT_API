@@ -113,7 +113,7 @@ class Settings(db.Model):
         self.cutting_images_size = json.dumps(current_app.config['_CUT_IMAGE_SIZE'])
 
     def get_cutting_size(self):
-        return int(json.loads(self.cutting_images_size))
+        return tuple(json.loads(self.cutting_images_size))
 
     def get_height(self):
         return int(json.loads(self.cutting_images_size)[1])

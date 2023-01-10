@@ -42,8 +42,8 @@ def make_predict_test(image, predict, medit, settings=None):
         _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
         if settings is not None:
             _CUT_IMAGE_SIZE = settings.get_cutting_size()
-        h_sum = int(image.height) / int(_CUT_IMAGE_SIZE[1])
-        w_sum = int(image.width) / int(_CUT_IMAGE_SIZE[0])
+        h_sum = int(int(image.height) / int(_CUT_IMAGE_SIZE[1]))
+        w_sum = int(int(image.width) / int(_CUT_IMAGE_SIZE[0]))
 
         if image.format.lower() == '.svs':
             f_path = os.path.join(Config.BASEDIR,

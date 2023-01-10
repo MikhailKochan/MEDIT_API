@@ -57,7 +57,7 @@ def mk_pred(**kwargs):
     image = kwargs.get('img')
     prd = kwargs.get('predict')
     mdt = kwargs.get('medit')
-    settings = kwargs.get('settings', Settings())
+    settings = kwargs.get('settings', None)
     print(image, prd, mdt, settings)
     predict, path = make_predict_test(image=image,
                                       predict=prd,

@@ -87,7 +87,7 @@ def make_predict_test(image, predict, medit, settings=None):
                 im_RGB = np.asarray(img_PILLOW)
                 image_BGR = cv2.cvtColor(im_RGB, cv2.COLOR_RGB2BGR)
 
-                if quality_checking_image(image_BGR):
+                if quality_checking_image(image_BGR, settings=settings):
 
                     outputs = predictor(im_RGB)
 

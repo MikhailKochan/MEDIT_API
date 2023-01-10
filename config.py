@@ -66,6 +66,18 @@ class Config(object):
 
     _CUT_IMAGE_SIZE = (4080, 3072)
     CUT_IMAGE_SIZE = (4080, 3072)
+
+    PERCENTAGE_WHITE = 30
+    PERCENTAGE_BLACK = 10
+
+    COLOR_FOR_WHITE_FILTER = [2, 202, 244]  # Its HSV color range for openCV2
+    COLOR_FOR_BLACK_FILTER = [2, 202, 244]  # Its HSV color range for openCV2
+
+    COLOR_FOR_DRAW_RECTANGLE = [2, 202, 244]
+    COLOR_FOR_DRAW_TEXT = [0, 0, 0]
+
+
+
     _CUDA_SET = "cpu"
     if torch.cuda.is_available():
         _CUDA_SET = "cuda"

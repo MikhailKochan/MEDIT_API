@@ -17,7 +17,7 @@ from config import Config
 from app.celery_task.async_test import quality_checking_image, quality_predict_area, draw_predict
 
 
-def make_predict_test(image, predict, medit):
+def make_predict_test(image, predict, medit, settings=None):
     from rq import get_current_job
     from app.new_tasks import _set_task_progress
     job = get_current_job()
@@ -40,7 +40,8 @@ def make_predict_test(image, predict, medit):
 
         CLASS_NAMES = Config.CLASS_NAMES
         _CUT_IMAGE_SIZE = Config._CUT_IMAGE_SIZE
-
+        if settings is not None:
+            _CUT_IMAGE_SIZE = settings.get_cutting_size()
         h_sum = int(image.height / _CUT_IMAGE_SIZE[1])
         w_sum = int(image.width / _CUT_IMAGE_SIZE[0])
 
@@ -94,12 +95,17 @@ def make_predict_test(image, predict, medit):
                     classes = outputs.pred_classes.tolist() if outputs.has("pred_classes") else None
 
                     if mitoz in classes:
-                        request_coord, request_label = quality_predict_area(image_BGR, outputs, mitoz_metadata, mitoz)
-                        print('COORD:', request_coord)
-                        print('LABEL:', request_label)
+                        request_coord, request_label = quality_predict_area(image=image_BGR,
+                                                                            predictions=outputs,
+                                                                            metadata=mitoz_metadata,
+                                                                            mitoses=mitoz,
+                                                                            settings=settings)
                         file_name = os.path.join(path_to_save_draw, f"{img_name_draw}.jpg")
 
-                        image_draw = draw_predict(image=image_BGR, coord=request_coord, labels=request_label)
+                        image_draw = draw_predict(image=image_BGR,
+                                                  coord=request_coord,
+                                                  labels=request_label,
+                                                  settings=settings)
                         if request_label:
                             cv2.imwrite(file_name, image_draw)
 

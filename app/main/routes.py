@@ -4,8 +4,8 @@ from flask import send_from_directory
 from flask_login import current_user, login_required
 from app import db
 import os
-from app.models import Images, Predict, Status, Task
-from app.main.forms import SearchPredictForm
+from app.models import Images, Predict, Settings, Task
+from app.main.forms import SearchPredictForm, SettingsForm
 from app.main import bp
 from sqlalchemy.dialects.sqlite import insert
 import json
@@ -58,6 +58,37 @@ def info():
     return render_template('info.html', title='О программе')
 
 
+@bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    def_set = Settings().__dict__
+    def_set.pop('_sa_instance_state')
+    default = def_set
+    user_settings = current_user.get_settings()
+
+    if user_settings is None:
+        user_settings = Settings(user=current_user)
+        db.session.add(user_settings)
+        db.session.commit()
+
+    if request.method == "POST":
+        req = request.form.to_dict()
+        user_settings.cutting_images_size = json.dumps((req['cutting_images_width'], req['cutting_images_height']))
+        # convert RGB2BGR
+        user_settings.color_for_draw_rectangle = json.dumps(list(req['color_box_rectangle'].split(',')[::-1]))
+        user_settings.color_for_draw_text = json.dumps(list(req['color_box_text'].split(',')[::-1]))
+
+        user_settings.percentage_black = int(req['percent_black'])
+        user_settings.percentage_white = int(req['percent_white'])
+        db.session.add(user_settings)
+        db.session.commit()
+        flash('Ваши настройки были изменены')
+        return render_template('settings.html', title='Настройки', settings=user_settings, default_set=default)
+
+    if request.method == 'GET':
+        return render_template('settings.html', title='Настройки', settings=user_settings, default_set=default)
+
+
 @bp.route('/get-zip/<string:filename>')
 @login_required
 def get_zip(filename):
@@ -95,12 +126,6 @@ def predict_rout():
         if img is None:
             return render_template('get_analysis.html', title='Исследование', tasks=tasks)
         predict = Predict(images=img, timestamp=datetime.utcnow())
-
-        # path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
-        #                                      f"{current_app.config['DRAW']}/{img.filename}")
-        #
-        # if not os.path.exists(path_to_save_draw_img):
-        #     os.mkdir(path_to_save_draw_img)
 
         task = current_user.launch_task(name='mk_pred',
                                         description=f'{img.filename} prediction',

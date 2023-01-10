@@ -42,6 +42,8 @@ class User(UserMixin, db.Model):
 
     predict = db.relationship('Predict', backref='user', lazy='dynamic')
 
+    settings = db.relationship('Settings', backref='user', lazy='dynamic')
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -56,6 +58,7 @@ class User(UserMixin, db.Model):
 
         image = kwargs.get('img')
         predict = kwargs.get('predict')
+        kwargs['settings'] = self.get_settings()
 
         rq_job = current_app.task_queue.enqueue('app.new_tasks.' + name,
                                                 job_timeout=job_timeout,
@@ -74,12 +77,55 @@ class User(UserMixin, db.Model):
 
         return task
 
+    def get_settings(self):
+        settings = Settings.query.filter_by(user=self).first()
+        if settings is None:
+            settings = Settings(self)
+        return settings
+
     def get_tasks_in_progress(self):
         return Task.query.filter_by(user=self, complete=False).all()
 
     def get_task_in_progress(self, name):
         return Task.query.filter_by(name=name, user=self,
                                     complete=False).all()
+
+
+class Settings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    cutting_images_size = db.Column(db.Text)
+
+    percentage_white = db.Column(db.Integer)
+    percentage_black = db.Column(db.Integer)
+
+    color_for_draw_rectangle = db.Column(db.Text)
+    color_for_draw_text = db.Column(db.Text)
+
+    def __init__(self, user: User = None):
+        if user is not None:
+            self.user_id = user.id
+        self.percentage_white = int(current_app.config['PERCENTAGE_WHITE'])
+        self.percentage_black = int(current_app.config['PERCENTAGE_BLACK'])
+        self.color_for_draw_rectangle = json.dumps(current_app.config['COLOR_FOR_DRAW_RECTANGLE'])
+        self.color_for_draw_text = json.dumps(current_app.config['COLOR_FOR_DRAW_TEXT'])
+        self.cutting_images_size = json.dumps(current_app.config['_CUT_IMAGE_SIZE'])
+
+    def get_cutting_size(self):
+        return int(json.loads(self.cutting_images_size))
+
+    def get_height(self):
+        return int(json.loads(self.cutting_images_size)[1])
+
+    def get_width(self):
+        return int(json.loads(self.cutting_images_size)[0])
+
+    def get_color_for_rectangle(self):
+        return list(json.loads(self.color_for_draw_rectangle))
+
+    def get_color_for_text(self):
+        return list(json.loads(str(self.color_for_draw_text)))
 
 
 class Images(db.Model):
@@ -218,22 +264,6 @@ class Predict(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     model = db.Column(db.String(128))
-
-    # def __init__(self,
-    #              image_id=None,
-    #              result_all_mitoz=None,
-    #              result_max_mitoz_in_one_img=None,
-    #              count_img=None,
-    #              name_img_have_max_mitoz=None,
-    #              model=None,
-    #              ):
-    #
-    #     self.image_id = image_id
-    #     self.result_all_mitoz = result_all_mitoz
-    #     self.result_max_mitoz_in_one_img = result_max_mitoz_in_one_img
-    #     self.count_img = count_img
-    #     self.name_img_have_max_mitoz = name_img_have_max_mitoz
-    #     self.model = model
 
     def __repr__(self):
         return f'<Predict Images {self.images.filename} create {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}>'

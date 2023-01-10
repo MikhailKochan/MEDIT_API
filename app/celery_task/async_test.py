@@ -20,7 +20,7 @@ import aiofiles
 from aiohttp import ClientSession, TCPConnector, FormData
 
 from io import BytesIO
-
+from app.models import Settings
 
 CUT_IMAGE_SIZE = Config.__dict__['_CUT_IMAGE_SIZE']
 sem = asyncio.Semaphore(10)
@@ -73,32 +73,52 @@ def read_region(file: Image, start_row: int, start_col: int):
     return img
 
 
-def quality_checking_image(img: np.asarray, quality_black=False):
+def quality_checking_image(img: np.asarray,
+                           quality_black=False,
+                           percentage=None,
+                           lower=None,
+                           upper=None,
+                           settings=None):
     """
 
     Args:
+        settings: user settings class Settings in models
+        upper: upper range for HSV color
+        lower: lower range for HSV color
+        percentage: percent S of all images for a quality (default for white mode = 30%,
+                                                                   for black mode = 10%)
         img: MUST be BGR
-        quality_black:
+        quality_black: Black mode for images
 
     Returns:
-
+        True of False
     """
     # print('START QUALITY')
     # start = time.time()
-    percentage = 30
-    lower = np.array([0, 0, 168], dtype=np.uint8)
-    upper = np.array([180, 30, 255], dtype=np.uint8)
-    if quality_black:
-        percentage = 10
-        lower = np.array([0, 0, 0], dtype=np.uint8)
-        upper = np.array([180, 255, 68], dtype=np.uint8)
+    if settings is None:
+        percentage = 30
+    else:
+        percentage = int(settings.percentage_white)
 
-    # img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    if lower is None and upper is None:
+        lower = np.array([0, 0, 168], dtype=np.uint8)
+        upper = np.array([180, 30, 255], dtype=np.uint8)
+
+    if quality_black:
+        if settings is None:
+            percentage = 10
+        else:
+            percentage = int(settings.percentage_black)
+
+        if lower is None and upper is None:
+            lower = np.array([0, 0, 0], dtype=np.uint8)
+            upper = np.array([180, 255, 68], dtype=np.uint8)
+
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
 
     imgh, imgw = img.shape[:2]
-    # print("filter time:", time.time() - start)
+
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     summa_S = 0.0
     for cnt in contours:
@@ -109,8 +129,6 @@ def quality_checking_image(img: np.asarray, quality_black=False):
         quality = False
     else:
         quality = True
-
-    # print(f"Quality time: {time.time() - start}")
 
     return quality
 
@@ -337,10 +355,11 @@ def _create_text_labels(classes, scores, class_names, is_crowd=None):
     return labels
 
 
-def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int = 0):
+def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int = 0, settings: Settings = None):
     """
 
     Args:
+        settings: user settings
         image: MUST BE IN BGR
         predictions: outputs after predict
         metadata:
@@ -357,11 +376,11 @@ def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int 
     scores = predictions.scores if predictions.has("scores") else None
     labels = _create_text_labels(classes, scores, metadata.get("thing_classes", None))
 
-    print(f"BOXES: {boxes}")
+    # print(f"BOXES: {boxes}")
     if mitoses in classes:
         if boxes is not None:
             boxes = _convert_boxes(boxes)
-            print(f"BOXES after convert: {boxes}")
+            # print(f"BOXES after convert: {boxes}")
             num_instances = len(boxes)
             if labels is not None:
                 assert len(labels) == num_instances
@@ -369,7 +388,7 @@ def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int 
             if boxes is not None:
                 areas = np.prod(boxes[:, 2:] - boxes[:, :2], axis=1)
             if areas is not None:
-                print(f"areas: {areas}")
+                # print(f"areas: {areas}")
                 sorted_idxs = np.argsort(-areas).tolist()
                 # Re-order overlapped instances in descending order.
                 boxes = boxes[sorted_idxs] if boxes is not None else None
@@ -377,20 +396,23 @@ def quality_predict_area(image: np.asarray, predictions, metadata, mitoses: int 
                 for i in range(num_instances):
                     if boxes is not None:
                         box_coord = boxes[i]
-                        print(f"BOX COORD: {box_coord}")
+                        # print(f"BOX COORD: {box_coord}")
                         x, y, x1, y1 = box_coord
                         img = image[int(y): int(y1), int(x): int(x1)]
                         if classes[i] == mitoses:
-                            if quality_checking_image(img) and quality_checking_image(img, quality_black=True):
+                            if quality_checking_image(img, settings) and quality_checking_image(img,
+                                                                                                quality_black=True,
+                                                                                                settings=settings):
                                 request_coord.append(box_coord)
                                 request_label.append(labels[i])
     return request_coord, request_label
 
 
-def draw_predict(image: np.asarray, coord: list, labels: list):
+def draw_predict(image: np.asarray, coord: list, labels: list, settings: Settings = None):
     """
     draw Image
     Args:
+        settings: user settings
         image: MUST be BGR
         coord: [[x,y,x1,y1], n1, n2... nx]
         labels: lest names
@@ -398,13 +420,21 @@ def draw_predict(image: np.asarray, coord: list, labels: list):
     Returns:
         draw Image: np.assarray
     """
+    if settings is not None:
+        # users settings
+        rectangle_color = settings.get_color_for_rectangle()
+        text_color = settings.get_color_for_text()
+    else:
+        # default settings
+        rectangle_color = (2, 202, 244)
+        text_color = (0, 0, 0)
     for i in range(len(coord)):
         x, y, x1, y1 = coord[i]
         x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
-        cv2.rectangle(image, (x, y), (x1, y1), [2, 202, 244], 2)
-        cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), [2, 202, 244], -1)
+        cv2.rectangle(image, (x, y), (x1, y1), rectangle_color, 2)
+        cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), rectangle_color, -1)
         image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
-                            .8, (0, 0, 0), 2, cv2.LINE_AA)
+                            .8, text_color, 2, cv2.LINE_AA)
     return image
 
 

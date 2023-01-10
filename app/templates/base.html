@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link type="text/css" href="{{ url_for('static', filename='css/api_style.css') }}" rel="stylesheet " />
+    <link type="text/css" href="{{ url_for('static', filename='css/api_style.css') }}" rel="stylesheet "/>
     {% block title %}
     {% if title %}
         <title>MEDIT - {{ title }}</title>
@@ -29,6 +29,7 @@
                     <a id="menu_analysis" href="{{ url_for('main.predict_rout') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
                     <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>
                     <a id="menu_history" href="{{ url_for('main.history') }}"><img src="/static/logo/history.png" alt="#">История исследований</a>
+                    <a id="menu_settings" href="{{ url_for('main.settings') }}"><img src="/static/logo/settings.png" alt="#">Настройки</a>
                     <a id="menu_info" href="{{ url_for('main.info') }}"><img src="/static/logo/info.png" alt="#">О программе</a>
                 </div>
                 <div class="menu_logo">

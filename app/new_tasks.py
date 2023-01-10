@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from config import Config
 from flask import current_app
 
-from app.models import Task, Predict
+from app.models import Task, Predict, Settings
 
 
 def img_test(**kwargs):
@@ -57,8 +57,12 @@ def mk_pred(**kwargs):
     image = kwargs.get('img')
     prd = kwargs.get('predict')
     mdt = kwargs.get('medit')
-    print(image, prd, mdt)
-    predict, path = make_predict_test(image=image, predict=prd, medit=mdt)
+    settings = kwargs.get('settings', Settings())
+    print(image, prd, mdt, settings)
+    predict, path = make_predict_test(image=image,
+                                      predict=prd,
+                                      medit=mdt,
+                                      settings=settings)
     if isinstance(predict, Predict):
         print(f'PREDICT TIME: {time.time() - start}')
         try:

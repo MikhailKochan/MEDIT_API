@@ -172,9 +172,9 @@
         {% endwith %}
         <div id='box_text' class="color_box" style="background:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">
             <p>Цвет текста: <input type="text" id="color_box_text" name="color_box_text" value="{{color_text[0]}},{{color_text[1]}},{{color_text[2]}}"></p>
-            <p>Red: <input type="range" id="red_text" min="0" name="red_text"max="255" value="{{color_text[0]}}"></p>
-            <p>Green: <input type="range" id="green_text" min="0"name="green_text"max="255" value="{{color_text[1]}}"></p>
-            <p>Blue: <input type="range" id="blue_text" min="0" name="blue_text"max="255" value="{{color_text[2]}}"></p>
+            <p>Red: <input type="range" id="red_text" min="0" name="red_text" max="255" value="{{color_text[0]}}"></p>
+            <p>Green: <input type="range" id="green_text" min="0" name="green_text" max="255" value="{{color_text[1]}}"></p>
+            <p>Blue: <input type="range" id="blue_text" min="0" name="blue_text" max="255" value="{{color_text[2]}}"></p>
         </div>
         {% endwith %}
     </div>
@@ -195,13 +195,17 @@
 
         var color = 'rgb(' + red + ',' + green + ',' + blue + ')';
 
+        document.getElementById(`red_${element}`).setAttribute('value', red);
+        document.getElementById(`green_${element}`).setAttribute('value', green);
+        document.getElementById(`blue_${element}`).setAttribute('value', blue);
+
         document.getElementById(`box_${element}`).style.backgroundColor = color;
         document.getElementById(`color_box_${element}`).setAttribute('value', red + ',' + green + ',' + blue);
         if(element == 'rectangle'){
-            document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-            document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            document.getElementById('test_label').style.backgroundColor = color;
+            document.getElementById('test_box').style.borderColor = color;
         } else {
-            document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            document.getElementById('test_label').style.color = color;
         }
     }
 

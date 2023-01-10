@@ -73,11 +73,16 @@ def settings():
 
     if request.method == "POST":
         req = request.form.to_dict()
+        print(req)
         user_settings.cutting_images_size = json.dumps((int(req['cutting_images_width']),
                                                         int(req['cutting_images_height'])))
+
         # convert RGB2BGR
-        user_settings.color_for_draw_rectangle = json.dumps(list(req['color_box_rectangle'].split(',')[::-1]))
-        user_settings.color_for_draw_text = json.dumps(list(req['color_box_text'].split(',')[::-1]))
+        BGR_rectangle = [int(req['blue_rectangle']), int(req['green_rectangle']), int(req['red_rectangle'])]
+        BGR_text = [int(req['blue_text']), int(req['green_text']), int(req['red_text'])]
+
+        user_settings.color_for_draw_rectangle = json.dumps(BGR_rectangle)
+        user_settings.color_for_draw_text = json.dumps(BGR_text)
 
         user_settings.percentage_black = int(req['percent_black'])
         user_settings.percentage_white = int(req['percent_white'])

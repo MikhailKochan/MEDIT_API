@@ -114,6 +114,8 @@ def quality_checking_image(img: np.asarray,
             lower = np.array([0, 0, 0], dtype=np.uint8)
             upper = np.array([180, 255, 68], dtype=np.uint8)
 
+    print('quality black', quality_black)
+    print('percentage', percentage)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
 

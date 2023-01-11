@@ -324,26 +324,28 @@
     };
 
     function myColor(element){
-        var element = element.path[0].id.split('_')[1];
-        var red = document.getElementById(`red_${element}`).value;
-        var green = document.getElementById(`green_${element}`).value;
-        var blue = document.getElementById(`blue_${element}`).value;
+        if (typeof element !== 'undefined' || typeof element !== 'null'){
+            var element = element.path[0].id.split('_')[1];
+            var red = document.getElementById(`red_${element}`).value;
+            var green = document.getElementById(`green_${element}`).value;
+            var blue = document.getElementById(`blue_${element}`).value;
 
-        document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        document.getElementById(`color_box_${element}`).value =  red + ',' + green + ',' + blue;
+            document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            document.getElementById(`color_box_${element}`).value =  red + ',' + green + ',' + blue;
 
-        if(element == 'rectangle'){
-            document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-            document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        } else {
-            document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        };
-        if(parseInt(red) + parseInt(green) > 400){
-            document.getElementById(`box_${element}`).style.color = 'rgb(0,0,0)';
-        }else{
-            document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
-        };
+            if(element == 'rectangle'){
+                document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+                document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            } else {
+                document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            };
+            if(parseInt(red) + parseInt(green) > 400){
+                document.getElementById(`box_${element}`).style.color = 'rgb(0,0,0)';
+            }else{
+                document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
+            };
+        }
     };
 
     document.getElementById('red_rectangle').addEventListener('input', myColor);

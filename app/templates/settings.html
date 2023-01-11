@@ -324,9 +324,9 @@
     };
 
     function myColor(element){
-    console.log(element);
+    console.log(element.target);
         if (typeof element !== 'undefined' || typeof element !== 'null'){
-            var element = element.path[0].id.split('_')[1];
+            var element = element.target.id.split('_')[1];
             var red = document.getElementById(`red_${element}`).value;
             var green = document.getElementById(`green_${element}`).value;
             var blue = document.getElementById(`blue_${element}`).value;

@@ -9,6 +9,9 @@
     #menu_settings{
         background: gray;
 }
+    .my_content{
+        min-height: 550px;
+    }
     form{
         box-sizing: border-box;
         display: flex;
@@ -159,13 +162,13 @@
 
     <div style="display:flex;flex-direction: column;">
         <div id="test_stand">
-            <div id="test_white">
-                <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
-                <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
-                    <div id="test_black"></div>
-                </div>
+        <div id="test_white">
+            <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
+            <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
+                <div id="test_black"></div>
             </div>
         </div>
+    </div>
         <div id="box_rectangle" class="color_box" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}})">
             <p>Цвет рамки: <input type="text" id="color_box_rectangle" name="color_box_rectangle" value="{{color[0]}},{{color[1]}},{{color[2]}}"></p>
             <p>Red: <input type="range" id="red_rectangle" name="red_rectangle" min="0" max="255" value="{{color[0]}}"></p>
@@ -173,7 +176,7 @@
             <p>Blue: <input type="range" id="blue_rectangle" name="blue_rectangle" min="0" max="255" value="{{color[2]}}"></p>
         </div>
         {% endwith %}
-        <div id='box_text' class="color_box" style="background:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">
+        <div id='box_text' class="color_box" style="background:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}});margin-top: 0;">
             <p>Цвет текста: <input type="text" id="color_box_text" name="color_box_text" value="{{color_text[0]}},{{color_text[1]}},{{color_text[2]}}"></p>
             <p>Red: <input type="range" id="red_text" min="0" name="red_text" max="255" value="{{color_text[0]}}"></p>
             <p>Green: <input type="range" id="green_text" min="0" name="green_text" max="255" value="{{color_text[1]}}"></p>

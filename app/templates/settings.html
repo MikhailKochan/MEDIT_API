@@ -17,8 +17,7 @@
         display: flex;
         place-items: center;
         flex-direction: row;
-        align-items: flex-start;
-
+        justify-content: flex-start;
     }
     form p{
         display: flex;
@@ -140,7 +139,7 @@
 </style>
 
 <form action="{{url_for('main.settings')}}" method="post">
-    <div style="display:flex;flex-direction:column;height:100%;max-height:400px;justify-content:space-around;width:400px;min-width:400px;">
+    <div style="display:flex;flex-direction:column;height:100%;justify-content:space-around;min-width:400px;">
         <p>
             <label for="cutting_images_width">Ширина изображения в пикселях</label>
             <input type="text" id="cutting_images_width" name="cutting_images_width" value="{{ settings.get_width() }}">
@@ -160,7 +159,7 @@
     {% with color_text = settings.get_color_for_text()[::-1] %}
     {% with color = settings.get_color_for_rectangle()[::-1] %}
 
-    <div style="display:flex;flex-direction: column;">
+    <div style="display:flex;flex-direction: column;margin-left: 60px;">
         <div id="test_stand">
             <div id="test_white">
                 <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>

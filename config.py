@@ -40,6 +40,7 @@ class Config(object):
 
     UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')
     SAVE_ZIP = os.path.join(basedir, "app/static/zip")
+    LOGO_PATH = os.path.join(basedir, "app/static/logo")
     CUTTING_FOLDER = os.path.join(basedir, "app/static/cutting_file")
     DRAW = os.path.join(basedir, "app/static/draw")
 

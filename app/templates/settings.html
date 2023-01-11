@@ -10,13 +10,14 @@
         background: gray;
 }
     .my_content{
-        min-height: 550px;
+        min-height: 590px;
     }
     form{
         box-sizing: border-box;
         display: flex;
         place-items: center;
         flex-direction: row;
+        align-items: flex-start;
         justify-content: flex-start;
     }
     form p{
@@ -35,15 +36,13 @@
         background:#333;
         color: white;
         margin: 10px;
-<!--        border: 10px solid;-->
-<!--        border-color: #333;-->
     }
     .color_box p{
         justify-content: space-between;
     }
     input{
         text-align: center;
-        border-radius: 5px;
+
         margin-left: 15px;
     }
     input[type="range"]{
@@ -150,21 +149,24 @@
         </p>
         <p>
             <label for="percent_white">Процент белого не более</label>
-            <input type="number" id="percent_white" size="3" name="percent_white" value="{{ settings.percentage_white }}" min="1" max="50">%</p>
+            <input type="number" id="percent_white" size="3" name="percent_white" value="{{ settings.percentage_white }}" min="0" max="50">%</p>
         <p>
             <label for="percent_black">Процент черного не более</label>
-            <input type="number" id="percent_black" size="3" name="percent_black" value="{{ settings.percentage_black }}" min="1" max="50">%</p>
-        <p><input id="reset" type="reset" value="Настройки по умолчанию"><input type="submit" value="Изменить настройки"></p>
+            <input type="number" id="percent_black" size="3" name="percent_black" value="{{ settings.percentage_black }}" min="1" max="50" >%</p>
+        <p><input id="reset" type="reset" value="Настройки по умолчанию" style="height: 40px">
+            <input type="submit" value="Изменить настройки" style="height: 40px"></p>
     </div>
     {% with color_text = settings.get_color_for_text()[::-1] %}
     {% with color = settings.get_color_for_rectangle()[::-1] %}
 
     <div style="display:flex;flex-direction: column;margin-left: 60px;">
-        <div id="test_stand">
-            <div id="test_white">
-                <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
-                <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
-                    <div id="test_black"></div>
+        <div style="display:flex;width:270px;height:280px;justify-content:center;align-items:center;">
+            <div id="test_stand">
+                <div id="test_white">
+                    <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
+                    <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
+                        <div id="test_black"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,11 +254,21 @@
 
     function changePercentageImages(element){
         var elem = element.target.id.split('_')[1];
-        var percent = 100 - parseInt(element.target.value);
+        let value = parseInt(element.target.value);
+        if (value > 50){
+            value = 50;
+        };
+        if (value < 0){
+            value = 1;
+        };
         if (elem == 'white'){
+            var percent = 100 - value;
             document.querySelector(`#test_${elem}`).setAttribute('style',`width:${percent}%;`);
         }else{
-            var percent = parseInt(element.target.value);
+            if (value == 0){
+                value = 1;
+            };
+            var percent = value;
             document.querySelector(`#test_${elem}`).setAttribute('style',`width:${percent}%;height:${percent}%;`);
         }
     };

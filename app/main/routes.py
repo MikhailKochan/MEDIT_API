@@ -58,6 +58,11 @@ def info():
     return render_template('info.html', title='О программе')
 
 
+@bp.route('/logo', methods=['GET', 'POST'])
+def logo():
+    return send_from_directory(current_app.config["LOGO_PATH"], path='mitoz_ai.png', as_attachment=True)
+
+
 @bp.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():

@@ -78,9 +78,11 @@ def settings():
 
     if request.method == "POST":
         req = request.form.to_dict()
+        print(req)
         req = check_req(req)
+        print(req)
         width = req['cutting_images_width'] if req['cutting_images_width'] else None
-        height = req['cutting_images_width'] if req['cutting_images_height'] else None
+        height = req['cutting_images_height'] if req['cutting_images_height'] else None
         if width is not None and height is not None:
             user_settings.cutting_images_size = json.dumps((int(width), int(height)))
 

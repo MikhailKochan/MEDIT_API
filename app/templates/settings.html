@@ -287,44 +287,45 @@
             i = 0;
         }else if(i == ''){
             i = 0;
-        }else if(i === undefined){
+        }else if(i === 'undefined'){
             i = 0;
         };
         return parseInt(i);
     };
 
     function myColorRevers(element){
-        var element = element.path[0].id.split('_')[2]
-        var colorList = document.getElementById(`color_box_${element}`).value.replace('rgb', '').split(',');
+        if (typeof element !== 'undefined' || typeof element !== 'null'){
+            var element = element.target.id.split('_')[2]
+            var colorList = document.getElementById(`color_box_${element}`).value.replace('rgb', '').split(',');
 
-        var red = myMaxInt(colorList[0]);
-        var green = myMaxInt(colorList[1]);
-        var blue = myMaxInt(colorList[2]);
+            var red = myMaxInt(colorList[0]);
+            var green = myMaxInt(colorList[1]);
+            var blue = myMaxInt(colorList[2]);
 
-        var color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            var color = 'rgb(' + red + ',' + green + ',' + blue + ')';
 
-        document.getElementById(`box_${element}`).style.backgroundColor = color;
+            document.getElementById(`box_${element}`).style.backgroundColor = color;
 
-        document.getElementById(`red_${element}`).value = red;
-        document.getElementById(`green_${element}`).value = green;
-        document.getElementById(`blue_${element}`).value = blue;
+            document.getElementById(`red_${element}`).value = red;
+            document.getElementById(`green_${element}`).value = green;
+            document.getElementById(`blue_${element}`).value = blue;
 
-        document.getElementById(`color_box_${element}`).value =  red + ',' + green + ',' + blue;
-        if(element == 'rectangle'){
-            document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-            document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        } else {
-            document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            document.getElementById(`color_box_${element}`).value =  red + ',' + green + ',' + blue;
+            if(element == 'rectangle'){
+                document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+                document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            } else {
+                document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+            };
+            if(parseInt(red) + parseInt(green) > 400){
+                document.getElementById(`box_${element}`).style.color = 'rgb(0,0,0)';
+            }else{
+                document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
+            };
         };
-        if(parseInt(red) + parseInt(green) > 400){
-            document.getElementById(`box_${element}`).style.color = 'rgb(0,0,0)';
-        }else{
-            document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
-        }
     };
 
     function myColor(element){
-    console.log(element.target);
         if (typeof element !== 'undefined' || typeof element !== 'null'){
             var element = element.target.id.split('_')[1];
             var red = document.getElementById(`red_${element}`).value;

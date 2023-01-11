@@ -14,12 +14,14 @@
         display: flex;
         place-items: center;
         flex-direction: row;
-        align-items: center;
+        align-items: flex-start;
 
     }
     form p{
         display: flex;
+        margin: 0;
         justify-content: flex-start;
+        align-items: center;
     }
     .color_box{
         display: flex;
@@ -51,8 +53,8 @@
     }
     input[type="range"]::-webkit-slider-thumb{
         -webkit-appearance: none;
-        height: 25px;
-        width: 25px;
+        height: 15px;
+        width: 15px;
         background:#fff;
         border-radius: 50%;
         cursor: pointer;
@@ -135,7 +137,7 @@
 </style>
 
 <form action="{{url_for('main.settings')}}" method="post">
-    <div style="display:flex;flex-direction:column;height:100%;justify-content:space-around;width:400px;min-width:400px;">
+    <div style="display:flex;flex-direction:column;height:100%;max-height:400px;justify-content:space-around;width:400px;min-width:400px;">
         <p>
             <label for="cutting_images_width">Ширина изображения в пикселях</label>
             <input type="text" id="cutting_images_width" name="cutting_images_width" value="{{ settings.get_width() }}">
@@ -154,15 +156,16 @@
     </div>
     {% with color_text = settings.get_color_for_text()[::-1] %}
     {% with color = settings.get_color_for_rectangle()[::-1] %}
-    <div id="test_stand">
-        <div id="test_white">
-            <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
-            <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
-                <div id="test_black"></div>
+
+    <div style="display:flex;flex-direction: column;">
+        <div id="test_stand">
+            <div id="test_white">
+                <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
+                <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
+                    <div id="test_black"></div>
+                </div>
             </div>
         </div>
-    </div>
-    <div style="display:flex;flex-direction: column;">
         <div id="box_rectangle" class="color_box" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}})">
             <p>Цвет рамки: <input type="text" id="color_box_rectangle" name="color_box_rectangle" value="{{color[0]}},{{color[1]}},{{color[2]}}"></p>
             <p>Red: <input type="range" id="red_rectangle" name="red_rectangle" min="0" max="255" value="{{color[0]}}"></p>
@@ -236,9 +239,9 @@
         document.querySelector('#percent_black').setAttribute('value', defaultSettings['percentage_black']);
 
         let percent_white = 100 - defaultSettings['percentage_white'];
-        let percent_black = defaultSettings['percentage_black'];
+        let percent_black = defaultSettings['percentage_white'];
         document.querySelector(`#test_white`).setAttribute('style',`width:${percent_white}%;`)
-        document.querySelector(`#test_black`).setAttribute('style',`width:${percent_black}%;height:${percent_black}%;`);
+        document.querySelector(`#test_black`).setAttribute('style',`width:${percent_white}%;height:${percent_black}%;`);
     }
 
     document.getElementById('reset').addEventListener('click', resetToDefault);

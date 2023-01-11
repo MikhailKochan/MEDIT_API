@@ -24,6 +24,13 @@ from detectron2.utils.visualizer import ColorMode, Visualizer
 from app import db
 
 
+def check_req(req):
+    for key, value in req.items():
+        if not value:
+            req[f'{key}'] = 0
+    return req
+
+
 def file_name_maker(filename):
     """
     функция для предотвращения повторения имен при сохранении

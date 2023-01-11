@@ -11,7 +11,7 @@ from sqlalchemy.dialects.sqlite import insert
 import json
 from rq import get_current_job
 from rq import Retry
-from app.view import file_save_and_add_to_db
+from app.view import file_save_and_add_to_db, check_req
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
 
@@ -78,9 +78,11 @@ def settings():
 
     if request.method == "POST":
         req = request.form.to_dict()
-
-        user_settings.cutting_images_size = json.dumps((int(req['cutting_images_width']),
-                                                        int(req['cutting_images_height'])))
+        req = check_req(req)
+        width = req['cutting_images_width'] if req['cutting_images_width'] else None
+        height = req['cutting_images_width'] if req['cutting_images_height'] else None
+        if width is not None and height is not None:
+            user_settings.cutting_images_size = json.dumps((int(width), int(height)))
 
         # convert RGB2BGR
         BGR_rectangle = [int(req['blue_rectangle']), int(req['green_rectangle']), int(req['red_rectangle'])]
@@ -89,8 +91,8 @@ def settings():
         user_settings.color_for_draw_rectangle = json.dumps(BGR_rectangle)
         user_settings.color_for_draw_text = json.dumps(BGR_text)
 
-        user_settings.percentage_black = int(req['percent_black'])
-        user_settings.percentage_white = int(req['percent_white'])
+        user_settings.percentage_black = int(req['percent_black']) if req['percent_black'] else 10
+        user_settings.percentage_white = int(req['percent_white']) if req['percent_white'] else 30
         db.session.add(user_settings)
         db.session.commit()
         flash('Ваши настройки были изменены')

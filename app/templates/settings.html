@@ -141,11 +141,11 @@
     <div style="display:flex;flex-direction:column;height:100%;justify-content:space-around;min-width:400px;">
         <p>
             <label for="cutting_images_width">Ширина изображения в пикселях</label>
-            <input type="text" id="cutting_images_width" name="cutting_images_width" value="{{ settings.get_width() }}">
+            <input type="number" id="cutting_images_width" name="cutting_images_width" value="{{ settings.get_width() }}" min="300" max="10000">
         </p>
         <p>
             <label for="cutting_images_height">Высота изображения в пикселях</label>
-            <input type="text" id="cutting_images_height" name="cutting_images_height" value="{{ settings.get_height() }}">
+            <input type="number" id="cutting_images_height" name="cutting_images_height" value="{{ settings.get_height() }}" min="300" max="10000">
         </p>
         <p>
             <label for="percent_white">Процент белого не более</label>

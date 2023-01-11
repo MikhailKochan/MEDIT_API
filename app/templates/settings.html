@@ -162,13 +162,13 @@
 
     <div style="display:flex;flex-direction: column;">
         <div id="test_stand">
-        <div id="test_white">
-            <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
-            <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
-                <div id="test_black"></div>
+            <div id="test_white">
+                <div id="test_label" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}}); color:rgb({{color_text[0]}},{{color_text[1]}},{{color_text[2]}})">mitoz</div>
+                <div id="test_box" style="border-color: rgb({{color[0]}},{{color[1]}},{{color[2]}});">
+                    <div id="test_black"></div>
+                </div>
             </div>
         </div>
-    </div>
         <div id="box_rectangle" class="color_box" style="background:rgb({{color[0]}},{{color[1]}},{{color[2]}})">
             <p>Цвет рамки: <input type="text" id="color_box_rectangle" name="color_box_rectangle" value="{{color[0]}},{{color[1]}},{{color[2]}}"></p>
             <p>Red: <input type="range" id="red_rectangle" name="red_rectangle" min="0" max="255" value="{{color[0]}}"></p>
@@ -213,7 +213,7 @@
         } else {
             document.getElementById('test_label').style.color = color;
         }
-    }
+    };
 
     function setAttr(height, width){
         if (height - width > 100){
@@ -227,7 +227,7 @@
             width = 235;
         };
         document.querySelector('#test_stand').setAttribute('style',`height:${height}px;width:${width}px;min-height:${height}px;min-width:${width}px`);
-    }
+    };
 
     function resetToDefault(){
         setColor('rectangle');
@@ -245,7 +245,7 @@
         let percent_black = defaultSettings['percentage_black'];
         document.querySelector(`#test_white`).setAttribute('style',`width:${percent_white}%;`)
         document.querySelector(`#test_black`).setAttribute('style',`width:${percent_black}%;height:${percent_black}%;`);
-    }
+    };
 
     document.getElementById('reset').addEventListener('click', resetToDefault);
 </script>
@@ -291,7 +291,8 @@
             i = 0;
         };
         return parseInt(i);
-    }
+    };
+
     function myColorRevers(element){
         var element = element.path[0].id.split('_')[2]
         var colorList = document.getElementById(`color_box_${element}`).value.replace('rgb', '').split(',');
@@ -320,9 +321,10 @@
         }else{
             document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
         }
-    }
+    };
+
     function myColor(element){
-        var element = element.path[0].id.split('_')[1]
+        var element = element.path[0].id.split('_')[1];
         var red = document.getElementById(`red_${element}`).value;
         var green = document.getElementById(`green_${element}`).value;
         var blue = document.getElementById(`blue_${element}`).value;
@@ -330,31 +332,33 @@
         document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
         document.getElementById(`box_${element}`).style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
         document.getElementById(`color_box_${element}`).value =  red + ',' + green + ',' + blue;
+
         if(element == 'rectangle'){
             document.getElementById('test_label').style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
             document.getElementById('test_box').style.borderColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
         } else {
             document.getElementById('test_label').style.color = 'rgb(' + red + ',' + green + ',' + blue + ')';
-        }
+        };
         if(parseInt(red) + parseInt(green) > 400){
             document.getElementById(`box_${element}`).style.color = 'rgb(0,0,0)';
         }else{
             document.getElementById(`box_${element}`).style.color = 'rgb(255,255,255)';
-        }
-    }
-    document.getElementById('red_rectangle').addEventListener('input',myColor);
-    document.getElementById('green_rectangle').addEventListener('input',myColor);
-    document.getElementById('blue_rectangle').addEventListener('input',myColor);
+        };
+    };
 
-    document.getElementById('red_text').addEventListener('input',myColor);
-    document.getElementById('green_text').addEventListener('input',myColor);
-    document.getElementById('blue_text').addEventListener('input',myColor);
+    document.getElementById('red_rectangle').addEventListener('input', myColor);
+    document.getElementById('green_rectangle').addEventListener('input', myColor);
+    document.getElementById('blue_rectangle').addEventListener('input', myColor);
 
-    document.getElementById('color_box_rectangle').addEventListener('input',myColorRevers);
-    document.getElementById('color_box_text').addEventListener('input',myColorRevers);
+    document.getElementById('red_text').addEventListener('input', myColor);
+    document.getElementById('green_text').addEventListener('input', myColor);
+    document.getElementById('blue_text').addEventListener('input', myColor);
 
-    document.getElementById('cutting_images_width').addEventListener('input',changeImagesSize);
-    document.getElementById('cutting_images_height').addEventListener('input',changeImagesSize);
+    document.getElementById('color_box_rectangle').addEventListener('input', myColorRevers);
+    document.getElementById('color_box_text').addEventListener('input', myColorRevers);
+
+    document.getElementById('cutting_images_width').addEventListener('input', changeImagesSize);
+    document.getElementById('cutting_images_height').addEventListener('input', changeImagesSize);
 
     document.getElementById('percent_white').addEventListener('input', changePercentageImages);
     document.getElementById('percent_black').addEventListener('input', changePercentageImages);

@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<form action="{{url_for('main.predict_rout')}}" style="margin-top:0%" enctype="form-data" method="post">
+<form action="{{url_for('main.predict_rout_celery')}}" style="margin-top:0%" enctype="form-data" method="post">
     <input type="file" name="file" class="input-file" accept=".svs" hidden>
     <input id="submit" type="submit" value="Загрузить" hidden/>
 </form>

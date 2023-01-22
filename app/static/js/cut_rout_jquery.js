@@ -108,8 +108,22 @@ function update_progress(status_url, element_id) {
 //        console.log(percent);
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
-        $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
-
+//        $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
+        let infoFunc = data['function'];
+        if (infoFunc == 'Cutting'){
+            infoFunc = 'Cutting';
+        }else if (infoFunc == 'Create zip'){
+                infoFunc = 'Архивация данных';
+                if (data['filename']) {
+                   $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}`);
+                };
+            };
+        if (data['state'] == 'PENDING') {
+            infoFunc = 'В очереди'
+        };
+        if (infoFunc){
+            $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
+        };
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
 //            console.log('1');
             if ('result' in data) {
@@ -117,7 +131,7 @@ function update_progress(status_url, element_id) {
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['state']} • `);
                 $(`#${element_id} > div.content > div.progress-bar`).hide()
                 $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
-                $(`#${element_id} > div.box > a`).attr("href", `/get-zip/${data['filename']}.zip`)
+                $(`#${element_id} > div.box > a`).attr("href", `/get-zip/${data['filename']}`)
                 $(`#${element_id} > div.box`).css("display", "flex");
             }
             else {

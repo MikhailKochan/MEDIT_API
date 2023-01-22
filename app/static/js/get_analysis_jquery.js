@@ -15,7 +15,7 @@ function makeProgressHTML(id, name){
             <div class="box" id="status" style="justify-content: center">
                 <div class="content" style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0px;">
                     <div class="details" style="justify-content: center">
-                        <span class="name">Загрузка • </span>
+                        <span class="name">Загрузка</span>
                         <span class="percent"></span>
                     </div>
                     <div class="progress-bar" style="width: 90%">
@@ -28,7 +28,12 @@ function makeProgressHTML(id, name){
             <div class="box" id="result" style="justify-content: center">
             </div>
             <div class="box">
-                <a class="button_download" href="" title="Скачать результат" style="display:none"><img src="/static/logo/download_green.png" alt="#"></a><br>
+                <a class="button_download" href="" style="display:none">
+                    <img src="/static/logo/download_green.png" alt="#" title="Скачать изображения">
+                </a>
+                <a class="button_cancel" href="" style="display:none">
+                    <img src="/static/logo/remove.png" alt="#" title="Удалить Изображения">
+                </a>
             </div>
         </div>
     `;
@@ -36,7 +41,7 @@ function makeProgressHTML(id, name){
 }
 var detailsElement = `
           <div class="details"style="flex-direction:row">
-            <span class="func_name">Анализ • </span>
+            <span class="func_name">Исследование</span>
             <span class="percent"></span>
         </div>
 `
@@ -107,21 +112,18 @@ $('document').ready(function(){
                             },
                             resetForm: true,
                     });
-
                 }
-
             });
-
         });
 
 function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
-//        console.log(data['state']);
+        console.log(data);
         percent = parseInt(data['progress']);
         if (percent) {
-            $(`#${element_id} > #status > div > div.progress-bar > div`).width(percent + '%');
+            $(`#${element_id} > #status > div > div.progress-bar > div`).width(data['progress'] + '%');
             $(`#${element_id} > #status > div > div.details > span.percent`).text(percent + '%');
         };
         let infoFunc = data['function'];
@@ -129,30 +131,34 @@ function update_progress(status_url, element_id) {
             infoFunc = 'Исследование';
         }else if (infoFunc == 'Create zip'){
                 infoFunc = 'Архивация данных';
-            }
+                if (data['filename']) {
+                   $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}`);
+                };
+            };
         if (data['state'] == 'PENDING') {
             infoFunc = 'В очереди'
         };
-
-        $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
-
-        if ('all_mitoz' in data){
+        if (infoFunc){
+            $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
+        };
+        if ('all_mitoses' in data && data['all_mitoses']){
 //            console.log(data['all_mitoz'])
-            $(`#${element_id} > #result`).text(`${data['all_mitoz']}`)
+            $(`#${element_id} > #result`).text(`${data['all_mitoses']}`)
         }
-        if ('analysis_number' in data){
+        if ('analysis_number' in data && data['analysis_number']){
             $(`#${element_id} > #analysis_number`).text(`${data['analysis_number']}`);
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
 //            console.log('1');
             if ('result' in data) {
 //                console.log('2');
-                if (data['state'] == 'FINISHED') {
-                            $(`#${element_id} > #status > div > div.details > span.name`).text('Исследование завершено')
+                if (data['state'] == 'SUCCESS') {
+                            $(`#${element_id} > #status > div > div.details`).css('margin-top', 0);
+                            $(`#${element_id} > #status > div > div.details > span.name`).text('Исследование завершено');
+                            $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
                         };
-                $(`#${element_id} > #status > div > div.progress-bar`).hide()
-                $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
-                $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}.zip`)
+                $(`#${element_id} > #status > div > div.progress-bar`).hide();
+
                 $(`#${element_id} > div:nth-child(5) > a`).css("display", "flex");
             }
             else {
@@ -175,7 +181,7 @@ var container = document.querySelectorAll('.uploaded-area > .container-table');
 
 for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
-    let status_url = `/progress/${container[i].id}`;
+    let status_url = `/status/${container[i].id}`;
     let name = $(`#${element_id} > #datetime > span`).text()
     name = cutName(name);
     $(`#${element_id} > #datetime > span`).html(name)

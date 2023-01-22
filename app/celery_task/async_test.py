@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 from sys import platform
 
+import requests
+
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 
@@ -16,14 +18,14 @@ from config import Config
 from PIL import Image
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
-import aiofiles
-from aiohttp import ClientSession, TCPConnector, FormData
+# import aiofiles
+# from aiohttp import ClientSession, TCPConnector, FormData
 
 from io import BytesIO
 from app.models import Settings
 
 CUT_IMAGE_SIZE = Config.__dict__['_CUT_IMAGE_SIZE']
-sem = asyncio.Semaphore(10)
+# sem = asyncio.Semaphore(100)
 
 
 def space_selector(height: int, width: int):
@@ -68,7 +70,7 @@ def read_region(file: Image, start_row: int, start_col: int):
     start = time.time()
     img = file.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
     img = img.convert('RGB')
-    # print(f'read region time: {time.time() - start} s')
+    print(f'read region time: {time.time() - start} s')
     return img
 
 
@@ -76,7 +78,7 @@ def quality_checking_image(img: np.asarray,
                            quality_black=False,
                            lower=None,
                            upper=None,
-                           settings=None):
+                           settings=None) -> bool:
     """
 
     Args:
@@ -87,12 +89,10 @@ def quality_checking_image(img: np.asarray,
         quality_black: Black mode for images
 
     Returns:
-        True of False
+        True or False quality
     """
-    # print('START QUALITY')
-    # start = time.time()
     if settings is None:
-        percentage = 30
+        percentage = 50
     else:
         percentage = int(settings.percentage_white)
 
@@ -110,8 +110,6 @@ def quality_checking_image(img: np.asarray,
             lower = np.array([0, 0, 0], dtype=np.uint8)
             upper = np.array([180, 255, 68], dtype=np.uint8)
 
-    print('quality black', quality_black)
-    print('percentage', percentage)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
 
@@ -122,8 +120,7 @@ def quality_checking_image(img: np.asarray,
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
         summa_S += w * h
-
-    if summa_S > imgh * imgw / 100 * percentage:
+    if summa_S > (imgh * imgw / 100 * percentage):
         quality = False
     else:
         quality = True
@@ -180,33 +177,134 @@ def convert_to_bytes(image: Image) -> np:
     return image_content
 
 
+process_count = 1
+
+
 async def async_image_process(img: Image, start_row: int, start_col: int, loop):
-    with ThreadPoolExecutor() as thread_pool:
+    with ThreadPoolExecutor(max_workers=process_count) as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(read_region, img, start_row, start_col))
 
 
 async def async_image_save_process(img: Image, loop, filename, f_path, quality):
-    with ThreadPoolExecutor() as thread_pool:
+    with ThreadPoolExecutor(max_workers=process_count) as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(save_image, img, filename, f_path, quality))
 
 
 async def async_convert_process(img: Image, loop):
-    with ThreadPoolExecutor() as thread_pool:
+    with ThreadPoolExecutor(max_workers=process_count) as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(convert_to_bytes, img))
 
 
-async def async_quality_process(img: Image, loop, image_name):
-    with ThreadPoolExecutor() as thread_pool:
-        return await loop.run_in_executor(thread_pool, partial(quality_checking_image, img, image_name))
+async def async_quality_process(img: Image, loop):
+    with ThreadPoolExecutor(max_workers=process_count) as thread_pool:
+        return await loop.run_in_executor(thread_pool, partial(quality_checking_image, img))
 
 
 async def async_open_image(f_path, loop):
-    with ThreadPoolExecutor() as thread_pool:
+    with ThreadPoolExecutor(max_workers=process_count) as thread_pool:
         return await loop.run_in_executor(thread_pool, partial(openslide.OpenSlide, f_path))
 
 
+def main(start_row, start_col, image, filename, f_path, number):
+    url = 'http://192.168.0.251:8001/uploadfile/'
+    try:
+        image = read_region(image, start_row, start_col)
+        start = time.time()
+        data = FormData()
+        """bytes block"""
+        # data.add_field('file',
+        #                await async_convert_process(image, loop),
+        #                filename=filename,
+        #                content_type='application/image')
+        # print(f'convert time: {time.time() - start} s')
+        """write read block"""
+        start = time.time()
+        np_image = np.asarray(image)
+        # print(f"np.asarray(image) time: {time.time() - start}")
+        quality = quality_checking_image(np_image)
+        path_save = save_image(image, filename, f_path, quality)
+
+        # print(f"Image number: {number} - quality: {quality}")
+
+        if quality:
+            print(f"Image number: {number} - quality: {quality}")
+    #         async with aiofiles.open(path_save, 'rb') as f:
+    #             data.add_field('file',
+    #                            await f.read(),
+    #                            filename=filename,
+    #                            content_type='application/image')
+    #         # print(f'write and read file time: {time.time() - start} s')
+    #
+    #         params = {"uploadType": "multipart/form-data"}
+    #
+    #         async with session.post(url, data=data, params=params) as resp:
+    #             if resp.status != 200:
+    #                 print(number, "--ERROR--")
+    #                 print(await resp.text())
+    #             else:
+    #                 print(number, "RESPONSE:")
+    #                 print(await resp.text())
+    #
+    except Exception as ex:
+        print("EXCEPTOIN IN async_main: ", ex)
+
+    else:
+        # pass
+        os.remove(path_save)
+
+
+async def async_main_test(session, start_row, start_col, image, loop, filename, f_path, number):
+    url = 'http://192.168.0.251:8001/uploadfile/'
+    try:
+        image = read_region(image, start_row, start_col)
+        start = time.time()
+        data = FormData()
+        """bytes block"""
+        # data.add_field('file',
+        #                await async_convert_process(image, loop),
+        #                filename=filename,
+        #                content_type='application/image')
+        # print(f'convert time: {time.time() - start} s')
+        """write read block"""
+        start = time.time()
+        np_image = np.asarray(image)
+        # print(f"np.asarray(image) time: {time.time() - start}")
+        quality = quality_checking_image(np_image)
+        path_save = None
+        if quality:
+            path_save = save_image(image, filename, f_path, quality)
+
+            print(f"Image number: {number} - quality: {quality}")
+            async with aiofiles.open(path_save, 'rb') as f:
+                data.add_field('file',
+                               await f.read(),
+                               filename=filename,
+                               content_type='application/image')
+                # print(f'write and read file time: {time.time() - start} s')
+
+                params = {"uploadType": "multipart/form-data"}
+
+                async with session.post(url, data=data, params=params) as resp:
+                    if resp.status != 200:
+                        print(number, "--ERROR--")
+                        print(await resp.text())
+                    else:
+                        print(number, "RESPONSE:")
+                        print(await resp.text())
+
+    except Exception as ex:
+        print("EXCEPTOIN IN async_main: ", ex)
+
+    else:
+        # pass
+        if path_save:
+            os.remove(path_save)
+    # finally:
+    #     sem.release()
+
+
 async def async_main(session, start_row, start_col, image, loop, filename, f_path, number):
-    url = 'http://localhost:8001/uploadfile/'
+    url = 'http://192.168.0.251:8001/uploadfile/'
     try:
         image = await async_image_process(image, start_row, start_col, loop)
         start = time.time()
@@ -220,38 +318,37 @@ async def async_main(session, start_row, start_col, image, loop, filename, f_pat
         """write read block"""
         start = time.time()
         np_image = np.asarray(image)
-        print(f"np.asarray(image) time: {time.time() - start}")
-        quality = await async_quality_process(np_image, loop, filename)
+        # print(f"np.asarray(image) time: {time.time() - start}")
+        quality = await async_quality_process(np_image, loop)
         path_save = await async_image_save_process(image, loop, filename, f_path, quality)
-
+        print(path_save)
         # print(f"Image number: {number} - quality: {quality}")
 
-        """ if quality:
-        async with aiofiles.open(path_save, 'rb') as f:
-            data.add_field('file',
-                           await f.read(),
-                           filename=filename,
-                           content_type='application/image')
-        # print(f'write and read file time: {time.time() - start} s')
+        if quality:
 
-        params = {"uploadType": "multipart/form-data"}
+            async with aiofiles.open(path_save, 'rb') as f:
+                data.add_field('file',
+                               await f.read(),
+                               filename=filename,
+                               content_type='application/image')
+            print(f'write and read file time: {time.time() - start} s')
 
-        async with session.post(url, data=data, params=params) as resp:
-            if resp.status != 200:
-                pass
-                # print(number, "--ERROR--")
-                # print(await resp.text())
-            else:
-                pass
-                # print("RESPONSE:")
-                # print(await resp.text())"""
+            params = {"uploadType": "multipart/form-data"}
+
+            async with session.post(url, data=data, params=params) as resp:
+                if resp.status != 200:
+                    print(number, "--ERROR--")
+                    print(await resp.text())
+                else:
+                    print(number, "RESPONSE:")
+                    print(await resp.text())
 
     except Exception as ex:
         print("EXCEPTOIN IN async_main: ", ex)
-        return
+
     else:
-        pass
-        # os.remove(path_save)
+        # pass
+        os.remove(path_save)
     # finally:
     #     sem.release()
 
@@ -267,28 +364,30 @@ async def bulk_request():
         image = await async_open_image(f_path, loop)
         width, height = image.level_dimensions[0]
         print(f"height: {height} | width: {width}")
-        # print(f'openslide image open time: {time.time() - start} s')
+        print(f'openslide image open time: {time.time() - start} s')
         tasks = []
         number = 0
         connector = TCPConnector(force_close=True)
         # async with ClientSession(connector=connector) as session:
         #     for start_row, start_col, file_name in space_selector(height, width):
-        #         await sem.acquire()
-        #         tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
-        #         if sem.locked():
-        #             await asyncio.gather(*tasks)
-        #             tasks = []
-        #     if len(tasks) > 0:
-        #         await asyncio.gather(*tasks)
+        #         with ThreadPoolExecutor() as thread_pool:
+        #
+        #             await loop.run_in_executor(thread_pool, partial(main,
+        #                                                             session, start_row, start_col,
+        #                                                             image, file_name, f_path, number))
+        #             number += 1
 
         async with ClientSession(connector=connector) as session:
             for start_row, start_col, file_name in space_selector(height, width):
-                tasks.append(async_main(session, start_row, start_col, image, loop, file_name, f_path, number))
+                # async with sem:
+                #     await async_main(session, start_row, start_col, image, loop, file_name, f_path, number)
+                tasks.append(async_main_test(session, start_row, start_col, image, loop, file_name, f_path, number))
                 number += 1
-                if number % 20 == 0:
+                if number % 1 == 0:
                     await asyncio.gather(*tasks)
                     tasks = []
-                    # break
+                    # print(number)
+                    break
             if tasks:
                 await asyncio.gather(*tasks)
     else:
@@ -309,7 +408,7 @@ class Rec_box:
     def compare_to_rec(self, B):
         """функция сравнения пересекаются ли прямоугольники"""
         if (self.x1 < B.x or B.x1 < self.x) or (self.y1 < B.y or B.y1 < self.y):
-            return f"Прямоугольники не пересекаются"
+            return print(f"Прямоугольники не пересекаются")
         pass
 
 
@@ -417,22 +516,25 @@ def draw_predict(image: np.asarray, coord: list, labels: list, settings: Setting
     Returns:
         draw Image: np.assarray
     """
-    if settings is not None:
-        # users settings
-        rectangle_color = settings.get_color_for_rectangle()
-        text_color = settings.get_color_for_text()
-    else:
-        # default settings
-        rectangle_color = (2, 202, 244)
-        text_color = (0, 0, 0)
-    for i in range(len(coord)):
-        x, y, x1, y1 = coord[i]
-        x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
-        cv2.rectangle(image, (x, y), (x1, y1), rectangle_color, 2)
-        cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), rectangle_color, -1)
-        image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
-                            .8, text_color, 2, cv2.LINE_AA)
-    return image
+    try:
+        if settings is not None:
+            # users settings
+            rectangle_color = settings.get_color_for_rectangle()
+            text_color = settings.get_color_for_text()
+        else:
+            # default settings
+            rectangle_color = (2, 202, 244)
+            text_color = (0, 0, 0)
+        for i in range(len(coord)):
+            x, y, x1, y1 = coord[i]
+            x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
+            cv2.rectangle(image, (x, y), (x1, y1), rectangle_color, 2)
+            cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), rectangle_color, -1)
+            image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
+                                .8, text_color, 2, cv2.LINE_AA)
+        return image
+    except Exception as e:
+        print('ERROR IN DRAW PREDICT:', e)
 
 
 def alfa():
@@ -479,9 +581,43 @@ def alfa():
     cv2.waitKey(0)
 
 
+def test_req():
+    f_path = glob.glob(f'{Config.UPLOAD_FOLDER}/*.svs')
+    if f_path:
+        f_path = f_path[0]
+        start = time.time()
+        image = openslide.OpenSlide(f_path)
+        width, height = image.level_dimensions[0]
+        print(f"height: {height} | width: {width}")
+        print(f'openslide image open time: {time.time() - start} s')
+        for start_row, start_col, file_name in space_selector(height, width):
+            # print((start_row, start_col), 0, CUT_IMAGE_SIZE)
+            img = image.read_region((start_row, start_col), 0, CUT_IMAGE_SIZE)
+            img = img.convert('RGB')
+
+            img_filename = os.path.basename(f_path)
+            save_folder = os.path.join(Config.CUTTING_FOLDER, img_filename)
+            path_save = os.path.join(save_folder, f"{file_name}.jpg")
+
+            os.makedirs(save_folder, exist_ok=True)
+
+            img.save(path_save)
+
+            with open(path_save, 'rb') as f:
+                params = {"uploadType": "multipart/form-data"}
+                resp = requests.post(url='http://192.168.0.251:8001/uploadfile/',
+                                     files={'file': f.read()},
+                                     params=params,
+                                     headers={'filename': f"{file_name}.jpg"})
+                print(resp.json())
+                print(type(resp.json()))
+            break
+
+
 if __name__ == "__main__":
-    alfa()
+    # alfa()
     # resize_image()
-    # start_t = time.time()
+    start_t = time.time()
     # asyncio.run(bulk_request())
-    # print(f'Finish time: {time.time() - start_t} s')
+    test_req()
+    print(f'Finish time: {time.time() - start_t} s')

@@ -68,7 +68,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
     except Exception as e:
         print(f"ERROR in cutting: {e}")
 
-        _set_task_progress(job=None, progress=100, function='Cutting')
+        _set_task_progress(job=job, progress=100, function='Cutting')
 
 
 def cutting_celery(job, path: str, CUTTING_FOLDER: str, _CUT_IMAGE_SIZE: tuple) -> str:

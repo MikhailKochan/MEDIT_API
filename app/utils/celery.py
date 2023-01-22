@@ -8,21 +8,11 @@ def make_celery(app):
     celery.config_from_object(app.config, namespace="CELERY")
     TaskBase = celery.Task
 
-    from app import db
-    from app.view import Medit
-
     class ContextTask(TaskBase):
         abstract = True
 
         def __call__(self, *args, **kwargs):
             with app.app_context():
-
-                # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
-                # db_sess = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
-                # db.session = db_sess
-                # medit = Medit()
-                # medit.init_app(app)
-
                 return TaskBase.__call__(self, *args, **kwargs)
 
     celery.Task = ContextTask
@@ -30,20 +20,18 @@ def make_celery(app):
     return celery
 
 
-def _set_celery_task_progress(job, progress, all_mitoz=None, function=None, filename=None, analysis_number=None):
+def _set_celery_task_progress(job, **kwargs):
     if job:
         try:
-            job.update_state(state='PROGRESS',
-                             meta={'progress': progress,
-                                   'function': function,
-                                   'filename': filename,
-                                   'all_mitoz': all_mitoz,
-                                   'analysis_number': analysis_number})
+            # task_id = job.request.id
+            # task = job.AsyncResult(task_id)
+            meta = {}
+            # meta['progress'] = progress
+            meta.update(kwargs)
+            job.update_state(state='PROGRESS', meta=meta)
 
         except Exception as e:
             print(f'ERROR in set_celery_task_progress: {e}')
-            if current_app:
-                current_app.logger.error(e)
 
 
 class DatabaseTask(Task):

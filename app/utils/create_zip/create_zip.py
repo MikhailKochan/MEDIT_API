@@ -18,7 +18,7 @@ def create_zip(path_to_save: str, job=None):
         progress = 0
 
         folder_name = os.path.basename(path_to_save)
-
+        # print(f'folder_name: {folder_name}')
         _set_task_progress(
             job=job,
             progress=progress,
@@ -27,25 +27,32 @@ def create_zip(path_to_save: str, job=None):
 
         list_img = glob.glob(f"{path_to_save}/*")
 
-        zipFile = zipfile.ZipFile(os.path.join(Config.__dict__['SAVE_ZIP'], f'{folder_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
+        zp_name = os.path.join(Config.__dict__['SAVE_ZIP'], f'{folder_name}.zip')
 
-        total = len(list_img)
+        with zipfile.ZipFile(zp_name, mode='w', compression=zipfile.ZIP_DEFLATED) as zipFile:
 
-        for file in list_img:
+            total = len(list_img)
 
-            filename = os.path.basename(file)
-            zipFile.write(file, arcname=filename)
+            for file in list_img:
+                filename = os.path.basename(file)
+                zipFile.write(file, arcname=filename)
 
-            # pbar.update(1)
+                if os.path.isdir(file):
+                    inside_list = glob.glob(f"{file}/*")
+                    for deep_file in inside_list:
+                        # print(deep_file)
+                        file_name = os.path.basename(deep_file)
+                        # print(filename)
+                        zipFile.write(deep_file, arcname=f'{filename}/{file_name}')
+                progress += 1 / total * 100.0
 
-            progress += 1 / total * 100.0
+                _set_task_progress(job=job,
+                                   progress=int(progress),
+                                   function='Create zip',
+                                   filename=folder_name
+                                   )
 
-            _set_task_progress(job=job,
-                               progress=float(D(str(progress)).quantize(D("1.00"))))
-
-        zipFile.close()
+            zipFile.close()
 
     except Exception as e:
         print('ERROR in create_zip', e)
-
-

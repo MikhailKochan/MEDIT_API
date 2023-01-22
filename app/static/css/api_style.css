@@ -398,6 +398,7 @@ section .details span {
 .uploaded-area .details{
     display: flex;
     flex-direction: row;
+    justify-content: space-evenly;
     /*justify-content: space-between;*/
     align-items: center;
     margin-top: 7px;
@@ -405,7 +406,7 @@ section .details span {
 .uploaded-area .progress-bar{
     height: 6px;
     width: 100%;
-    background: #fff;
+    background: #d0cfcf;
     margin-bottom: 4px;
     border-radius: 30px;
 }

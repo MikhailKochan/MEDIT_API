@@ -14,7 +14,7 @@
     <link rel="icon" href="{{ url_for('main.logo') }}" type="image/jpg" sizes="32x32">
 </head>
 <body>
-    <div class="content">
+    <div class="content" style="display:flex;flex-direction:column;">
         <div class="nav-bar" style="">
             <div class="company-name">MEDIT</div>
             {% if current_user.is_anonymous %}
@@ -26,8 +26,8 @@
         <div class="my_content">
             <div class="menu">
                 <div class="menu_a">
-                    <a id="menu_analysis" href="{{ url_for('main.predict_rout') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
-<!--                    <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>-->
+                    <a id="menu_analysis" href="{{ url_for('main.predict_rout_celery') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
+                    <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>
                     <a id="menu_history" href="{{ url_for('main.history') }}"><img src="/static/logo/history.png" alt="#">История исследований</a>
                     <a id="menu_settings" href="{{ url_for('main.settings') }}"><img src="/static/logo/settings.png" alt="#">Настройки</a>
                     <a id="menu_info" href="{{ url_for('main.info') }}"><img src="/static/logo/info.png" alt="#">О программе</a>
@@ -44,9 +44,9 @@
                 {% endblock %}
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
-                <ul>
+                <ul style="margin: 5px;">
                     {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <li style="list-style-type:none;background:#ffed00;border-radius:5px;padding:5px">{{ message }}</li>
                     {% endfor %}
                 </ul>
                 {% endif %}

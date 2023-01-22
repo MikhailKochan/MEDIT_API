@@ -1,9 +1,9 @@
 import glob
 import time
 import os
-import torch
+import numpy as np
 import zipfile
-
+import cv2
 from sys import platform
 from flask import current_app
 from datetime import datetime
@@ -12,7 +12,7 @@ import sqlite3
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import Session
 
-from .models import Images, Predict
+from .models import Images, Predict, Settings
 from config import Config
 
 from detectron2.config import get_cfg
@@ -29,6 +29,121 @@ def check_req(req):
         if not value:
             req[f'{key}'] = 0
     return req
+
+
+def quality_checking_image(img: np.asarray,
+                           quality_black=False,
+                           lower=None,
+                           upper=None,
+                           settings=None) -> bool:
+    """
+
+    Args:
+        settings: user settings class Settings in models
+        upper: upper range for HSV color
+        lower: lower range for HSV color
+        img: MUST be BGR
+        quality_black: Black mode for images
+
+    Returns:
+        True or False quality
+    """
+    # print('START QUALITY')
+    # start = time.time()
+    if settings is None:
+        percentage = 50
+    else:
+        percentage = int(settings.percentage_white)
+
+    if lower is None and upper is None:
+        lower = np.array([0, 0, 168], dtype=np.uint8)
+        upper = np.array([180, 30, 255], dtype=np.uint8)
+
+    if quality_black:
+        if settings is None:
+            percentage = 10
+        else:
+            percentage = int(settings.percentage_black)
+
+        if lower is None and upper is None:
+            lower = np.array([0, 0, 0], dtype=np.uint8)
+            upper = np.array([180, 255, 68], dtype=np.uint8)
+
+    # print('quality black', quality_black)
+    # print('percentage', percentage)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower, upper)
+
+    imgh, imgw = img.shape[:2]
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    summa_S = 0.0
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        summa_S += w * h
+
+    # print(f"percentage: {percentage}")
+    # print(f"imgh * imgw: {imgh * imgw}")
+    # print(f"imgh * imgw / 100 * percentage: {imgh * imgw / 100 * percentage}")
+    # print(f"summa: {summa_S}")
+    if summa_S > (imgh * imgw / 100 * percentage):
+        quality = False
+    else:
+        # print(f"summa: {summa_S} |  {imgh * imgw / 100 * percentage}")
+        quality = True
+
+    return quality
+
+
+def draw_predict(image: np.asarray, coord: list, labels: list, settings: Settings = None):
+    """
+    draw Image
+    Args:
+        settings: user settings
+        image: MUST be BGR
+        coord: [[x,y,x1,y1], n1, n2... nx]
+        labels: lest names
+
+    Returns:
+        draw Image: np.assarray
+    """
+    if settings is not None:
+        # users settings
+        rectangle_color = settings.get_color_for_rectangle()
+        text_color = settings.get_color_for_text()
+    else:
+        # default settings
+        rectangle_color = (2, 202, 244)
+        text_color = (0, 0, 0)
+    for i in range(len(coord)):
+        x, y, x1, y1 = coord[i]
+        x, y, x1, y1 = int(x), int(y), int(x1), int(y1)
+        cv2.rectangle(image, (x, y), (x1, y1), rectangle_color, 2)
+        cv2.rectangle(image, (x - 1, y - 23), (x + 134, y + 1), rectangle_color, -1)
+        image = cv2.putText(image, f"{labels[i]}", (x, y - 1), cv2.FONT_HERSHEY_SIMPLEX,
+                            .8, text_color, 2, cv2.LINE_AA)
+    return image
+
+
+def space_selector(height: int, width: int, CUT_IMAGE_SIZE):
+    # start = time.time()
+    h_sum = int(height / CUT_IMAGE_SIZE[1])
+    w_sum = int(width / CUT_IMAGE_SIZE[0])
+
+    h_rest = height % CUT_IMAGE_SIZE[1]
+    w_rest = width % CUT_IMAGE_SIZE[0]
+
+    s_col = int(h_rest / 2)
+    s_row = int(w_rest / 2)
+
+    for i in range(0, h_sum):
+        for j in range(0, w_sum):
+            start_row = j * CUT_IMAGE_SIZE[0] + s_row
+            start_col = i * CUT_IMAGE_SIZE[1] + s_col
+
+            filename = f"im_.{str(i)}.{str(j)}"
+            # print(f'generator time: {time.time() - start} s')
+            yield start_row, start_col, filename
 
 
 def file_name_maker(filename):

@@ -3,14 +3,13 @@ from flask import render_template, flash, redirect, url_for, request, g, jsonify
 from flask import send_from_directory
 from flask_login import current_user, login_required
 from app import db
-import os
+
 from app.models import Images, Predict, Settings, Task
 from app.main.forms import SearchPredictForm, SettingsForm
 from app.main import bp
-from sqlalchemy.dialects.sqlite import insert
+
 import json
-from rq import get_current_job
-from rq import Retry
+
 from app.view import file_save_and_add_to_db, check_req
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
@@ -69,18 +68,12 @@ def settings():
     def_set = Settings().__dict__
     def_set.pop('_sa_instance_state')
     default = def_set
-    user_settings = current_user.get_settings()
 
-    if user_settings is None:
-        user_settings = Settings(user=current_user)
-        db.session.add(user_settings)
-        db.session.commit()
+    user_settings = current_user.get_settings()
 
     if request.method == "POST":
         req = request.form.to_dict()
-        print(req)
         req = check_req(req)
-        print(req)
         width = req['cutting_images_width'] if req['cutting_images_width'] else None
         height = req['cutting_images_height'] if req['cutting_images_height'] else None
         if width is not None and height is not None:
@@ -108,6 +101,9 @@ def settings():
 @login_required
 def get_zip(filename):
     try:
+        print('filename in get-zip', filename)
+        if filename[:-4] != '.zip':
+            filename = f'{filename}.zip'
         return send_from_directory(current_app.config["SAVE_ZIP"], path=filename, as_attachment=True)
     except FileNotFoundError:
         return abort(404)
@@ -185,8 +181,8 @@ def cutting_rout_celery():
 
 @bp.route('/status/<task_id>')
 def taskstatus(task_id):
-    from app.celery_task.celery_task import cutting_task
-    task = cutting_task.AsyncResult(task_id)
+    from app.celery_task.celery_task import make_predict_task
+    task = make_predict_task.AsyncResult(task_id)
     # print(task.info)
     # print(dir(task))
     if task.state == 'PENDING':
@@ -202,7 +198,7 @@ def taskstatus(task_id):
             'progress': task.info.get('progress', 0),
             'function': task.info.get('function', ''),
             'filename': task.info.get('filename', ''),
-            'all_mitoz': task.info.get('all_mitoz'),
+            'all_mitoses': task.info.get('all_mitoses'),
             'analysis_number': task.info.get('analysis_number', '')
         }
         if 'result' in task.info:
@@ -211,7 +207,7 @@ def taskstatus(task_id):
         # something went wrong in the background job
         response = {
             'state': task.state,
-            'progress': 1,
+            'progress': 0,
             'status': str(task.info),  # this is the exception raised
         }
     return jsonify(response)
@@ -221,36 +217,29 @@ def taskstatus(task_id):
 @login_required
 def predict_rout_celery():
     try:
-        data = None
+        tasks = None
         if current_user.get_task_in_progress('img_predict'):
-            data = current_user.get_task_in_progress('img_predict')
-            flash('now images in predict')
+            tasks = current_user.get_task_in_progress('img_predict')
+            flash(f'Количество исследований в работе: {len(tasks)}')
         if request.method == 'GET':
-            return render_template('make_predict.html', title='analysis', body=data)
+            return render_template('get_analysis.html', title='Исследование', tasks=tasks)
         if request.method == 'POST':
-            img = file_save_and_add_to_db(request, do_predict=True)
-
-            predict = Predict(images=img,
-                              timestamp=datetime.utcnow(),
-                              path_to_save=os.path.join(current_app.config.BASEDIR,
-                                                        current_app.config.DRAW,
-                                                        img.filename,
-                                                        datetime.utcnow().strftime('%d_%m_%Y__%H_%M')))
+            img = file_save_and_add_to_db(request)
 
             celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
-                                                       kwargs={'img': img, 'predict': predict})
+                                                       kwargs={'img': img.id,
+                                                               'settings': current_user.get_settings().id})
 
             task = Task(id=celery_job.id,
                         name='img_predict',
                         description=f'Predict {img.filename}',
                         user=current_user,
                         images=img,
-                        predict=predict)
-            db.session.add(predict)
+                        )
+
             db.session.add(task)
             db.session.commit()
             return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
-        return render_template('make_predict.html', title='Порезка SVS', body=data)
 
     except Exception as e:
         current_app.logger.error(e)

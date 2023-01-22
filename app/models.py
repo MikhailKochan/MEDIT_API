@@ -38,11 +38,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
 
+    settings_id = db.Column(db.Integer, db.ForeignKey('settings.id'))
+
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     predict = db.relationship('Predict', backref='user', lazy='dynamic')
-
-    settings = db.relationship('Settings', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -78,9 +78,10 @@ class User(UserMixin, db.Model):
         return task
 
     def get_settings(self):
-        settings = Settings.query.filter_by(user=self).first()
+        settings = self.settngs
         if settings is None:
-            settings = Settings(self)
+            settings = Settings(user=self)
+            db.session.add(settings)
         return settings
 
     def get_tasks_in_progress(self):
@@ -91,9 +92,30 @@ class User(UserMixin, db.Model):
                                     complete=False).all()
 
 
+class Model(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    url = db.Column(db.String(128))
+    description = db.Column(db.Text)
+
+    settings = db.relationship('Settings', backref='model', lazy='dynamic')
+    predict = db.relationship('Predict', backref='model', lazy='dynamic')
+
+    def __init__(self, name: str = None, url: str = None, description: str = None):
+        self.name = name if name else current_app.config['MODEL_NAME']
+        self.url = url if url else current_app.config['MODEL_URL']
+        self.description = description if description else current_app.config['MODEL_DESCRIPTION']
+
+    def __repr__(self):
+        return f'ModelWeights\nName: {self.name}\nUrl: {self.url}\nDescription: {self.description}'
+
+
 class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    user = db.relationship('User', backref='settings', lazy='dynamic')
+
+    model_id = db.Column(db.Integer, db.ForeignKey('model.id'))
 
     cutting_images_size = db.Column(db.Text)
 
@@ -111,6 +133,10 @@ class Settings(db.Model):
         self.color_for_draw_rectangle = json.dumps(current_app.config['COLOR_FOR_DRAW_RECTANGLE'])
         self.color_for_draw_text = json.dumps(current_app.config['COLOR_FOR_DRAW_TEXT'])
         self.cutting_images_size = json.dumps(current_app.config['_CUT_IMAGE_SIZE'])
+        model = Model.query.get(1)
+        if model is None:
+            model = Model()
+        self.model = model
 
     def get_cutting_size(self):
         return tuple(json.loads(self.cutting_images_size))
@@ -205,10 +231,18 @@ class Images(db.Model):
         except Exception as e:
             current_app.logger.error(f"ERROR IN CUTTING: {e}")
 
-    def make_predict(self, predict, celery_job=None):
+    def make_predict(self, settings: Settings, celery_job=None):
         try:
+            time_now = datetime.utcnow()
+            predict = Predict(images=self,
+                              timestamp=time_now,
+                              path_to_save=os.path.join(current_app.config['BASEDIR'],
+                                                        current_app.config['DRAW'],
+                                                        f"{self.filename[:-4]}_{time_now.strftime('%d_%m_%Y__%H_%M')}"))
+            os.makedirs(predict.path_to_save, exist_ok=True)
+
             if self.format.lower() == '.svs':
-                from app.utils.prediction.make_predict import make_predict as start_predict
+                from app.utils.prediction.make_predict import make_predict_celery as start_predict
 
             elif self.format.lower() == '.jpg':
                 return current_app.logger.info('JPG not added in APP')
@@ -218,19 +252,13 @@ class Images(db.Model):
 
             current_app.logger.info(f'start predict {self.filename}')
 
-            path_to_save_draw_img = os.path.join(current_app.config['BASEDIR'],
-                                                 f"{current_app.config['DRAW']}/{self.filename}")
-
-            if not os.path.exists(path_to_save_draw_img):
-                os.mkdir(path_to_save_draw_img)
-
-            predict, path = start_predict(image=self,
-                                          predict=predict,
-                                          medit=current_app.medit,
-                                          job=celery_job)
+            predict = start_predict(image=self,
+                                    predict=predict,
+                                    job=celery_job,
+                                    settings=settings)
 
             current_app.logger.info(f'finish predict {self.filename}')
-            return predict, path
+            return predict
         except Exception as e:
             print(f"ERROR in predict: {e}")
             if current_app:
@@ -263,7 +291,7 @@ class Predict(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    model = db.Column(db.String(128))
+    model_id = db.Column(db.Integer, db.ForeignKey('model.id'))
 
     def __repr__(self):
         return f'<Predict Images {self.images.filename} create {self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}>'

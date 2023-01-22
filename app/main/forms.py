@@ -4,7 +4,7 @@ from wtforms.validators import ValidationError, InputRequired, DataRequired, Num
 
 
 class SearchPredictForm(FlaskForm):
-    analysis_number = StringField('Введите номер исследования', [InputRequired()])
+    analysis_number = IntegerField('Введите номер исследования', [InputRequired()])
     submit = SubmitField('Поиск')
 
     def validate_search(form, field):

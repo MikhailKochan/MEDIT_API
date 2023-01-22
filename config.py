@@ -12,10 +12,13 @@ class Config(object):
     # location where install detectron2
     DETECTRON = os.environ.get('DETECTRON_PATH')
 
-    _DATASET_FOLDER = './PUT_YOUR_DATASET_HERE'
+    _DATASET_FOLDER = 'PUT_YOUR_DATASET_HERE'
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
-    MODEL_NAME = ''
+    MODEL_NAME = 'mitoses'
+    MODEL_URL = os.environ.get('MODEL_URL') or 'http://127.0.0.1:8001/uploadfile/'
+    MODEL_DESCRIPTION = 'standard model'
+
     _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
 
     REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
@@ -71,8 +74,11 @@ class Config(object):
     PERCENTAGE_WHITE = 30
     PERCENTAGE_BLACK = 10
 
-    COLOR_FOR_WHITE_FILTER = [2, 202, 244]  # Its HSV color range for openCV2
-    COLOR_FOR_BLACK_FILTER = [2, 202, 244]  # Its HSV color range for openCV2
+    COLOR_FOR_WHITE_FILTER_LOWER = [0, 0, 168]  # Its HSV color range for openCV2
+    COLOR_FOR_WHITE_FILTER_UPPER = [180, 30, 255]  # Its HSV color range for openCV2
+
+    COLOR_FOR_BLACK_FILTER_LOWER = [0, 0, 0]  # Its HSV color range for openCV2
+    COLOR_FOR_BLACK_FILTER_UPPER = [180, 255, 68]  # Its HSV color range for openCV2
 
     COLOR_FOR_DRAW_RECTANGLE = [2, 202, 244]
     COLOR_FOR_DRAW_TEXT = [0, 0, 0]

@@ -16,7 +16,7 @@ function makeProgressHTML(id, name){
                 <span class="name">${name}</span>
                 <div class="content" style='display:flex;min-width: 0px;flex-direction: column;'>
                     <div class="details">
-                        <span class="name">Загрузка • </span>
+                        <span class="name">Загрузка</span>
                         <span class="percent"></span>
                     </div>
                     <div class="progress-bar">
@@ -32,7 +32,7 @@ function makeProgressHTML(id, name){
 };
 var detailsElement = `
           <div class="details"style="flex-direction:row">
-            <span class="func_name">Cutting • </span>
+            <span class="func_name">Cutting</span>
             <span class="percent"></span>
         </div>
 `;
@@ -108,7 +108,7 @@ function update_progress(status_url, element_id) {
 //        console.log(percent);
         $(`#${element_id} > div.content > div.progress-bar > div`).width(percent + '%');
         $(`#${element_id} > div.content > div:nth-child(2) > span.percent`).text(percent + '%');
-//        $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${data['function']} • `);
+
         let infoFunc = data['function'];
         if (infoFunc == 'Cutting'){
             infoFunc = 'Cutting';
@@ -123,6 +123,7 @@ function update_progress(status_url, element_id) {
         };
         if (infoFunc){
             $(`#${element_id} > #status > div > div.details > span.name`).text(`${infoFunc}`);
+            $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text(`${infoFunc}`);
         };
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
 //            console.log('1');

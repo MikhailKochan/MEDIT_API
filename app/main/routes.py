@@ -101,9 +101,9 @@ def settings():
 @login_required
 def get_zip(filename):
     try:
-        print('filename in get-zip', filename)
         if filename[:-4] != '.zip':
             filename = f'{filename}.zip'
+        print('filename in get-zip', filename)
         return send_from_directory(current_app.config["SAVE_ZIP"], path=filename, as_attachment=True)
     except FileNotFoundError:
         return abort(404)

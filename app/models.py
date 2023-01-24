@@ -78,7 +78,7 @@ class User(UserMixin, db.Model):
         return task
 
     def get_settings(self):
-        settings = self.settngs
+        settings = self.settings
         if settings is None:
             settings = Settings(user=self)
             db.session.add(settings)

@@ -16,6 +16,7 @@ from .models import Images, Predict, Settings
 from config import Config
 
 from detectron2.config import get_cfg
+from detectron2 import model_zoo
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances, register_pascal_voc
 from detectron2.engine import DefaultPredictor, DefaultTrainer
@@ -309,17 +310,17 @@ def create_zip(path_to_save_draw: str, date: datetime, image_name: str):
         zip_file_name = f"{image_name}_{date.strftime('%d_%m_%Y__%H_%M')}"
 
         zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
-        with tqdm(total=len(path_img), position=0, leave=False) as pbar:
-            for file in path_img:
-                pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
-                filename = os.path.basename(file)
-                zipFile.write(file, arcname=filename)
-                pbar.update(1)
+        # with tqdm(total=len(path_img), position=0, leave=False) as pbar:
+        for file in path_img:
+            # pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
+            filename = os.path.basename(file)
+            zipFile.write(file, arcname=filename)
+            # pbar.update(1)
         zipFile.close()
 
         result = f'{zip_file_name}.zip created'
 
-    except Exeption as e:
+    except Exception as e:
         result = e
 
     else:
@@ -355,12 +356,12 @@ class Medit:
 
         if Config.__dict__['DATASET_FORMAT'] == 'Coco':
 
-            path_to_config = os.path.join(Config.__dict__['DETECTRON'],
-                                          'configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
+            path_to_config = model_zoo.get_config_file('COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
 
         elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
-            path_to_config = os.path.join(Config.__dict__['DETECTRON'],
-                                          "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
+            # path_to_config = os.path.join(Config.__dict__['DETECTRON'],
+            #                               "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
+            path_to_config = model_zoo.get_config_file('PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml')
         else:
             return 'need set DATASET_FORMAT in .env and config'
         cfg.merge_from_file(path_to_config)
@@ -374,7 +375,7 @@ class Medit:
         cfg.DATASETS.TRAIN = ("mitoze_train",)
         cfg.DATASETS.TEST = ()
         cfg.DATALOADER.NUM_WORKERS = 2
-        # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # initialize from model zoo
+        # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.p kl"  # initialize from model zoo
         cfg.SOLVER.IMS_PER_BATCH = 2
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
         cfg.SOLVER.BASE_LR = 0.001

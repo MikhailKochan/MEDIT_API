@@ -59,7 +59,7 @@ def cutting_task(self, **kwargs):
 @shared_task(bind=True)
 def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
-
+    task = Task.query.get(self.request.id)
     img = Images.query.get(kwargs.get('img'))
     settings = Settings.query.get(kwargs.get('settings'))
 
@@ -67,7 +67,6 @@ def make_predict_task(self, **kwargs):
 
         image_predict = img.make_predict(celery_job=self, settings=settings)
         # print(image_predict, path_predict_img)
-        task = Task.query.get(self.request.id)
 
         if image_predict and isinstance(image_predict, Predict):
             create_zip(path_to_save=image_predict.path_to_save, job=self)
@@ -75,8 +74,14 @@ def make_predict_task(self, **kwargs):
             image_predict.path_to_save = os.path.basename(image_predict.path_to_save)
 
             db.session.add(image_predict)
-            task.complete = True
-            task.predict = image_predict
+
+            task = task_getter(self.request.id)
+            current_app.logger.info(f'{task} task in 79 line in celery_task.py')
+            if task:
+                task.complete = True
+                task.predict = image_predict
+            else:
+                current_app.logger.error(f'{self.request.id} task not found')
 
         os.remove(img.file_path)  # Delete download svs
         db.session.commit()

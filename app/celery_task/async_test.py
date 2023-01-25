@@ -91,8 +91,8 @@ def quality_checking_image(img: np.asarray,
     Returns:
         True or False quality
     """
-    if settings is None:
-        percentage = int(settings.percentage_white) if settings else 10
+    # if settings is None:
+    percentage = int(settings.percentage_white) if settings else 30
     #     percentage = 50
     # else:
     #     percentage = int(settings.percentage_white)

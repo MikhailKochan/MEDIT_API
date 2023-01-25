@@ -153,6 +153,14 @@ class Settings(db.Model):
     def get_color_for_text(self):
         return list(json.loads(str(self.color_for_draw_text)))
 
+    @staticmethod
+    def get_default_settings():
+        return {'percentage_white': int(current_app.config['PERCENTAGE_WHITE']),
+                'percentage_black': int(current_app.config['PERCENTAGE_BLACK']),
+                'color_for_draw_rectangle': json.dumps(current_app.config['COLOR_FOR_DRAW_RECTANGLE']),
+                'color_for_draw_text': json.dumps(current_app.config['COLOR_FOR_DRAW_TEXT']),
+                'cutting_images_size': json.dumps(current_app.config['_CUT_IMAGE_SIZE'])}
+
 
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)

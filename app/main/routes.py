@@ -65,9 +65,7 @@ def logo():
 @bp.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    def_set = Settings().__dict__
-    def_set.pop('_sa_instance_state')
-    default = def_set
+    default = Settings.get_default_settings()
 
     user_settings = current_user.get_settings()
 

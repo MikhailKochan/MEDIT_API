@@ -81,6 +81,7 @@ class User(UserMixin, db.Model):
         settings = self.settings
         if settings is None:
             settings = Settings(user=self)
+            self.settings = settings
             db.session.add(settings)
         return settings
 

@@ -92,23 +92,25 @@ def quality_checking_image(img: np.asarray,
         True or False quality
     """
     if settings is None:
-        percentage = 50
-    else:
-        percentage = int(settings.percentage_white)
+        percentage = int(settings.percentage_white) if settings else 10
+    #     percentage = 50
+    # else:
+    #     percentage = int(settings.percentage_white)
 
     if lower is None and upper is None:
         lower = np.array([0, 0, 168], dtype=np.uint8)
         upper = np.array([180, 30, 255], dtype=np.uint8)
 
     if quality_black:
-        if settings is None:
-            percentage = 10
-        else:
-            percentage = int(settings.percentage_black)
+        percentage = int(settings.percentage_black) if settings else 10
+        # if settings is None:
+        #     percentage = 10
+        # else:
+        #     percentage = int(settings.percentage_black)
 
         if lower is None and upper is None:
             lower = np.array([0, 0, 0], dtype=np.uint8)
-            upper = np.array([180, 255, 68], dtype=np.uint8)
+            upper = np.array([180, 255, 40], dtype=np.uint8)
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)

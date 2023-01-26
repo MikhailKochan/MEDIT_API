@@ -237,6 +237,7 @@ def predict_rout_celery():
 
             db.session.add(task)
             db.session.commit()
+            current_app.logger.info(f"task {task.id} add to bd")
             return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
 
     except Exception as e:

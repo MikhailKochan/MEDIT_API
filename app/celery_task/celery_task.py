@@ -63,10 +63,10 @@ def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
     job_id = str(self.request.id)
     task = Task.query.get(job_id)
-    current_app.logger.info(f'{task} task in 66 line in celery_task.py')
+    current_app.logger.info(f'task in 66 line in celery_task.py: {task} ')
     img = Images.query.get(kwargs.get('img'))
     settings = Settings.query.get(kwargs.get('settings'))
-
+    current_app.logger.info(f'str: {job_id} type: {type(self.request.id)}')
     if img and os.path.isfile(img.file_path):
 
         image_predict = img.make_predict(celery_job=self, settings=settings)

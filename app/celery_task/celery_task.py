@@ -62,9 +62,12 @@ def cutting_task(self, **kwargs):
 def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
     job_id = str(self.request.id)
-    task = Task.query.get(job_id)
+    img_id = kwargs.get('img')
+    img, task = db.session.query(Images, Task).filter(Images.id == img_id, Task.image_id == img_id).first()
+    # img = Images.query.get(kwargs.get('img'))
+    # task = Task.query.filter_by(images=img).first()
     current_app.logger.info(f'task in 66 line in celery_task.py: {task} ')
-    img = Images.query.get(kwargs.get('img'))
+
     settings = Settings.query.get(kwargs.get('settings'))
     current_app.logger.info(f'str: {job_id} type: {type(self.request.id)}')
     if img and os.path.isfile(img.file_path):
@@ -79,7 +82,7 @@ def make_predict_task(self, **kwargs):
 
             db.session.add(image_predict)
             if not isinstance(task, Task):
-                task = task_getter(job_id)
+                task = Task.query.get(job_id)
             current_app.logger.info(f'{task} task in 83 line in celery_task.py')
             if task:
                 task.complete = True

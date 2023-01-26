@@ -120,7 +120,7 @@ function update_progress(status_url, element_id) {
     // send GET request to status URL
     $.getJSON(status_url, function(data) {
         // update UI
-        console.log(data);
+//        console.log(data);
         percent = parseInt(data['progress']);
         if (percent) {
             $(`#${element_id} > #status > div > div.progress-bar > div`).width(data['progress'] + '%');
@@ -149,9 +149,9 @@ function update_progress(status_url, element_id) {
             $(`#${element_id} > #analysis_number`).text(`${data['analysis_number']}`);
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-//            console.log('1');
+            console.log(data);
             if ('result' in data) {
-//                console.log('2');
+//                console.log(data);
                 if (data['state'] == 'SUCCESS') {
                             $(`#${element_id} > #status > div > div.details`).css('margin-top', 0);
                             $(`#${element_id} > #status > div > div.details > span.name`).text('Исследование завершено');
@@ -163,7 +163,7 @@ function update_progress(status_url, element_id) {
             }
             else {
                 // something unexpected happened
-//                console.log('3');
+//                console.log(data);
                 $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
             }
         }

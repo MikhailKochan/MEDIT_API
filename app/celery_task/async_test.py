@@ -49,21 +49,46 @@ def space_selector(height: int, width: int):
             yield start_row, start_col, filename
 
 
-def list_maker(gen):
-    lst = [i for i in gen]
-    return lst
+def test_quality():
 
+    photo2 = 'im_.3.8_not_valid_black.jpg'
+    photo2 = 'photo_2023-01-25_22-33-04.jpg'
+    photo2 = 'photo_2023-01-25_22-32-11.jpg'
+    image = cv2.imread(f"C:\\Users\\user\\Pictures\\{photo2}")
 
-def list_spliter(lst):
-    n = np.array_split(lst, len(lst) // 20)
-    return n
-
-
-def task_maker(height, width):
-    gen = space_selector(height, width)
-    n = list_spliter(list_maker(gen))
-    for i in n:
-        yield i
+    # img = img[y: y + height, x: x + width]
+    # print(quality_checking_image(img))
+    lower_white = np.array([0, 0, 168], dtype=np.uint8)
+    upper_white = np.array([180, 30, 255], dtype=np.uint8)
+    lower_black = np.array([0, 0, 0], dtype=np.uint8)
+    upper_black = np.array([180, 240, 30], dtype=np.uint8)
+    #
+    # # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower_black, upper_black)
+    # mask = cv2.inRange(hsv, lower_white, upper_white)
+    #
+    # # print("filter time:", time.time() - start)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    summa_S = 0.0
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        cv2.rectangle(image, (x, y), (x + w, y + h), [255, 0, 0], 6)
+        summa_S += w * h
+    print(summa_S)
+    #
+    # if summa_S > CUT_IMAGE_SIZE[0] * CUT_IMAGE_SIZE[1] / 100 * 30:
+    # mask = cv2.bitwise_not(mask)
+    # btw_img = cv2.bitwise_and(image, image, mask=mask)
+    # cv2.imshow("result", mask)
+    # cv2.imshow("result", btw_img)
+    scale_percent = 30
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    image = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+    cv2.imshow("result", image)
+    cv2.waitKey(0)
 
 
 def read_region(file: Image, start_row: int, start_col: int):
@@ -91,11 +116,8 @@ def quality_checking_image(img: np.asarray,
     Returns:
         True or False quality
     """
-    # if settings is None:
+
     percentage = int(settings.percentage_white) if settings else 30
-    #     percentage = 50
-    # else:
-    #     percentage = int(settings.percentage_white)
 
     if lower is None and upper is None:
         lower = np.array([0, 0, 168], dtype=np.uint8)
@@ -103,14 +125,10 @@ def quality_checking_image(img: np.asarray,
 
     if quality_black:
         percentage = int(settings.percentage_black) if settings else 10
-        # if settings is None:
-        #     percentage = 10
-        # else:
-        #     percentage = int(settings.percentage_black)
 
         if lower is None and upper is None:
             lower = np.array([0, 0, 0], dtype=np.uint8)
-            upper = np.array([180, 255, 40], dtype=np.uint8)
+            upper = np.array([180, 240, 30], dtype=np.uint8)
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
@@ -211,8 +229,7 @@ def main(start_row, start_col, image, filename, f_path, number):
     url = 'http://192.168.0.251:8001/uploadfile/'
     try:
         image = read_region(image, start_row, start_col)
-        start = time.time()
-        data = FormData()
+        # data = FormData()
         """bytes block"""
         # data.add_field('file',
         #                await async_convert_process(image, loop),
@@ -621,5 +638,6 @@ if __name__ == "__main__":
     # resize_image()
     start_t = time.time()
     # asyncio.run(bulk_request())
-    test_req()
+    # test_req()
+    test_quality()
     print(f'Finish time: {time.time() - start_t} s')

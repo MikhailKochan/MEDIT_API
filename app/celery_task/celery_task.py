@@ -26,6 +26,7 @@ def task_getter(task_id: str):
 @shared_task(bind=True)
 def cutting_task(self, **kwargs):
     # print(self)
+    job_id = self.request.id
     from app.utils.create_zip.create_zip import create_zip
     img = Images.query.get(kwargs.get('img_id'))
     if img and os.path.isfile(img.file_path):
@@ -34,7 +35,8 @@ def cutting_task(self, **kwargs):
             create_zip(path_to_save=path_cutting_img, job=self)
             shutil.rmtree(path_cutting_img)  # Delete cutting folder
         os.remove(img.file_path)  # Delete download svs
-        task = task_getter(self.request.id)
+        current_app.logger.info(f'str: {str(job_id)} type: {type(self.request.id)}')
+        task = task_getter(str(job_id))
         current_app.logger.info(f'{task} task in 30 line in celery_task.py')
         if task:
             task.complete = True
@@ -59,7 +61,9 @@ def cutting_task(self, **kwargs):
 @shared_task(bind=True)
 def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
-    task = Task.query.get(self.request.id)
+    job_id = str(self.request.id)
+    task = Task.query.get(job_id)
+    current_app.logger.info(f'{task} task in 66 line in celery_task.py')
     img = Images.query.get(kwargs.get('img'))
     settings = Settings.query.get(kwargs.get('settings'))
 
@@ -74,14 +78,14 @@ def make_predict_task(self, **kwargs):
             image_predict.path_to_save = os.path.basename(image_predict.path_to_save)
 
             db.session.add(image_predict)
-
-            task = task_getter(self.request.id)
-            current_app.logger.info(f'{task} task in 79 line in celery_task.py')
+            if not isinstance(task, Task):
+                task = task_getter(job_id)
+            current_app.logger.info(f'{task} task in 83 line in celery_task.py')
             if task:
                 task.complete = True
                 task.predict = image_predict
             else:
-                current_app.logger.error(f'{self.request.id} task not found')
+                current_app.logger.error(f'{job_id} task not found')
 
         os.remove(img.file_path)  # Delete download svs
         db.session.commit()

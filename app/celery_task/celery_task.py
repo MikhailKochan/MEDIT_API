@@ -63,9 +63,17 @@ def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
     job_id = str(self.request.id)
     img_id = kwargs.get('img')
-    img, task = db.session.query(Images, Task).filter(Images.id == img_id, Task.image_id == img_id).first()
-    # img = Images.query.get(kwargs.get('img'))
-    # task = Task.query.filter_by(images=img).first()
+    request = db.session.query(Images, Task).filter(Images.id == img_id, Task.image_id == img_id).first()
+    current_app.logger.info(f'request in db: {request} ')
+    if len(request) == 2:
+        img = request[0]
+        task = request[1]
+    elif len(request) == 1:
+        img = request[0]
+        task = None
+    else:
+        img = Images.query.get(kwargs.get('img'))
+        task = Task.query.filter_by(images=img).first()
     current_app.logger.info(f'task in 66 line in celery_task.py: {task} ')
 
     settings = Settings.query.get(kwargs.get('settings'))

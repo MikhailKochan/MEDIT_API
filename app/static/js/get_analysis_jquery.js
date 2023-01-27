@@ -172,7 +172,7 @@ function update_progress(status_url, element_id) {
 //            console.log('4');
             setTimeout(function() {
                 update_progress(status_url, element_id);
-            }, 2000);
+            }, 5000);
         }
     });
 }

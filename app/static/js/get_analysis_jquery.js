@@ -1,4 +1,5 @@
-
+const form_js = document.querySelector("form");
+var pause_delay = parseInt($('#pause_delay').text());
 
 function getExtension(filename) {
   var parts = filename.split('.');
@@ -8,7 +9,7 @@ function getExtension(filename) {
 function makeProgressHTML(id, name){
     let progressHTML = `
         <div class="container-table" id="${id}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: flex-start;">
+            <div class="box" id="datetime" style="justify-content: flex-start;min-width: 192px;">
                 <img src="./static/logo/file.png">
                 <span class="name">${name}</span>
             </div>
@@ -23,7 +24,7 @@ function makeProgressHTML(id, name){
                     </div>
                 </div>
             </div>
-            <div class="box" id="analysis_number" style="justify-content: center">
+            <div class="box" id="analysis_number" style="justify-content: center;break-all;">
             </div>
             <div class="box" id="result" style="justify-content: center">
             </div>
@@ -51,11 +52,71 @@ function cutName(name) {
         name = splitName[0].substring(0, 12) + "... ." + splitName[splitName.length - 1];
     };
     return name
+};
+
+document.addEventListener("visibilitychange", function(){
+    if(document.hidden){
+
+    } else {
+        if (startTimeTimer){
+            let timeLost = Math.trunc((performance.now() - startTimeTimer) / 1000);
+            clearInterval(timer);
+            userTimer(window.timerTimeMinut - timeLost);
+        };
+    };
+});
+
+function userTimer(timeMinut){
+    $('#user_timer').show();
+    $('#inputSVS').hide();
+    if (parseInt(timeMinut)){
+        timeMinut = parseInt(timeMinut);
+        var timerShow = $('#time_stamp');
+        window.startTimeTimer = performance.now();
+        window.timerTimeMinut = timeMinut;
+        timer = setInterval(function () {
+//            let start = performance.now()
+            // Условие если время закончилось то...
+            if (timeMinut <= 0) {
+                // Таймер удаляется
+                clearInterval(timer);
+                $('#user_timer').hide();
+                $('#inputSVS').show();
+            } else { // Иначе
+                document.getElementById('time_stamp').innerHTML = formatTimeLeft(timeMinut)
+//                let workDelay = (performance.now() - start).toFixed(4);
+//                workDelay ++;
+//                console.log(workDelay);
+//            console.log(timeMinut);
+//            timeMinut -= workDelay;
+            };
+
+            timeMinut -= 1; // Уменьшаем таймер
+//            console.log(timeMinut);
+        }, 1000)
+    } else {
+        userTimer(100);
+    };
 }
 
-$('document').ready(function(){
+function formatTimeLeft(time){
+    seconds = time % 60; // Получаем секунды
+    minutes = Math.trunc(time /60 % 60);// Получаем минуты
+    hour = Math.trunc(time /60/60 % 60); // Получаем часы
+
+    if (seconds < 10){
+        seconds = `0${seconds}`;
+    };
+    if (minutes < 10){
+        minutes = `0${minutes}`;
+    };
+
+    return `через ${hour}:${minutes}:${seconds}`;
+}
+
+function start(){
         $('#inputSVS').on('click', function(){
-            console.log('click');
+//            console.log('click');
             $('.input-file').click()
         });
 
@@ -67,53 +128,68 @@ $('document').ready(function(){
 
                 if($('.input-file').val())
                 {
-
                     let file = $('.input-file')[0].files[0],
-                    fileOriginalName = file.name,
-                    name = file.name;
+                    fileType = getExtension(file.name);
+                    let validExtensions = ["svs", "zip"];
+                    if(validExtensions.includes(fileType)){
+                        let fileOriginalName = file.name,
+                        name = file.name;
+                        $('#inputSVS').hide();
 
-//                    if(name.length >= 8){
-//                        let splitName = name.split('.');
-//                        name = splitName[0].substring(0, 8) + "... ." + splitName[splitName.length - 1];
-//                    };
-                    name = cutName(name);
-                    let element_id = fileOriginalName.replaceAll('.', '\\.');
-                    let progressHTML = makeProgressHTML(fileOriginalName, name);
+                        name = cutName(name);
+                        let element_id = fileOriginalName.replaceAll('.', '\\.');
+                        let progressHTML = makeProgressHTML(fileOriginalName, name);
 
-                    event.preventDefault();
+                        event.preventDefault();
 
+                        $(this).ajaxSubmit({
+                                beforeSend: function() {
+                                    $('.progress-area').append(progressHTML)
+                                },
+                                uploadProgress: function(event, position, total, percentComplete) {
+    //                                console.log(percentComplete + '%');
+                                    $(`#${element_id}>#status > div > div.details > span.percent`).html(percentComplete + '%');
+                                    $(`#${element_id}>#status > div > div.progress-bar > div`).width(percentComplete + '%');
 
-                    $(this).ajaxSubmit({
-                            beforeSend: function() {
-//                                console.log(progressHTML);
-                                $('.progress-area').append(progressHTML)
-                            },
+                                    if (percentComplete >= 100) {
+                                        $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img style="width:20px;height:20px;" src="./static/logo/load.gif">`)
+                                    }
+                                },
+                                success:function(data, status, request){
+                                    $('#inputSVS').show();
+                                    userTimer(pause_delay);
+                                    $(`.progress-area > #${element_id}`).remove();
+                                    progressHTML = makeProgressHTML(data.task_id, name);
+    //                                console.log(progressHTML);
+                                    $('.uploaded-area').append(progressHTML);
 
-                            uploadProgress: function(event, position, total, percentComplete) {
-//                                console.log(percentComplete + '%');
-                                $(`#${element_id}>#status > div > div.details > span.percent`).html(percentComplete + '%');
-                                $(`#${element_id}>#status > div > div.progress-bar > div`).width(percentComplete + '%');
+                                    $(`#${data.task_id} > div.content > div.details`).after(detailsElement);
 
-                                if (percentComplete >= 100) {
-                                    $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img style="width:20px;height:20px;" src="./static/logo/load.gif">`)
-                                }
-                            },
-                            success:function(data, status, request){
-//                                console.log('success');
-                                $(`.progress-area > #${element_id}`).remove();
-                                progressHTML = makeProgressHTML(data.task_id, name);
-//                                console.log(progressHTML);
-                                $('.uploaded-area').append(progressHTML);
+                                    let status_url = request.getResponseHeader('Location');
+                                    update_progress(status_url, data.task_id);
+                                },
+                                resetForm: true,
+                        });
+                    }else{
+                        alert('Такой формат файла пока не поддерживается');
+                        $('form').reset();
+                    }
+                };
+    })
+}
 
-                                $(`#${data.task_id} > div.content > div.details`).after(detailsElement);
-
-                                let status_url = request.getResponseHeader('Location');
-                                update_progress(status_url, data.task_id);
-                            },
-                            resetForm: true,
-                    });
-                }
-            });
+$('document').ready(function(){
+        var user_access = $('#user_access').text();
+        $('#user_timer').hide();
+        $('#inputSVS').hide();
+        start();
+        if(parseInt(user_access)){
+                userTimer(parseInt(user_access));
+            } else if (parseInt(user_access) == 0) {
+                $('#inputSVS').show();
+            } else{
+                userTimer(20);
+            };
         });
 
 function update_progress(status_url, element_id) {
@@ -134,6 +210,8 @@ function update_progress(status_url, element_id) {
                 if (data['filename']) {
                    $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}`);
                 };
+            } else if(infoFunc == 'unzip'){
+                infoFunc = 'Подготовка данных';
             };
         if (data['state'] == 'PENDING') {
             infoFunc = 'В очереди'

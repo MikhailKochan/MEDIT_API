@@ -37,6 +37,10 @@ def _set_celery_task_progress(job, **kwargs):
 class DatabaseTask(Task):
     _db = None
 
+    def after_return(self, *args, **kwargs):
+        if self._db is not None:
+            self._db.remove()
+
     @property
     def db(self):
         if self._db is None:

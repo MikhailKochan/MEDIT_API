@@ -1,10 +1,12 @@
 import os
 import shutil
 import time
+import zipfile
 
 from celery import shared_task
 from flask import current_app
 
+from app.view import pre_work_zip
 from app.models import Task, Images, User, Predict, Settings
 from app import db
 
@@ -62,52 +64,98 @@ def cutting_task(self, **kwargs):
 def make_predict_task(self, **kwargs):
     from app.utils.create_zip.create_zip import create_zip
     job_id = str(self.request.id)
-    img_id = kwargs.get('img')
-    request = db.session.query(Images, Task).filter(Images.id == img_id, Task.image_id == img_id).first()
-    current_app.logger.info(f'request in db: {request} ')
-    if len(request) == 2:
-        img = request[0]
-        task = request[1]
-    elif len(request) == 1:
-        img = request[0]
-        task = None
+    user_id = kwargs.get('user_id')
+
+    start = time.time()
+    result = {'job_id': job_id, 'user_id': user_id}
+
+    user = User.query.get(user_id)
+    settings = user.settings
+
+    path_to_file = kwargs.get('path_file')
+    filename = os.path.basename(path_to_file)
+
+    if zipfile.is_zipfile(path_to_file):
+        path_to_file = pre_work_zip(path_to_file, self)
+
+    img = Images(path_to_file, name=filename)
+    task = Task(id=job_id, name='img_predict', description=f'Predict {img.filename}', user=user, images=img)
+
+    try:
+        db.session.add(task)
+        db.session.add(img)
+    except Exception as e:
+        result.update(add_images_task=False)
+        current_app.logger.error(f"ERROR in db.session.add(task, img): {e}")
+        db.session.rollback()
+        self.update_state(state='FAILURE')
+        # raise
     else:
-        img = Images.query.get(kwargs.get('img'))
-        task = Task.query.filter_by(images=img).first()
-    current_app.logger.info(f'task in 66 line in celery_task.py: {task} ')
-
-    settings = Settings.query.get(kwargs.get('settings'))
-    current_app.logger.info(f'str: {job_id} type: {type(self.request.id)}')
-    if img and os.path.isfile(img.file_path):
-
-        image_predict = img.make_predict(celery_job=self, settings=settings)
-        # print(image_predict, path_predict_img)
-
-        if image_predict and isinstance(image_predict, Predict):
-            create_zip(path_to_save=image_predict.path_to_save, job=self)
-            shutil.rmtree(image_predict.path_to_save)  # Delete cutting folder
-            image_predict.path_to_save = os.path.basename(image_predict.path_to_save)
-
-            db.session.add(image_predict)
-            if not isinstance(task, Task):
-                task = Task.query.get(job_id)
-            current_app.logger.info(f'{task} task in 83 line in celery_task.py')
-            if task:
-                task.complete = True
-                task.predict = image_predict
-            else:
-                current_app.logger.error(f'{job_id} task not found')
-
-        os.remove(img.file_path)  # Delete download svs
         db.session.commit()
+        result.update(add_images_task_to_db=True)
+        current_app.logger.info(f"task {task.id} add to db")
+        current_app.logger.info(f"Images {img.id} add to db")
+
+        if img and os.path.isfile(img.file_path):
+            image_predict = img.make_predict(celery_job=self, settings=settings)
+            if image_predict and isinstance(image_predict, Predict):
+                result.update(make_predict=True)
+                try:
+                    create_zip(path_to_save=image_predict.path_to_save, job=self)
+                except Exception as e:
+                    result.update(make_zip=f'{e}')
+                else:
+                    result.update(make_zip=True)
+                shutil.rmtree(image_predict.path_to_save)  # Delete cutting folder
+                image_predict.path_to_save = os.path.basename(image_predict.path_to_save)
+                try:
+                    db.session.add(image_predict)
+                    task.predict = image_predict
+                except Exception as e:
+                    result.update(add_task_image_predict=f'{e}')
+                    current_app.logger.error(f"ERROR in db.session.add(image_predict): {e}")
+                    db.session.rollback()
+                    self.update_state(state='FAILURE')
+                    # raise
+                else:
+                    result.update(add_task_image_predict=True)
+                    current_app.logger.info(f"Predict {Predict.id} add to db")
+                    db.session.commit()
+            else:
+                result.update(make_predict=False)
+                current_app.logger.error(f"Predict failed")
+                self.update_state(state='FAILURE')
+                return {'progress': 0, 'status': 'PREDICT FAILED'}
+    finally:
+        try:
+            t = Task.query.get(job_id)
+            t.complete = True
+        except Exception as e:
+            result.update(task_complete=False)
+            current_app.logger.error(f"ERROR in task.complete = True: {e}")
+            db.session.rollback()
+            self.update_state(state='FAILURE')
+        else:
+            result.update(task_complete=True)
+            db.session.commit()
+        try:
+            os.remove(path_to_file)  # Delete download
+        except Exception as e:
+            result.update(file_remove=f'{e}')
+        result.update(file_remove=True)
+        if img.format.lower() == '.mrxs':
+            img_folder = img.file_path[:-5]
+            if os.path.isdir(img_folder):
+                shutil.rmtree(img_folder)
+                result.update(folder_mrxs_remove=True)
+                current_app.logger.info(f'DELETE folder: {img_folder}')
+        result.update(duration_of_work=time.time() - start)
+        current_app.logger.info(f'TASK FINISH WITH RESULT: {result}')
         self.update_state(state='FINISHED')
         return {'progress': 100,
                 'status': 'FINISHED',
-                'result': 'ready to download',
+                'result': result,
                 }
-    else:
-        self.update_state(state='FAILURE')
-        return {'progress': 0, 'status': 'FAILED'}
 
 
 @shared_task(bind=True)

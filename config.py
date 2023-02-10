@@ -9,6 +9,8 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 
 class Config(object):
 
+    OPENSLIDE_FORMAT = ['.svs', '.mrxs']
+    IMAGE_FORMAT = OPENSLIDE_FORMAT
     # location where install detectron2
     DETECTRON = os.environ.get('DETECTRON_PATH')
 
@@ -16,7 +18,8 @@ class Config(object):
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
     MODEL_NAME = 'mitoses'
-    MODEL_URL = os.environ.get('MODEL_URL') or 'http://127.0.0.1:8001/uploadfile/'
+    MODEL_URL_TEST = os.environ.get('MODEL_URL_TEST') or 'http://127.0.0.1:8001/'
+    MODEL_URL = os.environ.get('MODEL_URL') or MODEL_URL_TEST + 'uploadfile/'
     MODEL_DESCRIPTION = 'standard model'
 
     _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
@@ -40,6 +43,7 @@ class Config(object):
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 
     UPDATE_TIME = int(1)  # time in second
+    RELOADING_TIME = int(3600)  # base reload time of custom upload file (in seconds)
 
     UPLOAD_FOLDER = os.path.join(basedir, 'app/static/downloads')
     SAVE_ZIP = os.path.join(basedir, "app/static/zip")
@@ -82,8 +86,6 @@ class Config(object):
 
     COLOR_FOR_DRAW_RECTANGLE = [2, 202, 244]
     COLOR_FOR_DRAW_TEXT = [0, 0, 0]
-
-
 
     _CUDA_SET = "cpu"
     if torch.cuda.is_available():

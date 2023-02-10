@@ -193,7 +193,9 @@ img {
     border: 1px solid #6b666e;
     align-content: center;
     min-width: 120px;
-    font-size: inherit;
+    font-size: small;
+    word-break: break-word;
+    padding: 2px;
 }
 .box a {
     margin: 5px;
@@ -209,7 +211,8 @@ img {
     font-size: 18px;
     text-align: center;
     border-radius: 5px;
-    font-size: inherit;
+    font-size: small;
+    word-break: break-word;
 }
 
 .box a:hover {

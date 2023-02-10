@@ -1,4 +1,5 @@
-from datetime import datetime
+import datetime
+import os
 from flask import render_template, flash, redirect, url_for, request, g, jsonify, current_app, abort
 from flask import send_from_directory
 from flask_login import current_user, login_required
@@ -9,8 +10,9 @@ from app.main.forms import SearchPredictForm, SettingsForm
 from app.main import bp
 
 import json
+import zipfile
 
-from app.view import file_save_and_add_to_db, check_req
+from app.view import check_req, file_name_maker, check_zip
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
 
 
@@ -120,34 +122,6 @@ def progress(task_id):
         return abort(404)
 
 
-@bp.route('/')
-@bp.route('/predict', methods=['POST', 'GET'])
-@login_required
-def predict_rout():
-    tasks = None
-    if current_user.get_task_in_progress('mk_pred'):
-        tasks = current_user.get_task_in_progress('mk_pred')
-        flash(f'Количество исследований в работе: {len(tasks)}')
-    if request.method == 'GET':
-        return render_template('get_analysis.html', title='Исследование', tasks=tasks)
-    if request.method == 'POST':
-        img = file_save_and_add_to_db(request)
-        if img is None:
-            return render_template('get_analysis.html', title='Исследование', tasks=tasks)
-        predict = Predict(images=img, timestamp=datetime.utcnow())
-
-        task = current_user.launch_task(name='mk_pred',
-                                        description=f'{img.filename} prediction',
-                                        job_timeout=10800,
-                                        img=img,
-                                        predict=predict,
-                                        medit=current_app.medit,
-                                        )
-        db.session.commit()
-
-        return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.progress', task_id=task.id)}
-
-
 @bp.route('/cutting_celery', methods=['POST', 'GET'])
 @login_required
 def cutting_rout_celery():
@@ -156,25 +130,76 @@ def cutting_rout_celery():
         if current_user.get_task_in_progress('img_cutt'):
             tasks = current_user.get_task_in_progress('img_cutt')
             flash(f'now {len(tasks)} images in cutting')
-        if request.method == 'POST':
-            img = file_save_and_add_to_db(request)
-            if img:
-                celery_job = cutting_task.apply_async(link_error=error_handler.s(),
-                                                      kwargs={'img_id': img.id})
-
-                task = Task(id=celery_job.id,
-                            name='img_cutt',
-                            description=f'Cutting {img.filename}',
-                            user=current_user,
-                            images=img)
-
-                db.session.add(task)
-
-                db.session.commit()
-                return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
+        # if request.method == 'POST':
+            # img = file_save_and_add_to_db(request)
+            # if img:
+            #     celery_job = cutting_task.apply_async(link_error=error_handler.s(),
+            #                                           kwargs={'img_id': img.id})
+            #
+            #     task = Task(id=celery_job.id,
+            #                 name='img_cutt',
+            #                 description=f'Cutting {img.filename}',
+            #                 user=current_user,
+            #                 images=img)
+            #
+            #     db.session.add(task)
+            #
+            #     db.session.commit()
+            #     return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
     except Exception as e:
         current_app.logger.error(e)
     return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
+
+
+@bp.route('/predict', methods=['POST', 'GET'])
+@login_required
+def predict_rout_celery():
+    try:
+        # print('g.test_server_connect:', g.test_server_connect)
+        access = 0  # время до следующей задачи
+        tasks = current_user.get_my_tasks()
+        task_in_process = [task for task in tasks if task.complete is False]
+        delay = current_user.settings.user_reloading_time  # пауза между задачами заданная в настройках пользователя
+        if tasks:
+            next_task_time = tasks[0].timestamp + datetime.timedelta(seconds=delay)
+            dt = next_task_time - datetime.datetime.utcnow()
+            if dt.days < 0:
+                pass
+            else:
+                access = dt.seconds  # время до следующей задачи
+
+        if request.method == 'POST':
+            files = request.files.getlist("file")
+            for file in files:
+                current_app.logger.info(f'получил файл {file.filename}')
+
+                filename = file_name_maker(file.filename)
+                path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+                file.save(path)
+                current_app.logger.info(f"сохранил файл {filename}")
+
+                if (zipfile.is_zipfile(path) and check_zip(path)) \
+                        or filename.endswith(tuple(current_app.config['IMAGE_FORMAT'])):
+
+                    celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
+                                                               kwargs={'user_id': current_user.id,
+                                                                       'path_file': path})
+
+                    return jsonify({'task_id': celery_job.id}), 202, {'Location': url_for('main.taskstatus',
+                                                                                          task_id=celery_job.id)}
+                else:
+                    os.remove(path)
+                    current_app.logger.info(f"файл {filename} не подходит, и был удален")
+        return render_template('get_analysis.html',
+                               title='Исследование',
+                               tasks=task_in_process,
+                               access=access,
+                               pause_delay=delay,
+                               server_connect=g.test_server_connect,
+                               )
+    except Exception as e:
+        current_app.logger.error(e)
 
 
 @bp.route('/status/<task_id>')
@@ -183,62 +208,42 @@ def taskstatus(task_id):
     task = make_predict_task.AsyncResult(task_id)
     # print(task.info)
     # print(dir(task))
-    if task.state == 'PENDING':
-        # job did not start yet
-        response = {
-            'state': task.state,
-            'progress': 0,
-            'status': 'Pending...'
-        }
-    elif task.state != 'FAILURE':
-        response = {
-            'state': task.state,
-            'progress': task.info.get('progress', 0),
-            'function': task.info.get('function', ''),
-            'filename': task.info.get('filename', ''),
-            'all_mitoses': task.info.get('all_mitoses'),
-            'analysis_number': task.info.get('analysis_number', '')
-        }
-        if 'result' in task.info:
-            response['result'] = task.info['result']
-    else:
-        # something went wrong in the background job
-        response = {
-            'state': task.state,
-            'progress': 0,
-            'status': str(task.info),  # this is the exception raised
-        }
-    return jsonify(response)
+    if task:
+        if task.state == 'PENDING':
+            # job did not start yet
+            response = {
+                'state': task.state,
+                'progress': 0,
+                'status': 'Pending...'
+            }
+        elif task.state != 'FAILURE':
+            response = {
+                'state': task.state,
+                'progress': task.info.get('progress', 0),
+                'function': task.info.get('function', ''),
+                'filename': task.info.get('filename', ''),
+                'all_mitoses': task.info.get('all_mitoses'),
+                'analysis_number': task.info.get('analysis_number', '')
+            }
+            if 'result' in task.info:
+                response['result'] = task.info['result']
+        else:
+            # something went wrong in the background job
+            response = {
+                'state': task.state,
+                'progress': 0,
+                'status': str(task.info),  # this is the exception raised
+            }
+        return jsonify(response)
 
 
-@bp.route('/predict_celery', methods=['POST', 'GET'])
-@login_required
-def predict_rout_celery():
-    try:
-        tasks = None
-        if current_user.get_task_in_progress('img_predict'):
-            tasks = current_user.get_task_in_progress('img_predict')
-            flash(f'Количество исследований в работе: {len(tasks)}')
-        if request.method == 'GET':
-            return render_template('get_analysis.html', title='Исследование', tasks=tasks)
-        if request.method == 'POST':
-            img = file_save_and_add_to_db(request)
-
-            celery_job = make_predict_task.apply_async(link_error=error_handler.s(),
-                                                       kwargs={'img': img.id,
-                                                               'settings': current_user.get_settings().id})
-
-            task = Task(id=celery_job.id,
-                        name='img_predict',
-                        description=f'Predict {img.filename}',
-                        user=current_user,
-                        images=img,
-                        )
-
-            db.session.add(task)
-            db.session.commit()
-            current_app.logger.info(f"task {task.id} add to bd")
-            return jsonify({'task_id': task.id}), 202, {'Location': url_for('main.taskstatus', task_id=task.id)}
-
-    except Exception as e:
-        current_app.logger.error(e)
+@bp.before_request
+def test_ml_server_connect():
+    # проверяем функцию, которая обрабатывает текущий URL
+    # print('we in test connect before')
+    # print(request.endpoint)
+    if request.endpoint in ['main.predict_rout_celery']:
+        # если это `predict_rout_celery`
+        test_server_connect = getattr(g, 'test_server_connect', None)
+        if test_server_connect is None and current_user:
+            g.test_server_connect = current_user.test_server_ml()

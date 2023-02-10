@@ -6,7 +6,7 @@ import pathlib
 import os
 import redis
 import rq
-
+import requests
 import json
 from time import time
 
@@ -43,6 +43,9 @@ class User(UserMixin, db.Model):
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     predict = db.relationship('Predict', backref='user', lazy='dynamic')
+
+    def __init__(self):
+        self.settings = Settings(user=self)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -85,26 +88,40 @@ class User(UserMixin, db.Model):
             db.session.add(settings)
         return settings
 
+    def get_my_tasks(self):
+        return Task.query.filter_by(user=self).order_by(Task.timestamp.desc()).all()
+
     def get_tasks_in_progress(self):
-        return Task.query.filter_by(user=self, complete=False).all()
+        return Task.query.filter_by(user=self, complete=False).order_by(Task.timestamp.desc()).all()
 
     def get_task_in_progress(self, name):
-        return Task.query.filter_by(name=name, user=self,
-                                    complete=False).all()
+        return Task.query.filter_by(name=name, user=self, complete=False).order_by(Task.timestamp.desc()).all()
+
+    def test_server_ml(self):
+        settings = self.settings
+        try:
+            req = requests.get(settings.model.url_test, timeout=2)
+        except Exception as e:
+            current_app.logger.error(f"{settings.model.url_test} have a problem:\n{e}")
+            return False
+        else:
+            return True if req.status_code == 200 else False
 
 
 class Model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     url = db.Column(db.String(128))
+    url_test = db.Column(db.String(128))
     description = db.Column(db.Text)
 
     settings = db.relationship('Settings', backref='model', lazy='dynamic')
     predict = db.relationship('Predict', backref='model', lazy='dynamic')
 
-    def __init__(self, name: str = None, url: str = None, description: str = None):
+    def __init__(self, name: str = None, url: str = None, url_test: str = None, description: str = None):
         self.name = name if name else current_app.config['MODEL_NAME']
         self.url = url if url else current_app.config['MODEL_URL']
+        self.url_test = url_test if url_test else current_app.config['MODEL_URL_TEST']
         self.description = description if description else current_app.config['MODEL_DESCRIPTION']
 
     def __repr__(self):
@@ -126,6 +143,8 @@ class Settings(db.Model):
     color_for_draw_rectangle = db.Column(db.Text)
     color_for_draw_text = db.Column(db.Text)
 
+    user_reloading_time = db.Column(db.Integer)
+
     def __init__(self, user: User = None):
         if user is not None:
             self.user_id = user.id
@@ -137,7 +156,9 @@ class Settings(db.Model):
         model = Model.query.get(1)
         if model is None:
             model = Model()
+            db.session.add(model)
         self.model = model
+        self.user_reloading_time = current_app.config['RELOADING_TIME']
 
     def get_cutting_size(self):
         return tuple(json.loads(self.cutting_images_size))
@@ -165,7 +186,7 @@ class Settings(db.Model):
 
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    analysis_number = db.Column(db.Integer, unique=False)
+    analysis_number = db.Column(db.String(128), unique=False)
     name = db.Column(db.String(64), index=True, unique=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     img_creation_time = db.Column(db.String(64), index=True)
@@ -185,24 +206,26 @@ class Images(db.Model):
     notifications = db.relationship('Notification', backref='images',
                                     lazy='dynamic')
 
-    def __init__(self, path: str = None):
-        # self.id = generator_id(self)
+    def __init__(self, path: str = None, *args, **kwargs):
         self.timestamp = datetime.utcnow()
         self.cut_file = False
         if path:
             self.file_path = path
             self.filename = os.path.basename(path)
             self.format = pathlib.Path(path).suffix
-            if self.format.lower() == '.svs':
+            self.name = kwargs.get('name')
+            if self.format.lower() in current_app.config['OPENSLIDE_FORMAT']:
                 file = openslide.OpenSlide(path)
-                self.analysis_number = file.properties['aperio.ImageID']
-                self.name = file.properties['aperio.Filename']
-                self.img_creation_time = file.properties['aperio.Time']
-                self.img_creation_date = file.properties['aperio.Date']
                 self.width, self.height = file.level_dimensions[0]
+                if self.format.lower() == '.svs':
+                    self.analysis_number = file.properties.get('aperio.ImageID')
+                    self.img_creation_time = file.properties.get('aperio.Time')
+                    self.img_creation_date = file.properties.get('aperio.Date')
+                elif self.format.lower() == '.mrxs':
+                    self.analysis_number = file.properties.get('mirax.GENERAL.SLIDE_ID')
+                    self.img_creation_time = file.properties.get('mirax.GENERAL.SLIDE_UTC_CREATIONDATETIME')
+                    self.img_creation_date = file.properties.get('mirax.GENERAL.SLIDE_UTC_CREATIONDATETIME')
             # TODO add more format
-            elif self.format.lower() == '.jpg':
-                pass
 
     def add_notification(self, name, data):
         self.notifications.filter_by(name=name).delete()
@@ -250,7 +273,7 @@ class Images(db.Model):
                                                         f"{self.filename[:-4]}_{time_now.strftime('%d_%m_%Y__%H_%M')}"))
             os.makedirs(predict.path_to_save, exist_ok=True)
 
-            if self.format.lower() == '.svs':
+            if self.format.lower() in current_app.config['OPENSLIDE_FORMAT']:
                 from app.utils.prediction.make_predict import make_predict_celery as start_predict
 
             elif self.format.lower() == '.jpg':

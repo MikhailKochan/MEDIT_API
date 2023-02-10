@@ -14,7 +14,7 @@
     {{ form.hidden_tag() }}
     <p>
         {{ form.analysis_number.label }}
-        {{ form.analysis_number(size=32) }}
+        {{ form.analysis_number(size=40) }}
         <br>
         {% for error in form.analysis_number.errors %}
         <span style="color: red;">[{{ error }}]</span>
@@ -68,7 +68,7 @@
                     </div>
                 </div>
             </div>
-            <div class="box" id="analysis_number" style="justify-content: center">
+            <div class="box" id="analysis_number" style="justify-content: center;word-break: break-all">
 
             </div>
             <div class="box" id="result" style="justify-content: center;min-width: 80px">

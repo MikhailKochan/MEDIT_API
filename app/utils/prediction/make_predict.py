@@ -282,13 +282,14 @@ def make_predict_celery(image, predict, job, settings):
         all_mitoz = 0
         progress = 0
         max_mitoz_in_one_img = 0
-        file = None
+        # file = None
         url = settings.model.url
-        if image.format.lower() == '.svs':
-            f_path = os.path.join(Config.BASEDIR,
-                                  Config.UPLOAD_FOLDER,
-                                  image.filename)
-            file = openslide.OpenSlide(f_path)
+        # if image.format.lower() == '.svs':
+
+        f_path = os.path.join(Config.BASEDIR,
+                              Config.UPLOAD_FOLDER,
+                              image.filename)
+        file = openslide.OpenSlide(f_path)
 
         assert file, f"IMAGE FORMAT: {image.format} NOT SUPPORTED"
 
@@ -302,77 +303,84 @@ def make_predict_celery(image, predict, job, settings):
         _CUT_IMAGE_SIZE = settings.get_cutting_size()
 
         total = int(image.height / _CUT_IMAGE_SIZE[1]) * int(image.width / _CUT_IMAGE_SIZE[0])
-
+        valid_percent = _CUT_IMAGE_SIZE[1] * _CUT_IMAGE_SIZE[0] * 0.10
+        zeros = np.zeros([_CUT_IMAGE_SIZE[1], _CUT_IMAGE_SIZE[0], 3], dtype=np.uint8)
         for start_row, start_col, img_name in space_selector(image.height, image.width, _CUT_IMAGE_SIZE):
-            img_PILLOW = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
-            img_PILLOW = img_PILLOW.convert('RGB')
+            try:
+                img_PILLOW = file.read_region((start_row, start_col), 0, _CUT_IMAGE_SIZE)
+                img_PILLOW = img_PILLOW.convert('RGB')
 
-            im_RGB = np.asarray(img_PILLOW)
-            image_BGR = cv2.cvtColor(im_RGB, cv2.COLOR_RGB2BGR)
+                im_RGB = np.asarray(img_PILLOW)
+                image_BGR = cv2.cvtColor(im_RGB, cv2.COLOR_RGB2BGR)
 
-            if quality_checking_image(image_BGR, settings=settings):
-                save_image_path = os.path.join(predict.path_to_save, f"{img_name}.jpg")
-                img_PILLOW.save(save_image_path)
+                is_black = np.count_nonzero(image_BGR == zeros) / 3
 
-                check = True
-                img_name_not_valid = f'{img_name}_not_valid'
-                response = send_image_to_model(path_to_image=save_image_path,
-                                               url=url)
-                if response is None:
-                    print(f'server in URL:{url} don`t send response')
-                    os.remove(save_image_path)
-                    continue
-                response = response['response']
+                if (is_black < valid_percent) and quality_checking_image(image_BGR, settings=settings):
+                    save_image_path = os.path.join(predict.path_to_save, f"{img_name}.jpg")
+                    img_PILLOW.save(save_image_path)
 
-                request_coord, request_label = response['request_coord'], response['request_label']
+                    check = True
+                    img_name_not_valid = f'{img_name}_not_valid'
+                    response = send_image_to_model(path_to_image=save_image_path,
+                                                   url=url)
+                    if response is None:
+                        print(f'server in URL:{url} don`t send response')
+                        os.remove(save_image_path)
+                        continue
+                    response = response['response']
 
-                coord_not_valid, label_not_valid = [], []
-                coord_valid, label_valid = [], []
+                    request_coord, request_label = response['request_coord'], response['request_label']
 
-                for index, box_coord in enumerate(request_coord):
+                    coord_not_valid, label_not_valid = [], []
+                    coord_valid, label_valid = [], []
 
-                    x, y, x1, y1 = box_coord
-                    predict_zone = image_BGR[int(y): int(y1), int(x): int(x1)]
+                    for index, box_coord in enumerate(request_coord):
 
-                    if not quality_checking_image(predict_zone, settings=settings):
-                        check = False
-                        img_name_not_valid = img_name_not_valid + '_white'
+                        x, y, x1, y1 = box_coord
+                        predict_zone = image_BGR[int(y): int(y1), int(x): int(x1)]
 
-                    if not quality_checking_image(predict_zone, quality_black=True, settings=settings):
-                        check = False
-                        img_name_not_valid = img_name_not_valid + '_black'
+                        if not quality_checking_image(predict_zone, settings=settings):
+                            check = False
+                            img_name_not_valid = img_name_not_valid + '_white'
 
-                    if not check:
-                        coord_not_valid.append([int(x), int(y), int(x1), int(y1)])
-                        if request_label[index]:
-                            label_not_valid.append(request_label[index])
+                        if not quality_checking_image(predict_zone, quality_black=True, settings=settings):
+                            check = False
+                            img_name_not_valid = img_name_not_valid + '_black'
 
+                        if not check:
+                            coord_not_valid.append([int(x), int(y), int(x1), int(y1)])
+                            if request_label[index]:
+                                label_not_valid.append(request_label[index])
+
+                        else:
+                            coord_valid.append([int(x), int(y), int(x1), int(y1)])
+                            if request_label[index]:
+                                label_valid.append(request_label[index])
+
+                    if coord_not_valid:
+                        # print(f'coord_not_valid: {coord_not_valid}')
+                        image_draw_not_valid = draw_predict(image=image_BGR,
+                                                            coord=coord_not_valid,
+                                                            labels=label_not_valid,
+                                                            settings=settings)
+                        not_valid_path = os.path.join(predict.path_to_save, 'not_valid')
+                        os.makedirs(not_valid_path, exist_ok=True)
+                        save_image_path_not_valid = os.path.join(not_valid_path, f"{img_name_not_valid}.jpg")
+                        cv2.imwrite(save_image_path_not_valid, image_draw_not_valid)
+
+                    if coord_valid:
+                        # print(f'coord_valid: {coord_valid}')
+                        image_draw = draw_predict(image=image_BGR,
+                                                  coord=coord_valid,
+                                                  labels=label_valid,
+                                                  settings=settings)
+                        cv2.imwrite(save_image_path, image_draw)
                     else:
-                        coord_valid.append([int(x), int(y), int(x1), int(y1)])
-                        if request_label[index]:
-                            label_valid.append(request_label[index])
-
-                if coord_not_valid:
-                    # print(f'coord_not_valid: {coord_not_valid}')
-                    image_draw_not_valid = draw_predict(image=image_BGR,
-                                                        coord=coord_not_valid,
-                                                        labels=label_not_valid,
-                                                        settings=settings)
-                    not_valid_path = os.path.join(predict.path_to_save, 'not_valid')
-                    os.makedirs(not_valid_path, exist_ok=True)
-                    save_image_path_not_valid = os.path.join(not_valid_path, f"{img_name_not_valid}.jpg")
-                    cv2.imwrite(save_image_path_not_valid, image_draw_not_valid)
-
-                if coord_valid:
-                    # print(f'coord_valid: {coord_valid}')
-                    image_draw = draw_predict(image=image_BGR,
-                                              coord=coord_valid,
-                                              labels=label_valid,
-                                              settings=settings)
-                    cv2.imwrite(save_image_path, image_draw)
-                else:
-                    os.remove(save_image_path)
-                all_mitoz += len(coord_valid)
+                        os.remove(save_image_path)
+                    all_mitoz += len(coord_valid)
+            except Exception as e:
+                print(f'ERROR in make_predict_celery in iteration: {e}', sys.exc_info()[0])
+                continue
 
             progress += 1 / total * 100.0
 

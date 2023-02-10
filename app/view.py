@@ -7,7 +7,7 @@ import cv2
 from sys import platform
 from flask import current_app
 from datetime import datetime
-
+import pathlib
 import sqlite3
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import Session
@@ -56,10 +56,6 @@ def quality_checking_image(img: np.asarray,
     else:
         percentage = int(settings.percentage_white)
 
-    if lower is None and upper is None:
-        lower = np.array([0, 0, 168], dtype=np.uint8)
-        upper = np.array([180, 30, 255], dtype=np.uint8)
-
     if quality_black:
         if settings is None:
             percentage = 10
@@ -70,6 +66,9 @@ def quality_checking_image(img: np.asarray,
             lower = np.array([0, 0, 0], dtype=np.uint8)
             upper = np.array([180, 255, 68], dtype=np.uint8)
 
+    if lower is None and upper is None:
+        lower = np.array([0, 0, 168], dtype=np.uint8)
+        upper = np.array([180, 30, 255], dtype=np.uint8)
     # print('quality black', quality_black)
     # print('percentage', percentage)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -171,31 +170,70 @@ def file_name_maker(filename):
         return filename
 
 
-def file_save_and_add_to_db(request, do_predict=False):
-    files = request.files.getlist("file")
-    if files:
-        for file in files:
-            filename = file_name_maker(file.filename)
-            path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            current_app.logger.info(f'получил файл {file.filename}')
-            file.save(path)
-            current_app.logger.info(f"сохранил файл {filename}")
-            img = Images(path)
-            # if Images.query.filter_by(analysis_number=img.analysis_number).first() is None:
-            db.session.add(img)
-            db.session.commit()
-            current_app.logger.info(f"{filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-            # else:
-            #     current_app.logger.info(f"{filename} already in bd")
-            # img = Images.query.filter_by(analysis_number=img.analysis_number).first()
+def check_zip(path):
+    with zipfile.ZipFile(path, 'r') as zipF:
+        namelist = zipF.namelist()
+        list_to_extract = []
+        for file in namelist:
+            if file.endswith('.mrxs'):
+                open_file = file  # images file to open openslide
+                folder = file.replace('.mrxs', '/')
+                mst1 = folder + 'Index.dat'
+                mst2 = folder + 'Slidedat.ini'
+                if mst1 in namelist and mst2 in namelist:
+                    list_to_extract.append(file)
+                    for file in namelist:
+                        if folder in file:
+                            list_to_extract.append(file)
+                    return [list_to_extract, open_file]
+            elif file.endswith('.svs'):
+                open_file = file  # images file to open openslide
+                list_to_extract.append(file)
+                return [list_to_extract, open_file]
+    return False
 
-            if do_predict:
-                path_to_save_draw = os.path.join(Config.BASEDIR, Config.DRAW, filename)
-                if not os.path.exists(path_to_save_draw):
-                    os.mkdir(path_to_save_draw)
-            return img
+
+def pre_work_zip(path, job):
+    from app.utils.celery import _set_celery_task_progress
+
+    progress = 0
+    _set_celery_task_progress(
+        job=job,
+        progress=progress,
+        function='unzip')
+
+    check = check_zip(path)
+    if check:
+        list_to_extract = check[0]
+        total = len(list_to_extract)
+        with zipfile.ZipFile(path, 'r') as zipF:
+            for file in list_to_extract:
+                zipF.extract(file, current_app.config['UPLOAD_FOLDER'])
+
+                progress += 1 / total * 100.0
+                _set_celery_task_progress(
+                    job=job,
+                    progress=progress,
+                    function='unzip')
+
+    os.remove(path)
+    return os.path.join(current_app.config['UPLOAD_FOLDER'], check[1]) if check else check
+
+
+def file_save_and_add_to_db(path):
+
+    if zipfile.is_zipfile(path):
+        path = pre_work_zip(path)
+
+    if os.path.isfile(path) and path.endswith(tuple(current_app.config['IMAGE_FORMAT'])):
+        img = Images(path, name=file.filename)
+        db.session.add(img)
+        db.session.commit()
+        current_app.logger.info(f"{filename} saved to {current_app.config['UPLOAD_FOLDER']}")
+
     else:
-        return None
+        os.remove(path)
+    return img
 
 
 def show_all_table(db='app.db'):

@@ -4,13 +4,32 @@
 <style>
     #menu_analysis{
         background: gray;
-
-
-}
+    }
+    #inputSVS{
+        height: 60px;
+        max-width: 200px;
+        margin-top: 1%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #user_timer{
+        height: 60px;
+        width: 200px;
+        margin-top: 1%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: red;
+        border-radius: 5px;
+        text-align: center;
+        flex-direction: column;
+        color: white;
+    }
 </style>
 
 <div class="container-table" style="width:100%;justify-content: center">
-    <div class="box" style="background: #eff1f4;">
+    <div class="box" style="background: #eff1f4;min-width:192px">
         Файл
     </div>
     <div class="box" style="background: #eff1f4;">
@@ -28,7 +47,7 @@
 </div>
 
 <form action="{{url_for('main.predict_rout_celery')}}" style="margin-top:0%" enctype="form-data" method="post">
-    <input type="file" name="file" class="input-file" accept=".svs" hidden>
+    <input type="file" name="file" class="input-file" accept=".svs, .zip" hidden>
     <input id="submit" type="submit" value="Загрузить" hidden/>
 </form>
 
@@ -37,7 +56,7 @@
     {% if tasks %}
     {% for task in tasks %}
         <div class="container-table" id="{{ task.id }}" style="width:100%;justify-content:center">
-            <div class="box" id="datetime" style="justify-content: flex-start;">
+            <div class="box" id="datetime" style="justify-content:flex-start;min-width:192px;">
                 <img src="./static/logo/file.png">
                 <span class="name">{{ task.images.filename }}</span>
             </div>
@@ -52,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            <div class="box" id="analysis_number" style="justify-content: center">
+            <div class="box" id="analysis_number" style="justify-content: center;word-break: break-all;">
 
             </div>
             <div class="box" id="result" style="justify-content: center">
@@ -60,10 +79,10 @@
             </div>
             <div class="box">
                 <a class="button_download" href="" style="display:none">
-                    <img src="/static/logo/download_green.png" alt="#" title="Скачать изображения">
+                    <img src="/static/logo/download_green.png" alt="#" title="Скачать результат исследования">
                 </a>
                 <a class="button_cancel" href="" style="display:none">
-                    <img src="/static/logo/remove.png" alt="#" title="Удалить Изображения">
+                    <img src="/static/logo/remove.png" alt="#" title="Удалить результат исследования">
                 </a>
             </div>
         </div>
@@ -71,12 +90,20 @@
     {% endif %}
 </section>
 
-
-<button id="inputSVS" class="button" type="button" style="height:60px;max-width:200px;margin-top:1%;display:flex;justify-content:center;align-items:center;">
-    <img src="/static/logo/upload.png" alt="#">
-    <p>Выбрать файл</p>
-</button>
-
+{% if server_connect %}
+    <div id="user_access" hidden>{{ access }}</div>
+    <div id="pause_delay" hidden>{{ pause_delay }}</div>
+    <div id="user_timer" style="{% if access == 0 %} display:none {% endif %}">
+        Следующая загрузка
+        <div id="time_stamp"></div>
+    </div>
+    <button id="inputSVS" class="button" type="button" style="{% if not access == 0 %} display:none {% endif %}">
+        <img src="/static/logo/upload.png" alt="#">
+        Выбрать файл
+    </button>
+{% else %}
+    <p>Нет связи с сервером, попробуйте обновить страницу через какое то время</p>
+{% endif %}
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="https://malsup.github.io/jquery.form.js"></script>
 <script src="/static/js/get_analysis_jquery.js"></script>

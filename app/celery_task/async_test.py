@@ -119,10 +119,6 @@ def quality_checking_image(img: np.asarray,
 
     percentage = int(settings.percentage_white) if settings else 30
 
-    if lower is None and upper is None:
-        lower = np.array([0, 0, 168], dtype=np.uint8)
-        upper = np.array([180, 30, 255], dtype=np.uint8)
-
     if quality_black:
         percentage = int(settings.percentage_black) if settings else 10
 
@@ -130,21 +126,26 @@ def quality_checking_image(img: np.asarray,
             lower = np.array([0, 0, 0], dtype=np.uint8)
             upper = np.array([180, 240, 30], dtype=np.uint8)
 
+    if lower is None and upper is None:
+        lower = np.array([0, 0, 168], dtype=np.uint8)
+        upper = np.array([180, 10, 255], dtype=np.uint8)
+
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
 
     imgh, imgw = img.shape[:2]
 
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    summa_S = 0.0
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        summa_S += w * h
-    if summa_S > (imgh * imgw / 100 * percentage):
+    moments = cv2.moments(mask, 1)
+    dArea = moments['m00']
+    # contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # summa_S = 0.0
+    # for cnt in contours:
+    #     x, y, w, h = cv2.boundingRect(cnt)
+    #     summa_S += w * h
+    if dArea > (imgh * imgw * (percentage / 100)):
         quality = False
     else:
         quality = True
-
     return quality
 
 

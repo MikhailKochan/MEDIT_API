@@ -10,7 +10,7 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 class Config(object):
 
     OPENSLIDE_FORMAT = ['.svs', '.mrxs']
-    IMAGE_FORMAT = OPENSLIDE_FORMAT
+    IMAGE_FORMAT = OPENSLIDE_FORMAT.append('.zip')
     # location where install detectron2
     DETECTRON = os.environ.get('DETECTRON_PATH')
 
@@ -18,7 +18,7 @@ class Config(object):
     _DATASET_NAME = os.environ.get('DATASET_NAME')
 
     MODEL_NAME = 'mitoses'
-    MODEL_URL_TEST = os.environ.get('MODEL_URL_TEST') or 'http://127.0.0.1:8001/'
+    MODEL_URL_TEST = os.environ.get('MODEL_URL_TEST') or 'http://127.0.0.1:8007/'
     MODEL_URL = os.environ.get('MODEL_URL') or MODEL_URL_TEST + 'uploadfile/'
     MODEL_DESCRIPTION = 'standard model'
 

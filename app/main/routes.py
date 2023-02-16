@@ -1,12 +1,14 @@
 import datetime
 import os
+
 from flask import render_template, flash, redirect, url_for, request, g, jsonify, current_app, abort
 from flask import send_from_directory
 from flask_login import current_user, login_required
 from app import db
 
 from app.models import Images, Predict, Settings, Task
-from app.main.forms import SearchPredictForm, SettingsForm
+from app.main.forms import SearchPredictForm, SettingsForm, PredictForm
+
 from app.main import bp
 
 import json
@@ -167,12 +169,11 @@ def predict_rout_celery():
                 pass
             else:
                 access = dt.seconds  # время до следующей задачи
-
-        if request.method == 'POST':
+        form = PredictForm()
+        if request.method == 'POST' and access == 0:
             files = request.files.getlist("file")
             for file in files:
                 current_app.logger.info(f'получил файл {file.filename}')
-
                 filename = file_name_maker(file.filename)
                 path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
@@ -191,12 +192,14 @@ def predict_rout_celery():
                 else:
                     os.remove(path)
                     current_app.logger.info(f"файл {filename} не подходит, и был удален")
+
         return render_template('get_analysis.html',
                                title='Исследование',
                                tasks=task_in_process,
                                access=access,
                                pause_delay=delay,
                                server_connect=g.test_server_connect,
+                               form=form,
                                )
     except Exception as e:
         current_app.logger.error(e)
@@ -238,6 +241,7 @@ def taskstatus(task_id):
 
 
 @bp.before_request
+@login_required
 def test_ml_server_connect():
     # проверяем функцию, которая обрабатывает текущий URL
     # print('we in test connect before')

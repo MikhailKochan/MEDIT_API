@@ -1,6 +1,15 @@
 from flask_wtf import FlaskForm
+from config import Config
 from wtforms import StringField, SubmitField, IntegerField
 from wtforms.validators import ValidationError, InputRequired, DataRequired, NumberRange
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+# # from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+
+
+class PredictForm(FlaskForm):
+    file = FileField(validators=[FileAllowed(Config.__dict__['IMAGE_FORMAT'], 'Данный формат не поддерживается'),
+                                 FileRequired('Файл пустой')])
+    submit = SubmitField('Загрузить')
 
 
 class SearchPredictForm(FlaskForm):

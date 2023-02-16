@@ -227,7 +227,7 @@ function update_progress(status_url, element_id) {
             $(`#${element_id} > #analysis_number`).text(`${data['analysis_number']}`);
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
-            console.log(data);
+//            console.log(data);
             if ('result' in data) {
 //                console.log(data);
                 if (data['state'] == 'SUCCESS') {

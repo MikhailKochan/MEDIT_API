@@ -6,6 +6,7 @@ import zipfile
 import cv2
 from sys import platform
 from flask import current_app
+from werkzeug.utils import secure_filename
 from datetime import datetime
 import pathlib
 import sqlite3
@@ -157,7 +158,7 @@ def file_name_maker(filename):
         n - count filename repeated
     """
     g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
-
+    filename = secure_filename(filename)
     if g:
         g.sort()
         point = '.'

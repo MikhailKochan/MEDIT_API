@@ -380,17 +380,16 @@ def make_predict_celery(image, predict, job, settings):
                     all_mitoz += len(coord_valid)
             except Exception as e:
                 print(f'ERROR in make_predict_celery in iteration: {e}', sys.exc_info()[0])
-                continue
+            finally:
+                progress += 1 / total * 100.0
 
-            progress += 1 / total * 100.0
-
-            _set_celery_task_progress(
-                job=job,
-                progress=int(progress),
-                all_mitoses=all_mitoz,
-                function='Predict',
-                analysis_number=image.analysis_number
-            )
+                _set_celery_task_progress(
+                    job=job,
+                    progress=int(progress),
+                    all_mitoses=all_mitoz,
+                    function='Predict',
+                    analysis_number=image.analysis_number
+                )
 
         predict.result_all_mitoz = all_mitoz
         predict.result_max_mitoz_in_one_img = max_mitoz_in_one_img

@@ -224,7 +224,7 @@ def taskstatus(task_id):
                 'state': task.state,
                 'progress': task.info.get('progress', 0),
                 'function': task.info.get('function', ''),
-                'filename': task.info.get('filename', ''),
+                'filename': task.info.get('filename'),
                 'all_mitoses': task.info.get('all_mitoses'),
                 'analysis_number': task.info.get('analysis_number', '')
             }

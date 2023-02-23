@@ -28,6 +28,7 @@ def history():
     data = Predict.query.filter(Predict.tasks,
                                 Task.complete == True,
                                 Task.user_id == current_user.id)
+    #  t = Task.query.filter(Task.user_id==3,Task.complete==True).all()
 
     if form.validate_on_submit():
         if analysis_number:
@@ -52,8 +53,11 @@ def history():
     # if request.method == 'GET':
     next_url = url_for('main.history', page=data.next_num) if data.has_next else None
     prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None
-    return render_template('predict_history.html', title='История исследований', data=data.items,
-                           next_url=next_url, prev_url=prev_url, form=form)
+    return render_template('predict_history.html', title='История исследований',
+                           data=data.items,
+                           next_url=next_url, prev_url=prev_url,
+                           form=form,
+                           )
 
 
 @bp.route('/info', methods=['GET', 'POST'])
@@ -103,9 +107,10 @@ def settings():
 @login_required
 def get_zip(filename):
     try:
+        print('filename in get-zip', filename)
         if filename[:-4] != '.zip':
             filename = f'{filename}.zip'
-        print('filename in get-zip', filename)
+            print(f'filename changed to {filename}')
         return send_from_directory(current_app.config["SAVE_ZIP"], path=filename, as_attachment=True)
     except FileNotFoundError:
         return abort(404)
@@ -116,9 +121,10 @@ def progress(task_id):
     try:
         send = current_app.redis.get(task_id)
         if send:
-            return jsonify(json.loads(send.decode("utf-8")))
+            response = json.loads(send.decode("utf-8"))
         else:
-            return jsonify({'state': 'PENDING'})
+            response = {'state': 'PENDING'}
+        return jsonify(response)
     except Exception as e:
         current_app.logger.info(f"ERROR in progress rout: {e}")
         return abort(404)
@@ -153,6 +159,7 @@ def cutting_rout_celery():
     return render_template('cut_rout.html', title='Порезка SVS', tasks=tasks)
 
 
+@bp.route('/')
 @bp.route('/predict', methods=['POST', 'GET'])
 @login_required
 def predict_rout_celery():
@@ -187,12 +194,12 @@ def predict_rout_celery():
                                                                kwargs={'user_id': current_user.id,
                                                                        'path_file': path})
 
-                    return jsonify({'task_id': celery_job.id}), 202, {'Location': url_for('main.taskstatus',
+                    return jsonify({'task_id': celery_job.id}), 202, {'Location': url_for('main.progress',
                                                                                           task_id=celery_job.id)}
                 else:
                     os.remove(path)
                     current_app.logger.info(f"файл {filename} не подходит, и был удален")
-
+                    flash(f'Файл {file.filename} не может быть запущен в работу, не верный формат')
         return render_template('get_analysis.html',
                                title='Исследование',
                                tasks=task_in_process,
@@ -205,38 +212,31 @@ def predict_rout_celery():
         current_app.logger.error(e)
 
 
-@bp.route('/status/<task_id>')
-def taskstatus(task_id):
-    from app.celery_task.celery_task import make_predict_task
-    task = make_predict_task.AsyncResult(task_id)
-    # print(task.info)
-    # print(dir(task))
-    if task:
-        if task.state == 'PENDING':
-            # job did not start yet
-            response = {
-                'state': task.state,
-                'progress': 0,
-                'status': 'Pending...'
-            }
-        elif task.state != 'FAILURE':
-            response = {
-                'state': task.state,
-                'progress': task.info.get('progress', 0),
-                'function': task.info.get('function', ''),
-                'filename': task.info.get('filename'),
-                'all_mitoses': task.info.get('all_mitoses'),
-                'analysis_number': task.info.get('analysis_number', '')
-            }
-            if 'result' in task.info:
-                response['result'] = task.info['result']
-        else:
-            # something went wrong in the background job
-            response = {
-                'state': task.state,
-                'progress': 0,
-                'status': str(task.info),  # this is the exception raised
-            }
+@bp.route('/del_task/<string:task_id>', methods=['DELETE'])
+@login_required
+def delete(task_id):
+    print(f'delete task {task_id}')
+    delete_status = False
+    try:
+        current_app.redis.delete(task_id)
+        task = Task.query.get(task_id)
+        folder_name = os.path.basename(task.predict.path_to_save)
+        zip_file = os.path.join(current_app.config['SAVE_ZIP'], f'{folder_name}.zip')
+        db.session.delete(task.predict)
+        db.session.delete(task)
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'ERROR IN del_task route: {e}')
+        delete_status = False
+    else:
+        db.session.commit()
+        if os.path.isfile(zip_file):
+            os.remove(zip_file)
+            current_app.logger.info(f'DELETE zip file {zip_file}')
+        delete_status = True
+        current_app.logger.info(f'DELETE task {task_id}')
+    finally:
+        response = {'task': {'id': task_id, 'delete': delete_status}}
         return jsonify(response)
 
 

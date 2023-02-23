@@ -275,9 +275,10 @@ def send_image_to_model(path_to_image, url):
             return resp.json()
 
 
-def make_predict_celery(image, predict, job, settings):
+def make_predict_celery(image, predict, job_id, settings):
     from app.view import space_selector
-    from app.utils.celery import _set_celery_task_progress
+    # from app.utils.celery import _set_celery_task_progress
+    from app.new_tasks import _set_task_progress as _set_celery_task_progress
     try:
         all_mitoz = 0
         progress = 0
@@ -294,10 +295,11 @@ def make_predict_celery(image, predict, job, settings):
         assert file, f"IMAGE FORMAT: {image.format} NOT SUPPORTED"
 
         _set_celery_task_progress(
-            job=job,
+            job=job_id,
             progress=progress,
             all_mitoses=all_mitoz,
             function='Predict',
+            state='PROGRESS',
             analysis_number=image.analysis_number)
 
         _CUT_IMAGE_SIZE = settings.get_cutting_size()
@@ -384,7 +386,7 @@ def make_predict_celery(image, predict, job, settings):
                 progress += 1 / total * 100.0
 
                 _set_celery_task_progress(
-                    job=job,
+                    job=job_id,
                     progress=int(progress),
                     all_mitoses=all_mitoz,
                     function='Predict',

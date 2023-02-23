@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;400;700&display=swap');
+/*@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;1,400;1,600&display=swap');*/
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poiret+One&display=swap');
+/*@import url('https://fonts.googleapis.com/css2?family=Poiret+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Marck+Script&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap');*/
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 html,body{
     /*font-family: "Cormorant SC";*/
@@ -177,6 +177,7 @@ img {
     flex-direction: column;
 }
 .container-table {
+    background: white;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -215,6 +216,24 @@ img {
     word-break: break-word;
 }
 
+.box .button_delete {
+    margin: 5px;
+    color: #070c13;
+    background: #ffffff;
+    display: flex;
+    height: 70%;
+    width: 30%;
+    border: none;
+    align-items: center;
+    justify-content: space-evenly;
+    text-decoration: none;
+    font-size: 18px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: small;
+    word-break: break-word;
+}
+
 .box a:hover {
     background: gray;
     /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
@@ -222,7 +241,7 @@ img {
 .box a.button_download:hover {
     background: #4abc96;
 }
-.box a.button_cancel:hover {
+.box .button_delete:hover {
     background: #f44336;
 }
 form {

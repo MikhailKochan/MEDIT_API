@@ -13,6 +13,10 @@
         justify-content: center;
         align-items: center;
     }
+    .container-table{
+        z-index: 1;
+        transition: opacity 1s, transform 2s;
+    }
     #user_timer{
         height: 60px;
         width: 200px;
@@ -82,9 +86,9 @@
                 <a class="button_download" href="" style="display:none">
                     <img src="/static/logo/download_green.png" alt="#" title="Скачать результат исследования">
                 </a>
-                <a class="button_cancel" href="" style="display:none">
-                    <img src="/static/logo/remove.png" alt="#" title="Удалить результат исследования">
-                </a>
+                <button class="button_delete" style="display:none">
+                    <img src="/static/logo/remove.png" alt="#" title="Удалить исследование">
+                </button>
             </div>
         </div>
     {% endfor %}

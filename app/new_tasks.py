@@ -90,7 +90,7 @@ def mk_pred(**kwargs):
 
 def _set_task_progress(job, **kwargs):
     if job:
-        job_id = job.get_id()
+        job_id = job
         if current_app:
             rd = current_app.redis
         else:

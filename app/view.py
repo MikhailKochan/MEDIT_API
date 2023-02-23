@@ -150,25 +150,25 @@ def space_selector(height: int, width: int, CUT_IMAGE_SIZE):
 def file_name_maker(filename):
     """
     функция для предотвращения повторения имен при сохранении
+    и проверки вредной информации в имени файла
     Args:
         filename:
             str
     Returns:
-        filename + (n)
+        filename_n
         n - count filename repeated
     """
-    g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], filename[:-4])}*")
     filename = secure_filename(filename)
+
+    spl = os.path.splitext(filename)
+    searching_name = spl[0]
+
+    g = glob.glob(f"{os.path.join(current_app.config['UPLOAD_FOLDER'], searching_name)}*")
+
     if g:
-        g.sort()
-        point = '.'
-        spl = g[0].split(point)
-        end_str = spl.pop(-1)
-        name = point.join(spl)
-        new_filename = name + f"_{len(g)}." + end_str
-        return os.path.basename(new_filename)
-    else:
-        return filename
+        filename = searching_name + f"_{len(g)}" + spl[-1]
+
+    return filename
 
 
 def check_zip(path):
@@ -186,29 +186,35 @@ def check_zip(path):
                     for file in namelist:
                         if folder in file:
                             list_to_extract.append(file)
-                    return [list_to_extract, open_file]
+                    # if list_to_extract:
+                    #     return {'list_to_extract': list_to_extract, 'open_file': open_file}
             elif file.endswith('.svs'):
                 open_file = file  # images file to open openslide
                 list_to_extract.append(file)
-                return [list_to_extract, open_file]
+            if list_to_extract:
+                return {'list_to_extract': list_to_extract, 'open_file': open_file}
     return False
 
 
 def pre_work_zip(path, job):
-    from app.utils.celery import _set_celery_task_progress
+    from app.new_tasks import _set_task_progress as _set_celery_task_progress
 
     progress = 0
     _set_celery_task_progress(
         job=job,
+        state='PROGRESS',
         progress=progress,
         function='unzip')
 
     check = check_zip(path)
     if check:
-        list_to_extract = check[0]
+        list_to_extract = check.get('list_to_extract')
         total = len(list_to_extract)
         with zipfile.ZipFile(path, 'r') as zipF:
             for file in list_to_extract:
+                # filename = os.path.join(current_app.config['UPLOAD_FOLDER'], secure_filename(file))
+                # with open(filename, "wb") as f:
+                #     f.write(zipF.read(file))
                 zipF.extract(file, current_app.config['UPLOAD_FOLDER'])
 
                 progress += 1 / total * 100.0
@@ -218,20 +224,17 @@ def pre_work_zip(path, job):
                     function='unzip')
 
     os.remove(path)
-    return os.path.join(current_app.config['UPLOAD_FOLDER'], check[1]) if check else check
+    return os.path.join(current_app.config['UPLOAD_FOLDER'], check.get('open_file')) if check else False
 
 
 def file_save_and_add_to_db(path):
-
     if zipfile.is_zipfile(path):
         path = pre_work_zip(path)
-
     if os.path.isfile(path) and path.endswith(tuple(current_app.config['IMAGE_FORMAT'])):
         img = Images(path, name=file.filename)
         db.session.add(img)
         db.session.commit()
         current_app.logger.info(f"{filename} saved to {current_app.config['UPLOAD_FOLDER']}")
-
     else:
         os.remove(path)
     return img

@@ -20,18 +20,6 @@ import sqlite3
 from app import login, db
 
 
-def generator_id(cls):
-    try:
-        connect = sqlite3.connect('app.db')
-        cursor = connect.cursor()
-        cursor.execute(f"SELECT * FROM {type(cls).__name__}")
-        result = cursor.fetchall()
-        connect.commit()
-        return len(result) + int(1)
-    except Exception as e:
-        print(f'Error in generator_id : {e}')
-
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -286,7 +274,7 @@ class Images(db.Model):
 
             predict = start_predict(image=self,
                                     predict=predict,
-                                    job=celery_job,
+                                    job_id=celery_job,
                                     settings=settings)
 
             current_app.logger.info(f'finish predict {self.filename}')

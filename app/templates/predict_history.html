@@ -4,7 +4,14 @@
 <style>
     #menu_history{
         background: gray;
-}
+    }
+    .container-table{
+        z-index: 1;
+        transition: opacity 1s, transform 2s;
+    }
+    .container-wrapper {
+        margin-top: 0;
+    }
 </style>
 
 
@@ -75,14 +82,14 @@
                 {{ predict.result_all_mitoz }}
             </div>
             <div class="box">
-                {% if predict.path_to_save %}
-                    <a class="button_download" href="/get-zip/{{ predict.path_to_save }}" style="">
-                        <img src="/static/logo/download_green.png" alt="Скачать" title="Скачать изображения">
-                    </a>
-                    <a class="button_cancel" href="" style="">
-                        <img src="/static/logo/remove.png" alt="Удалить" title="Удалить Изображения">
-                    </a>
-                {% endif %}
+<!--                {% if predict.path_to_save %}-->
+                <a class="button_download" href="/get-zip/{{ predict.path_to_save or '#' }}" style="">
+                    <img src="/static/logo/download_green.png" alt="Скачать" title="Скачать результат исследования">
+                </a>
+                <button class="button_delete" id="{{predict.tasks.filter_by(predict_id = predict.id).first().id or '#'}}">
+                    <img src="/static/logo/remove.png" alt="Удалить" title="Удалить исследование">
+                </button>
+<!--                {% endif %}-->
 <!--                <a class="button_csv" href="" style="">-->
 <!--                    <img src="/static/logo/csv.png" alt="#">-->
 <!--                </a>-->
@@ -103,13 +110,12 @@
     </li>
 </ul>
 
-<!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>-->
-<!--<script src="https://malsup.github.io/jquery.form.js"></script>-->
-<!--<script src="/static/js/get_analysis_jquery.js"></script>-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://malsup.github.io/jquery.form.js"></script>
+<script src="/static/js/predict_history_jquery.js"></script>
 <script>
-<!--    const fileInput = document.querySelector("#submit"),-->
-<!--    bottomInputFile = document.querySelector("button");-->
-<!--    bottomInputFile.addEventListener("click", ()=>{fileInput.click();});-->
+
+
 </script>
 {{ super() }}
 {% endblock %}

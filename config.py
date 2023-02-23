@@ -10,7 +10,7 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 class Config(object):
 
     OPENSLIDE_FORMAT = ['.svs', '.mrxs']
-    IMAGE_FORMAT = OPENSLIDE_FORMAT.append('.zip')
+    IMAGE_FORMAT = OPENSLIDE_FORMAT
     # location where install detectron2
     DETECTRON = os.environ.get('DETECTRON_PATH')
 

@@ -32,9 +32,9 @@ function makeProgressHTML(id, name){
                 <a class="button_download" href="" style="display:none">
                     <img src="/static/logo/download_green.png" alt="#" title="Скачать изображения">
                 </a>
-                <a class="button_cancel" href="" style="display:none">
+                <button class="button_delete" style="display:none">
                     <img src="/static/logo/remove.png" alt="#" title="Удалить Изображения">
-                </a>
+                </button>
             </div>
         </div>
     `;
@@ -207,9 +207,6 @@ function update_progress(status_url, element_id) {
             infoFunc = 'Исследование';
         }else if (infoFunc == 'Create zip'){
                 infoFunc = 'Архивация данных';
-                if (data['filename']) {
-                   $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['filename']}`);
-                };
             } else if(infoFunc == 'unzip'){
                 infoFunc = 'Подготовка данных';
             };
@@ -228,22 +225,26 @@ function update_progress(status_url, element_id) {
         }
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
 //            console.log(data);
-            if ('result' in data) {
+//            if ('result' in data) {
 //                console.log(data);
                 if (data['state'] == 'SUCCESS') {
                             $(`#${element_id} > #status > div > div.details`).css('margin-top', 0);
+                            if (data['filename']) {
+                               $(`#${element_id} > div.box > a.button_download`).attr("href", `/get-zip/${data['zipname']}`);
+                            };
+                            delete_button_maker_logic(element_id);
                             $(`#${element_id} > #status > div > div.details > span.name`).text('Исследование завершено');
                             $(`#${element_id}>#status > div > div.details > span.percent`).html(`<img class='fa-check' src="./static/logo/green_check.png">`);
                         };
                 $(`#${element_id} > #status > div > div.progress-bar`).hide();
 
                 $(`#${element_id} > div:nth-child(5) > a`).css("display", "flex");
-            }
-            else {
-                // something unexpected happened
-//                console.log(data);
-                $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
-            }
+                $(`#${element_id} > div.box > .button_delete`).css("display", "flex");
+//            } else {
+//                // something unexpected happened
+////                console.log(data);
+//                $(`#${element_id} > div.content > div:nth-child(2) > span.func_name`).text('Result: ' + data['state']);
+//            }
         }
         else {
             // rerun in 2 seconds
@@ -255,13 +256,32 @@ function update_progress(status_url, element_id) {
     });
 }
 
+function delete_button_maker_logic(element_id){
+    let row = $(`#${element_id}`),
+    delete_button = $(`#${element_id} > div.box > .button_delete`);
+    delete_button.bind('click', function() {
+            $.ajax({
+                url: `/del_task/${element_id}`,
+                type: 'DELETE',
+                beforeSend: function() {
+                    row.css({'z-index': 0});
+                },
+                success: function(result) {
+                    row.css({'transform': 'translateY(-100%)'});
+                    setTimeout(() => row.remove(), 1000);
+                }
+            });
+    });
+};
+
 var container = document.querySelectorAll('.uploaded-area > .container-table');
 
 for (var i = 0; i < container.length; ++i) {
     let element_id = container[i].id;
-    let status_url = `/status/${container[i].id}`;
+    let status_url = `/progress/${element_id}`;
     let name = $(`#${element_id} > #datetime > span`).text()
     name = cutName(name);
-    $(`#${element_id} > #datetime > span`).html(name)
+    $(`#${element_id} > #datetime > span`).html(name);
+//    delete_button_maker_logic(element_id);
     update_progress(status_url, element_id);
 }

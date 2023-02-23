@@ -76,14 +76,14 @@ def make_predict_task(self, **kwargs):
     filename = os.path.basename(path_to_file)
 
     if zipfile.is_zipfile(path_to_file):
-        path_to_file = pre_work_zip(path_to_file, self)
+        path_to_file = pre_work_zip(path_to_file, job_id)
 
     img = Images(path_to_file, name=filename)
     task = Task(id=job_id, name='img_predict', description=f'Predict {img.filename}', user=user, images=img)
 
     try:
-        db.session.add(task)
-        db.session.add(img)
+        db.session.add_all([task, img])
+        # db.session.add(img)
     except Exception as e:
         result.update(add_images_task=False)
         current_app.logger.error(f"ERROR in db.session.add(task, img): {e}")
@@ -93,15 +93,14 @@ def make_predict_task(self, **kwargs):
     else:
         db.session.commit()
         result.update(add_images_task_to_db=True)
-        current_app.logger.info(f"task {task.id} add to db")
-        current_app.logger.info(f"Images {img.id} add to db")
+        current_app.logger.info(f"task {task.id} add to db\n Images {img.id} add to db")
 
         if img and os.path.isfile(img.file_path):
-            image_predict = img.make_predict(celery_job=self, settings=settings)
+            image_predict = img.make_predict(celery_job=job_id, settings=settings)
             if image_predict and isinstance(image_predict, Predict):
                 result.update(make_predict=True)
                 try:
-                    create_zip(path_to_save=image_predict.path_to_save, job=self)
+                    create_zip(path_to_save=image_predict.path_to_save, job=job_id)
                 except Exception as e:
                     result.update(make_zip=f'{e}')
                 else:

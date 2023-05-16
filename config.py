@@ -22,12 +22,14 @@ class Config(object):
     MODEL_URL = os.environ.get('MODEL_URL') or MODEL_URL_TEST + 'uploadfile/'
     MODEL_DESCRIPTION = 'standard model'
 
+    THRESH_PERCENTAGE = 95
+
     _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
 
     REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
 
     DATASET_FORMAT = os.environ.get('dataset_format')
-
+    IMAGE_FORMAT = ['svs']
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
 

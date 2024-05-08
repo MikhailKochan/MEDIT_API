@@ -7,7 +7,7 @@ from sys import platform
 
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
-import openslide
+# import openslide
 from decimal import Decimal as D
 from config import Config
 from app.celery_task.async_test import quality_checking_image, quality_predict_area, draw_predict

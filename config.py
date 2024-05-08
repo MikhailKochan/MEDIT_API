@@ -1,4 +1,4 @@
-import torch
+# import torch
 import os
 from dotenv import load_dotenv
 from sys import platform
@@ -26,21 +26,21 @@ class Config(object):
 
     _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
 
-    REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
+    # REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
 
     DATASET_FORMAT = os.environ.get('dataset_format')
     IMAGE_FORMAT = ['svs']
-    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
-    BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
+    # ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
+    # BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
 
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY', '228485e30f7c4a62a762e5900cc6edeb')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
+    REDIS_URL = os.environ.get('REDIS_URL', 'redis://')
 
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL') + '/0' or 'redis://localhost:6379/0'
+    CELERY_BROKER_URL = REDIS_URL + '/0' or 'redis://localhost:6379/0'
     result_backend = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 
@@ -57,13 +57,13 @@ class Config(object):
 
     if platform == 'win32':
         _MODEL_OUTPUT = _MODEL_OUTPUT.replace('/', '\\')
-        REG_DATA_SET = REG_DATA_SET.replace('/', '\\')
+        # REG_DATA_SET = REG_DATA_SET.replace('/', '\\')
         UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
         SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
         CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
         DRAW = DRAW.replace('/', '\\')
 
-        DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
+        # DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
 
     folder_list = [UPLOAD_FOLDER, SAVE_ZIP, CUTTING_FOLDER, DRAW]
 
@@ -90,8 +90,8 @@ class Config(object):
     COLOR_FOR_DRAW_TEXT = [0, 0, 0]
 
     _CUDA_SET = "cpu"
-    if torch.cuda.is_available():
-        _CUDA_SET = "cuda"
+    # if torch.cuda.is_available():
+    #     _CUDA_SET = "cuda"
     _COLORS = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
     _ITER = 5000
 

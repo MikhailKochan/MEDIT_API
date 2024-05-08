@@ -5,7 +5,7 @@ from sys import platform
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 
-import openslide
+# import openslide
 
 from decimal import Decimal as D
 # from tqdm import tqdm

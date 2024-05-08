@@ -11,7 +11,7 @@ import requests
 if platform == 'win32':
     os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 
-import openslide
+# import openslide
 import time
 from config import Config
 

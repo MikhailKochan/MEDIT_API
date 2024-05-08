@@ -30,3 +30,19 @@
 ```bash
     flask run
 ```
+
+# Create new user
+
+Открываем консоль
+```bash
+    flask shell
+```
+
+```python
+    db.create_all()
+    u = User()
+    u.username
+    u.username = 'Admin'
+    u.set_password('Admin')
+    db.session.commit()
+```

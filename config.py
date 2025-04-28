@@ -1,7 +1,5 @@
-import torch
 import os
 from dotenv import load_dotenv
-from sys import platform
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.flaskenv'))
@@ -10,12 +8,6 @@ load_dotenv(os.path.join(basedir, '.flaskenv'))
 class Config(object):
 
     OPENSLIDE_FORMAT = ['.svs', '.mrxs']
-    IMAGE_FORMAT = OPENSLIDE_FORMAT
-    # location where install detectron2
-    DETECTRON = os.environ.get('DETECTRON_PATH')
-
-    _DATASET_FOLDER = 'PUT_YOUR_DATASET_HERE'
-    _DATASET_NAME = os.environ.get('DATASET_NAME')
 
     MODEL_NAME = 'mitoses'
     MODEL_URL_TEST = os.environ.get('MODEL_URL_TEST') or 'http://127.0.0.1:8007/'
@@ -24,25 +16,20 @@ class Config(object):
 
     THRESH_PERCENTAGE = 95
 
-    _MODEL_OUTPUT = os.path.join(_DATASET_FOLDER, f'{_DATASET_NAME}/model20_11_2022')
-
-    REG_DATA_SET = os.path.join(basedir, _DATASET_FOLDER, _DATASET_NAME)
-
-    DATASET_FORMAT = os.environ.get('dataset_format')
     IMAGE_FORMAT = ['svs']
-    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
-    BASIC_AUTH_ES = tuple(os.environ.get('BASIC_AUTH_ES').split(','))
 
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY', "secret_key_key")
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
+    REDIS_HOST: str = os.environ.get("REDIS_HOST", "localhost")
+    REDIS_PORT: int = os.environ.get("REDIS_PORT", 6379)
+    REDIS_URL: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL') + '/0' or 'redis://localhost:6379/0'
-    result_backend = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
-    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', REDIS_URL)
+    result_backend = os.environ.get('CELERY_RESULT_BACKEND', REDIS_URL)
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', REDIS_URL)
 
     UPDATE_TIME = int(1)  # time in second
     RELOADING_TIME = int(3600)  # base reload time of custom upload file (in seconds)
@@ -55,19 +42,7 @@ class Config(object):
 
     BASEDIR = basedir
 
-    if platform == 'win32':
-        _MODEL_OUTPUT = _MODEL_OUTPUT.replace('/', '\\')
-        REG_DATA_SET = REG_DATA_SET.replace('/', '\\')
-        UPLOAD_FOLDER = UPLOAD_FOLDER.replace('/', '\\')
-        SAVE_ZIP = SAVE_ZIP.replace('/', '\\')
-        CUTTING_FOLDER = CUTTING_FOLDER.replace('/', '\\')
-        DRAW = DRAW.replace('/', '\\')
-
-        DETECTRON = os.environ.get('DETECTRON_PATH_WIN')
-
-    folder_list = [UPLOAD_FOLDER, SAVE_ZIP, CUTTING_FOLDER, DRAW]
-
-    for folder in folder_list:
+    for folder in [UPLOAD_FOLDER, SAVE_ZIP, CUTTING_FOLDER, DRAW]:
         if not os.path.exists(folder):
             os.mkdir(folder)
             print(f"Directory {folder} created")
@@ -89,9 +64,6 @@ class Config(object):
     COLOR_FOR_DRAW_RECTANGLE = [2, 202, 244]
     COLOR_FOR_DRAW_TEXT = [0, 0, 0]
 
-    _CUDA_SET = "cpu"
-    if torch.cuda.is_available():
-        _CUDA_SET = "cuda"
     _COLORS = [(0, 0, 0), (1.0, 0, 0), (1.0, 1.0, 240.0 / 255)]
     _ITER = 5000
 
@@ -109,7 +81,4 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['unix.mk@gmail.com']
 
-    @property
-    def CUT_IMAGE_SIZE(self):
-        return self._CUT_IMAGE_SIZE
 

@@ -5,7 +5,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import pathlib
 import os
 import redis
-import rq
 import requests
 import json
 from time import time

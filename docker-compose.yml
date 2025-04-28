@@ -1,0 +1,82 @@
+services:
+
+  medit-back:
+    container_name: medit_back
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: medit_back
+    restart: always
+    command: ["sh", "entrypoint.sh"]
+    environment:
+      - CELERY_BROKER_URL=redis://medit-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://medit-redis:6379/0
+      - MODEL_URL_TEST=""
+      - MODEL_URL=""
+      - DATABASE_URL=postgresql+psycopg2://medit_admin:medit_admin_pass@medit-db:5432/medit_dev
+      - REDIS_HOST=medit-redis
+      - REDIS_PORT=6379
+      - DATASET_FORMAT="Coco"
+      - DATASET_NAME="mitoz"
+    volumes:
+      - .:/app
+    depends_on:
+      medit-db:
+        condition: service_started
+      medit-redis:
+        condition: service_started
+    ports:
+      - 8778:5000
+    networks:
+      - medit-net
+#    profiles: ["tool", "develop"]
+
+  medit-db:
+    image: postgres:12.0-alpine
+    container_name: medit_postgresql
+    volumes:
+#      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=medit_admin
+      - POSTGRES_PASSWORD=medit_admin_pass
+      - POSTGRES_DB=medit_dev
+    ports:
+      - 5432:5432
+    networks:
+      - medit-net
+    restart: on-failure
+#    profiles: ["develop"]
+
+  medit-celery:
+    image: medit_back
+    container_name: medit_celery
+    volumes:
+      - .:/app
+    depends_on:
+      medit-redis:
+        condition: service_started
+      medit-back:
+        condition: service_started
+    environment:
+      - CELERY_BROKER_URL=redis://medit-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://medit-redis:6379/0
+    restart: always
+    command: celery -A ai_medit.celery worker --loglevel=info
+    networks:
+      - medit-net
+
+  medit-redis:
+    image: redis:5
+    container_name: medit_redis
+    networks:
+      - medit-net
+#    profiles: ["tool", "develop"]
+
+
+volumes:
+  postgres_data:
+
+networks:
+  medit-net:
+    name: medit-net

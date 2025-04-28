@@ -16,12 +16,12 @@ from sqlalchemy.orm import Session
 from .models import Images, Predict, Settings
 from config import Config
 
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
-from detectron2.data import MetadataCatalog, DatasetCatalog
-from detectron2.data.datasets import register_coco_instances, register_pascal_voc
-from detectron2.engine import DefaultPredictor, DefaultTrainer
-from detectron2.utils.visualizer import ColorMode, Visualizer
+# from detectron2.config import get_cfg
+# from detectron2 import model_zoo
+# from detectron2.data import MetadataCatalog, DatasetCatalog
+# from detectron2.data.datasets import register_coco_instances, register_pascal_voc
+# from detectron2.engine import DefaultPredictor, DefaultTrainer
+# from detectron2.utils.visualizer import ColorMode, Visualizer
 
 from app import db
 
@@ -352,12 +352,12 @@ def create_zip(path_to_save_draw: str, date: datetime, image_name: str):
         zip_file_name = f"{image_name}_{date.strftime('%d_%m_%Y__%H_%M')}"
 
         zipFile = zipfile.ZipFile(os.path.join(zip_folder, f'{zip_file_name}.zip'), 'w', zipfile.ZIP_DEFLATED)
-        # with tqdm(total=len(path_img), position=0, leave=False) as pbar:
+
         for file in path_img:
-            # pbar.set_description(f"Total img: {len(path_img)}. Start zip:")
+
             filename = os.path.basename(file)
             zipFile.write(file, arcname=filename)
-            # pbar.update(1)
+
         zipFile.close()
 
         result = f'{zip_file_name}.zip created'
@@ -377,90 +377,90 @@ def app_job(med, img):
         session.commit()
 
 
-class Medit:
-    def __init__(self, app=None):
-        self.predictor = None
-        self.Visualizer = None
-        self.ColorMode = None
-        self.mitoz_metadata = None
-        self.cfg = None
-        if app is not None:
-            self.init_app(app)
-
-    def init_app(self, app):
-        app.medit = self
-        self.predictor = self.make_predictor()
-
-    def create_cfg(self):
-
-        cfg = get_cfg()
-        # TODO add config
-
-        if Config.__dict__['DATASET_FORMAT'] == 'Coco':
-
-            path_to_config = model_zoo.get_config_file('COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
-
-        elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
-            # path_to_config = os.path.join(Config.__dict__['DETECTRON'],
-            #                               "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
-            path_to_config = model_zoo.get_config_file('PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml')
-        else:
-            return 'need set DATASET_FORMAT in .env and config'
-        cfg.merge_from_file(path_to_config)
-        cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
-        cfg.INPUT.MAX_SIZE_TRAIN = 4080
-        cfg.INPUT.MAX_SIZE_TEST = 4080
-        cfg.INPUT.MIN_SIZE_TEST = 3072
-        cfg.SOLVER.STEPS = (1000,)
-        cfg.SOLVER.MAX_ITER = Config.__dict__['_ITER']
-        cfg.MODEL.DEVICE = Config.__dict__['_CUDA_SET']
-        cfg.DATASETS.TRAIN = ("mitoze_train",)
-        cfg.DATASETS.TEST = ()
-        cfg.DATALOADER.NUM_WORKERS = 2
-        # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.p kl"  # initialize from model zoo
-        cfg.SOLVER.IMS_PER_BATCH = 2
-        cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
-        cfg.SOLVER.BASE_LR = 0.001
-        cfg.OUTPUT_DIR = Config.__dict__['_MODEL_OUTPUT']
-
-        cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # 3 classes (mitoz, GMCC, ostiocit)
-        os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-
-        cfg.SOLVER.GAMMA = 0.05
-
-        cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.80  # set the testing threshold for this model
-        self.cfg = cfg
-
-    def make_predictor(self):
-        try:
-            if Config.__dict__['DATASET_FORMAT'] == 'Coco':
-                register_coco_instances("mitoze_train", {},
-                                        f"{Config.__dict__['REG_DATA_SET']}/train/_annotations.coco.json",
-                                        f"{Config.__dict__['REG_DATA_SET']}/train")
-
-            elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
-                register_pascal_voc("mitoze_train", Config.__dict__['REG_DATA_SET'], "train_mitoz", "2012",
-                                    Config.__dict__['CLASS_NAMES'])
-
-        except Exception as e:
-            print(e)
-        mitoz_metadata = MetadataCatalog.get("mitoze_train")
-        mitoz_metadata.thing_colors = Config.__dict__['_COLORS']
-        # torch.multiprocessing.freeze_support()
-        # torch.multiprocessing.set_start_method('spawn')
-        print('loop make predictor')
-        if self.cfg is None:
-            self.create_cfg()
-        cfg = self.cfg
-
-        predictor = DefaultPredictor(cfg)
-
-        self.Visualizer = Visualizer
-        self.ColorMode = ColorMode
-        self.mitoz_metadata = mitoz_metadata
-
-        return predictor
+# class Medit:
+#     def __init__(self, app=None):
+#         self.predictor = None
+#         self.Visualizer = None
+#         self.ColorMode = None
+#         self.mitoz_metadata = None
+#         self.cfg = None
+#         if app is not None:
+#             self.init_app(app)
+#
+#     def init_app(self, app):
+#         app.medit = self
+#         self.predictor = self.make_predictor()
+#
+#     def create_cfg(self):
+#
+#         cfg = get_cfg()
+#         # TODO add config
+#
+#         if Config.__dict__['DATASET_FORMAT'] == 'Coco':
+#
+#             path_to_config = model_zoo.get_config_file('COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml')
+#
+#         elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
+#             # path_to_config = os.path.join(Config.__dict__['DETECTRON'],
+#             #                               "configs/PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml")
+#             path_to_config = model_zoo.get_config_file('PascalVOC-Detection/faster_rcnn_R_50_FPN.yaml')
+#         else:
+#             return 'need set DATASET_FORMAT in .env and config'
+#         cfg.merge_from_file(path_to_config)
+#         cfg.INPUT.MIN_SIZE_TRAIN = (3072,)
+#         cfg.INPUT.MAX_SIZE_TRAIN = 4080
+#         cfg.INPUT.MAX_SIZE_TEST = 4080
+#         cfg.INPUT.MIN_SIZE_TEST = 3072
+#         cfg.SOLVER.STEPS = (1000,)
+#         cfg.SOLVER.MAX_ITER = Config.__dict__['_ITER']
+#         cfg.MODEL.DEVICE = Config.__dict__['_CUDA_SET']
+#         cfg.DATASETS.TRAIN = ("mitoze_train",)
+#         cfg.DATASETS.TEST = ()
+#         cfg.DATALOADER.NUM_WORKERS = 2
+#         # cfg.MODEL.WEIGHTS = "detectron2://ImageNetPretrained/MSRA/R-50.p kl"  # initialize from model zoo
+#         cfg.SOLVER.IMS_PER_BATCH = 2
+#         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  # faster, and good enough for this toy dataset
+#         cfg.SOLVER.BASE_LR = 0.001
+#         cfg.OUTPUT_DIR = Config.__dict__['_MODEL_OUTPUT']
+#
+#         cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # 3 classes (mitoz, GMCC, ostiocit)
+#         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+#
+#         cfg.SOLVER.GAMMA = 0.05
+#
+#         cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+#         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.80  # set the testing threshold for this model
+#         self.cfg = cfg
+#
+#     def make_predictor(self):
+#         try:
+#             if Config.__dict__['DATASET_FORMAT'] == 'Coco':
+#                 register_coco_instances("mitoze_train", {},
+#                                         f"{Config.__dict__['REG_DATA_SET']}/train/_annotations.coco.json",
+#                                         f"{Config.__dict__['REG_DATA_SET']}/train")
+#
+#             elif Config.__dict__['DATASET_FORMAT'] == 'Pascal':
+#                 register_pascal_voc("mitoze_train", Config.__dict__['REG_DATA_SET'], "train_mitoz", "2012",
+#                                     Config.__dict__['CLASS_NAMES'])
+#
+#         except Exception as e:
+#             print(e)
+#         mitoz_metadata = MetadataCatalog.get("mitoze_train")
+#         mitoz_metadata.thing_colors = Config.__dict__['_COLORS']
+#         # torch.multiprocessing.freeze_support()
+#         # torch.multiprocessing.set_start_method('spawn')
+#         print('loop make predictor')
+#         if self.cfg is None:
+#             self.create_cfg()
+#         cfg = self.cfg
+#
+#         predictor = DefaultPredictor(cfg)
+#
+#         self.Visualizer = Visualizer
+#         self.ColorMode = ColorMode
+#         self.mitoz_metadata = mitoz_metadata
+#
+#         return predictor
 
 
 if __name__ == '__main__':

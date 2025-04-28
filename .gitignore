@@ -9,7 +9,6 @@ app/static/cutting_file/*
 app/static/downloads/*
 app/static/draw/*
 app/static/zip/*
-migrations
 PUT_YOUR_DATASET_HERE
 tests.py
 app/kwargs.py

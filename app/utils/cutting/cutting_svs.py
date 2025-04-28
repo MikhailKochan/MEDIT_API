@@ -8,7 +8,6 @@ if platform == 'win32':
 import openslide
 
 from decimal import Decimal as D
-# from tqdm import tqdm
 
 
 def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
@@ -43,7 +42,7 @@ def cutting(path, CUTTING_FOLDER, _CUT_IMAGE_SIZE, job=None):
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
 
-        # with tqdm(total=total, position=0, leave=False) as pbar:
+
         for i in range(0, h_sum):
             for j in range(0, w_sum):
                 # pbar.set_description(f"Total img: {total}. Start cutting")
@@ -99,7 +98,7 @@ def cutting_celery(job, path: str, CUTTING_FOLDER: str, _CUT_IMAGE_SIZE: tuple) 
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
 
-        # with tqdm(total=total, position=0, leave=False) as pbar:
+
         for i in range(0, w_sum):
             for j in range(0, h_sum):
                 # pbar.set_description(f"Total img: {total}. Start cutting")

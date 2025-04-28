@@ -1,8 +1,6 @@
 import zipfile
 import os
 import glob
-from tqdm import tqdm
-from decimal import Decimal as D
 
 from config import Config
 

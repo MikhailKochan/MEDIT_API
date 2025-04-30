@@ -1,21 +1,18 @@
+import os
+import redis
+import requests
+import pathlib
+import json
+
+from typing import List
 from datetime import datetime
 from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-import pathlib
-import os
-import redis
-import requests
-import json
 from time import time
 
-from sys import platform
-
-if platform == 'win32':
-    os.add_dll_directory(os.getcwd() + '/app/static/dll/openslide-win64-20171122/bin')
 import openslide
 
-import sqlite3
 from app import login, db
 
 
@@ -75,7 +72,7 @@ class User(UserMixin, db.Model):
             db.session.add(settings)
         return settings
 
-    def get_my_tasks(self):
+    def get_my_tasks(self) -> List['Task']:
         return Task.query.filter_by(user=self).order_by(Task.timestamp.desc()).all()
 
     def get_tasks_in_progress(self):
@@ -273,7 +270,7 @@ class Images(db.Model):
 
             predict = start_predict(image=self,
                                     predict=predict,
-                                    job_id=celery_job,
+                                    job=celery_job,
                                     settings=settings)
 
             current_app.logger.info(f'finish predict {self.filename}')
@@ -370,21 +367,21 @@ class Task(db.Model):
     complete = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    def get_rq_job(self):
-        try:
-            rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
-        except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError) as e:
-            current_app.logger.error(e)
-            return None
-        return rq_job
-
-    def get_progress(self):
-        job = self.get_rq_job()
-        return job.meta.get('progress', 0) if job is not None else 100
-
-    def get_filename(self):
-        job = self.get_rq_job()
-        return job.meta.get('filename')
+    # def get_rq_job(self):
+    #     try:
+    #         rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
+    #     except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError) as e:
+    #         current_app.logger.error(e)
+    #         return None
+    #     return rq_job
+    #
+    # def get_progress(self):
+    #     job = self.get_rq_job()
+    #     return job.meta.get('progress', 0) if job is not None else 100
+    #
+    # def get_filename(self):
+    #     job = self.get_rq_job()
+    #     return job.meta.get('filename')
 
 
 class Status(db.Model):

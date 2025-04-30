@@ -13,7 +13,7 @@ def send_image_to_model(path_to_image, url):
     with open(path_to_image, 'rb') as f:
         params = {"uploadType": "multipart/form-data"}
         resp = requests.post(url=url,
-                             files={'file': f.read()},
+                             files={'images': (os.path.basename(path_to_image), f, 'image/jpeg')},
                              params=params)
         if resp.status_code != 200:
             print("--ERROR--")
@@ -22,9 +22,10 @@ def send_image_to_model(path_to_image, url):
             return resp.json()
 
 
-def make_predict_celery(image, predict, job_id, settings):
+def make_predict_celery(image, predict, job, settings):
     from app.view import space_selector
-    from app.new_tasks import _set_task_progress as _set_celery_task_progress
+    # from app.new_tasks import _set_task_progress as _set_celery_task_progress
+    from app.utils.celery import _set_celery_task_progress
     try:
         all_mitoz = 0
         progress = 0
@@ -39,7 +40,7 @@ def make_predict_celery(image, predict, job_id, settings):
         assert file, f"IMAGE FORMAT: {image.format} NOT SUPPORTED"
 
         _set_celery_task_progress(
-            job=job_id,
+            job=job,
             progress=progress,
             all_mitoses=all_mitoz,
             function='Predict',
@@ -130,7 +131,7 @@ def make_predict_celery(image, predict, job_id, settings):
                 progress += 1 / total * 100.0
 
                 _set_celery_task_progress(
-                    job=job_id,
+                    job=job,
                     progress=int(progress),
                     all_mitoses=all_mitoz,
                     function='Predict',

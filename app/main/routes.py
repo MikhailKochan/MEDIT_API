@@ -1,18 +1,21 @@
-import datetime
 import os
+import json
+import zipfile
+import datetime
+
+from typing import List
+from celery.result import AsyncResult
 
 from flask import render_template, flash, redirect, url_for, request, g, jsonify, current_app, abort
 from flask import send_from_directory
 from flask_login import current_user, login_required
-from app import db
 
 from app.models import Images, Predict, Settings, Task
 from app.main.forms import SearchPredictForm, SettingsForm, PredictForm
 
+from app import db
 from app.main import bp
 
-import json
-import zipfile
 
 from app.view import check_req, file_name_maker, check_zip
 from app.celery_task.celery_task import make_predict_task, cutting_task, error_handler
@@ -43,7 +46,7 @@ def history():
         elif sort == 'mitoses':
             data = data.order_by(Predict.result_all_mitoz.desc())
 
-    data = data.paginate(page, current_app.config['POSTS_PER_PAGE'], False)
+    data = db.paginate(data, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     if len(data.items) == 0:
         if analysis_number:
@@ -119,11 +122,18 @@ def get_zip(filename):
 @bp.route('/progress/<task_id>', methods=['GET', 'POST'])
 def progress(task_id):
     try:
-        send = current_app.redis.get(task_id)
-        if send:
-            response = json.loads(send.decode("utf-8"))
+        result = AsyncResult(task_id)
+        # Базовый ответ
+        response = {'state': result.state}
+        # Метаданные, которые ты передавал в update_state(meta={...})
+        meta = result.info or {}
+        # Расплющиваем meta внутрь корневого словаря
+        if isinstance(meta, dict):
+            response.update(meta)
         else:
-            response = {'state': 'PENDING'}
+            # если meta — это просто строка (например, str(Exception))
+            response['error'] = str(meta)
+
         return jsonify(response)
     except Exception as e:
         current_app.logger.info(f"ERROR in progress rout: {e}")
@@ -166,18 +176,21 @@ def predict_rout_celery():
     try:
         # print('g.test_server_connect:', g.test_server_connect)
         access = 0  # время до следующей задачи
-        tasks = current_user.get_my_tasks()
+        tasks: List[Task] = current_user.get_my_tasks()
         task_in_process = [task for task in tasks if task.complete is False]
         delay = current_user.settings.user_reloading_time  # пауза между задачами заданная в настройках пользователя
+
         if tasks:
-            next_task_time = tasks[0].timestamp + datetime.timedelta(seconds=delay)
+            next_task_time: datetime.datetime = tasks[0].timestamp + datetime.timedelta(seconds=delay)
             dt = next_task_time - datetime.datetime.utcnow()
             if dt.days < 0:
                 pass
             else:
                 access = dt.seconds  # время до следующей задачи
+
         form = PredictForm()
-        if request.method == 'POST' and access == 0:
+
+        if request.method == 'POST' and access <= 0:
             files = request.files.getlist("file")
             for file in files:
                 current_app.logger.info(f'получил файл {file.filename}')
@@ -200,6 +213,7 @@ def predict_rout_celery():
                     os.remove(path)
                     current_app.logger.info(f"файл {filename} не подходит, и был удален")
                     flash(f'Файл {file.filename} не может быть запущен в работу, не верный формат')
+
         return render_template('get_analysis.html',
                                title='Исследование',
                                tasks=task_in_process,

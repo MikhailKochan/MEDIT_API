@@ -91,11 +91,13 @@ def mk_pred(**kwargs):
 def _set_task_progress(job, **kwargs):
     if job:
         job_id = job
-        if current_app:
+
+        if getattr(current_app, "redis"):
             rd = current_app.redis
         else:
             from redis import Redis
-            rd = Redis.from_url(Config.__dict__['REDIS_URL'])
+            rd = Redis.from_url(Config.REDIS_URL)
+
         data = rd.get(job_id)
         if data:
             send = json.loads(data)

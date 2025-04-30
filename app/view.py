@@ -197,7 +197,7 @@ def check_zip(path):
 
 
 def pre_work_zip(path, job):
-    from app.new_tasks import _set_task_progress as _set_celery_task_progress
+    from app.utils.celery import _set_celery_task_progress
 
     progress = 0
     _set_celery_task_progress(

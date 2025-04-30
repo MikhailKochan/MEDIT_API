@@ -13,8 +13,7 @@ from app import db
 
 @shared_task
 def error_handler(request, exc, traceback):
-    current_app.logger.error('Task {0} raised exception: {1!r}\n{2!r}'.format(
-        request.id, exc, traceback))
+    current_app.logger.error('Task {0} raised exception: {1!r}\n{2!r}'.format(request.id, exc, traceback))
 
 
 def task_getter(task_id: str):
@@ -76,7 +75,7 @@ def make_predict_task(self, **kwargs):
     filename = os.path.basename(path_to_file)
 
     if zipfile.is_zipfile(path_to_file):
-        path_to_file = pre_work_zip(path_to_file, job_id)
+        path_to_file = pre_work_zip(path_to_file, self)
 
     img = Images(path_to_file, name=filename)
     task = Task(id=job_id, name='img_predict', description=f'Predict {img.filename}', user=user, images=img)
@@ -96,11 +95,11 @@ def make_predict_task(self, **kwargs):
         current_app.logger.info(f"task {task.id} add to db\n Images {img.id} add to db")
 
         if img and os.path.isfile(img.file_path):
-            image_predict = img.make_predict(celery_job=job_id, settings=settings)
+            image_predict = img.make_predict(celery_job=self, settings=settings)
             if image_predict and isinstance(image_predict, Predict):
                 result.update(make_predict=True)
                 try:
-                    create_zip(path_to_save=image_predict.path_to_save, job=job_id)
+                    create_zip(path_to_save=image_predict.path_to_save, job=self)
                 except Exception as e:
                     result.update(make_zip=f'{e}')
                 else:

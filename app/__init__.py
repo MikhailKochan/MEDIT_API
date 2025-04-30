@@ -3,7 +3,9 @@ import logging
 
 from config import Config
 
+from redis import Redis
 from sqlalchemy import MetaData
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -30,9 +32,9 @@ login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Введите логин и пароль прежде чем просмотреть эту страницу'
 
-
 moment = Moment()
 
+redis_client = Redis.from_url(Config.REDIS_URL)
 ext_celery = FlaskCeleryExt(create_celery_app=make_celery)
 
 
@@ -82,6 +84,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db, render_as_batch=True)
     login.init_app(app)
 
+    app.redis = redis_client
     # Celery init
     ext_celery.init_app(app)
 

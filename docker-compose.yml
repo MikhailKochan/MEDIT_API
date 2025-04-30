@@ -8,16 +8,7 @@ services:
     image: medit_back
     restart: always
     command: ["sh", "entrypoint.sh"]
-    environment:
-      - CELERY_BROKER_URL=redis://medit-redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://medit-redis:6379/0
-      - MODEL_URL_TEST=http://10.0.104.37/ml/
-      - MODEL_URL=http://10.0.104.37/ml/uploadfile/
-      - DATABASE_URL=postgresql+psycopg2://medit_admin:medit_admin_pass@medit-db:5432/medit_dev
-      - REDIS_HOST=medit-redis
-      - REDIS_PORT=6379
-      - DATASET_FORMAT=Coco
-      - DATASET_NAME=mitoz
+    env_file: .env
     volumes:
       - .:/app
     depends_on:
@@ -58,9 +49,7 @@ services:
         condition: service_started
       medit-back:
         condition: service_started
-    environment:
-      - CELERY_BROKER_URL=redis://medit-redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://medit-redis:6379/0
+    env_file: .env
     restart: always
     command: celery -A ai_medit.celery worker --loglevel=info
     networks:

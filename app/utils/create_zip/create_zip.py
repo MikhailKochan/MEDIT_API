@@ -21,7 +21,7 @@ def create_zip(path_to_save: str, job=None):
 
             list_img = glob.glob(f"{path_to_save}/*")
 
-            zp_name = os.path.join(Config.__dict__['SAVE_ZIP'], f'{folder_name}.zip')
+            zp_name = os.path.join(Config.SAVE_ZIP, f'{folder_name}.zip')
 
             with zipfile.ZipFile(zp_name, mode='w', compression=zipfile.ZIP_DEFLATED) as zipFile:
 
@@ -44,8 +44,7 @@ def create_zip(path_to_save: str, job=None):
                                               progress=int(progress),
                                               function='Create zip',
                                               filename=folder_name,
-                                              zipname=folder_name
-                                              )
+                                              zipname=f'{folder_name}.zip')
 
                 zipFile.close()
         except Exception as e:

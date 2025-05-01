@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_en.html' %}
 
 {% block content %}
 <style>
@@ -34,30 +34,30 @@
 
 <div class="container-table" style="width:100%;justify-content: center">
     <div class="box"  style="background: #eff1f4;width:100%;min-width: 192px;">
-        <a href="/history?sort=name" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Сортировать по имени файла">
-        Файл
+        <a href="/history?sort=name" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Sort by file name">
+        File
         </a>
     </div>
     <div class="box" style="background: #eff1f4;">
-        <a href="/history?sort=date" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Сортировать по дате исследования">
-            Дата исследования
+        <a href="/history?sort=date" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Sort by analysis date">
+            Analysis Date
         </a>
     </div>
     <div class="box" style="background: #eff1f4;">
-        Статус
+        Status
     </div>
     <div class="box" style="background: #eff1f4;">
-        <a href="/history?sort=analysis_number" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Сортировать по номеру исследования">
-            Номер исследования
+        <a href="/history?sort=analysis_number" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Sort by analysis number">
+            Analysis Number
         </a>
     </div>
     <div class="box" style="background: #eff1f4;min-width: 80px">
-        <a href="/history?sort=mitoses"style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Сортировать по количеству найденных митозов">
-            Найдено митозов
+        <a href="/history?sort=mitoses" style="height:100%;width:100%;margin:0px;border-radius:0px;" title="Sort by mitoses count">
+            Find mitoses
         </a>
     </div>
     <div class="box" style="background: #eff1f4;">
-        Скачать результат
+        Download result
     </div>
 </div>
 
@@ -73,7 +73,7 @@
                 {{ predict.timestamp.strftime('%d.%m.%Y %H:%M') }}
             </div>
             <div class="box" id="status" style="justify-content: center">
-                Завершено
+                Finished
             </div>
             <div class="box" id="analysis_number" style="justify-content: center">
                 {{ predict.images.analysis_number }}
@@ -84,10 +84,10 @@
             <div class="box">
 <!--                {% if predict.path_to_save %}-->
                 <a class="button_download" href="/get-zip/{{ predict.path_to_save or '#' }}" style="">
-                    <img src="/static/logo/download_green.png" alt="Скачать" title="Скачать результат исследования">
+                    <img src="/static/logo/download_green.png" alt="Download" title="Download analysis result">
                 </a>
                 <button class="button_delete" id="{{predict.tasks.filter_by(predict_id = predict.id).first().id or '#'}}">
-                    <img src="/static/logo/remove.png" alt="Удалить" title="Удалить исследование">
+                    <img src="/static/logo/remove.png" alt="Remove" title="Remove analysis">
                 </button>
 <!--                {% endif %}-->
 <!--                <a class="button_csv" href="" style="">-->
@@ -100,13 +100,10 @@
 </section>
 <ul class="pager">
     <li class="previous" style="{% if not prev_url %}display: none{% endif %}">
-        <a href="{{ prev_url or '#' }}"><span aria-hidden="true">&larr;</span>назад
-
-        </a>
+        <a href="{{ prev_url or '#' }}"><span aria-hidden="true">&larr;</span>back</a>
     </li>
     <li class="next" style="{% if not next_url %}display: none{% endif %}">
-        <a href="{{ next_url or '#' }}">вперед<span aria-hidden="true">&rarr;</span>
-        </a>
+        <a href="{{ next_url or '#' }}">next<span aria-hidden="true">&rarr;</span></a>
     </li>
 </ul>
 

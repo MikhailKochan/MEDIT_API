@@ -11,7 +11,7 @@ from flask import send_from_directory
 from flask_login import current_user, login_required
 
 from app.models import Images, Predict, Settings, Task
-from app.main.forms import SearchPredictForm, SettingsForm, PredictForm
+from app.main.forms import SearchPredictForm, SettingsForm, PredictForm, SearchPredictFormEn
 
 from app import db
 from app.main import bp
@@ -24,13 +24,17 @@ from app.celery_task.celery_task import make_predict_task, cutting_task, error_h
 @bp.route('/history', methods=['GET', 'POST'])
 @login_required
 def history():
-    form = SearchPredictForm()
+
+    language = request.args.get("lang", "ru")
+    current_app.logger.info("language: {0}".format(language))
+
+    form = SearchPredictFormEn() if language == "en" else SearchPredictForm()
+
     sort = request.args.get('sort', '', type=str)
     page = request.args.get('page', 1, type=int)
     analysis_number = form.data.get('analysis_number')
-    data = Predict.query.filter(Predict.tasks,
-                                Task.complete == True,
-                                Task.user_id == current_user.id)
+
+    data = Predict.query.filter(Predict.tasks, Task.complete.is_(True), Task.user_id == current_user.id)
     #  t = Task.query.filter(Task.user_id==3,Task.complete==True).all()
 
     if form.validate_on_submit():
@@ -48,19 +52,21 @@ def history():
 
     data = db.paginate(data, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    if len(data.items) == 0:
+    if not data.items:
         if analysis_number:
-            flash(f'У Вас нет исследованний с номером {analysis_number}')
+            message = f'Not found analysis with number {analysis_number}'\
+                if language == "en" else f'Нет исследований с номером {analysis_number}'
         else:
-            flash(f'Нет выполненых исследованний')
-    # if request.method == 'GET':
+            message = 'No finished analysis' if language == "en" else 'Нет выполненных исследований'
+        flash(message)
+
     next_url = url_for('main.history', page=data.next_num) if data.has_next else None
     prev_url = url_for('main.history', page=data.prev_num) if data.has_prev else None
-    return render_template('predict_history.html', title='История исследований',
-                           data=data.items,
-                           next_url=next_url, prev_url=prev_url,
-                           form=form,
-                           )
+
+    template = 'predict_history_en.html' if language == "en" else 'predict_history.html'
+    title = 'Analysis history' if language == "en" else 'История исследований'
+
+    return render_template(template, title=title, data=data.items, next_url=next_url, prev_url=prev_url, form=form)
 
 
 @bp.route('/info', methods=['GET', 'POST'])
@@ -108,14 +114,18 @@ def settings():
 
 @bp.route('/get-zip/<string:filename>')
 @login_required
-def get_zip(filename):
+def get_zip(filename: str):
     try:
-        print('filename in get-zip', filename)
-        if filename[:-4] != '.zip':
+        current_app.logger.info('filename in get-zip', filename)
+
+        if filename.endswith('.zip'):
+
             filename = f'{filename}.zip'
-            print(f'filename changed to {filename}')
+            current_app.logger.info(f'filename changed to {filename}')
+
         return send_from_directory(current_app.config["SAVE_ZIP"], path=filename, as_attachment=True)
-    except FileNotFoundError:
+    except FileNotFoundError as err:
+        current_app.logger.error(f"ERROR: {err}")
         return abort(404)
 
 
@@ -173,6 +183,8 @@ def cutting_rout_celery():
 @bp.route('/predict', methods=['POST', 'GET'])
 @login_required
 def predict_rout_celery():
+    language = request.args.get("lang", "ru")
+    current_app.logger.info("language: {0}".format(language))
     try:
         # print('g.test_server_connect:', g.test_server_connect)
         access = 0  # время до следующей задачи
@@ -214,8 +226,9 @@ def predict_rout_celery():
                     current_app.logger.info(f"файл {filename} не подходит, и был удален")
                     flash(f'Файл {file.filename} не может быть запущен в работу, не верный формат')
 
-        return render_template('get_analysis.html',
-                               title='Исследование',
+        template = 'get_analysis_en.html' if language == "en" else 'get_analysis.html'
+        return render_template(template,
+                               title='Analysis' if language == "en" else 'Исследование',
                                tasks=task_in_process,
                                access=access,
                                pause_delay=delay,

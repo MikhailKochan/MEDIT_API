@@ -102,6 +102,9 @@ class Model(db.Model):
     settings = db.relationship('Settings', backref='model', lazy='dynamic')
     predict = db.relationship('Predict', backref='model', lazy='dynamic')
 
+    def is_available(self) -> bool:
+        return 200 <= requests.get(self.url_test).status_code < 300
+
     def __init__(self, name: str = None, url: str = None, url_test: str = None, description: str = None):
         self.name = name if name else current_app.config['MODEL_NAME']
         self.url = url if url else current_app.config['MODEL_URL']

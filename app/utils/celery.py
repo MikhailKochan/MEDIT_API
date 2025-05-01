@@ -1,4 +1,5 @@
 from celery import current_app as current_celery_app, Task
+from celery import current_task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
@@ -21,17 +22,13 @@ def make_celery(app):
 
 
 def _set_celery_task_progress(job, **kwargs):
-    if job:
-        try:
-            # task_id = job.request.id
-            # task = job.AsyncResult(task_id)
-            meta = {}
-            # meta['progress'] = progress
-            meta.update(kwargs)
-            job.update_state(state='PROGRESS', meta=meta)
+    try:
+        meta = current_task.meta if hasattr(current_task, 'meta') else {}
+        meta.update(kwargs)
+        current_task.update_state(state='PROGRESS', meta=meta)
 
-        except Exception as e:
-            print(f'ERROR in set_celery_task_progress: {e}')
+    except Exception as e:
+        print(f'ERROR in set_celery_task_progress: {e}')
 
 
 class DatabaseTask(Task):

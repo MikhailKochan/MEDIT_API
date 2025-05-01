@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link type="text/css" href="{{ url_for('static', filename='css/api_style.css') }}" rel="stylesheet "/>
@@ -18,26 +18,26 @@
         <div class="nav-bar" style="">
             <div class="company-name">MEDIT</div>
             <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:10px;">
-                <label for="lang-select" style="color:#eff1f4">Язык:</label>
+                <label for="lang-select" style="color:#eff1f4">Language:</label>
                 <select id="lang-select">
                     <option value="ru" {% if request.args.get('lang') == 'ru' %}selected{% endif %}>RU</option>
                     <option value="en" {% if request.args.get('lang') == 'en' %}selected{% endif %}>EN</option>
                 </select>
             </div>
             {% if current_user.is_anonymous %}
-            <a href="{{ url_for('auth.login') }}" style="display:none">Вход</a>
+            <a href="{{ url_for('auth.login') }}" style="display:none">Sign In</a>
             {% else %}
-            <a href="{{ url_for('auth.logout') }}">Выход</a>
+            <a href="{{ url_for('auth.logout') }}">Sign Out</a>
             {% endif %}
         </div>
         <div class="my_content">
             <div class="menu">
                 <div class="menu_a">
-                    <a id="menu_analysis" href="{{ url_for('main.predict_rout_celery') }}"><img src="/static/logo/analysis.png" alt="#">Исследование</a>
-<!--                    <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Порезать SVS</a>-->
-                    <a id="menu_history" href="{{ url_for('main.history') }}"><img src="/static/logo/history.png" alt="#">История исследований</a>
-                    <a id="menu_settings" href="{{ url_for('main.settings') }}"><img src="/static/logo/settings.png" alt="#">Настройки</a>
-                    <a id="menu_info" href="{{ url_for('main.info') }}"><img src="/static/logo/info.png" alt="#">О программе</a>
+                    <a id="menu_analysis" href="{{ url_for('main.predict_rout_celery') }}"><img src="/static/logo/analysis.png" alt="#">Analysis</a>
+<!--                    <a id="menu_cutting" href="{{ url_for('main.cutting_rout_celery') }}"><img src="/static/logo/cutting.png" alt="#">Cut SVS</a>-->
+                    <a id="menu_history" href="{{ url_for('main.history') }}"><img src="/static/logo/history.png" alt="#">Analysis History</a>
+                    <a id="menu_settings" href="{{ url_for('main.settings') }}"><img src="/static/logo/settings.png" alt="#">Settings</a>
+                    <a id="menu_info" href="{{ url_for('main.info') }}"><img src="/static/logo/info.png" alt="#">About the Program</a>
                 </div>
                 <div class="menu_logo">
                     <img id="logo" src="/static/logo/mitoz.gif" alt="">

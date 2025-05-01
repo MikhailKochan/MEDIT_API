@@ -16,6 +16,10 @@ class SearchPredictForm(FlaskForm):
     analysis_number = StringField('Введите номер исследования', [InputRequired()])
     submit = SubmitField('Поиск')
 
+
+class SearchPredictFormEn(FlaskForm):
+    analysis_number = StringField('Enter analysis number: ', [InputRequired()])
+    submit = SubmitField('Search')
     # def validate_search(form, field):
     #     if not field.dataget('analysis_number').isdigit():
     #         raise ValidationError('Номер исследования это целое число')
